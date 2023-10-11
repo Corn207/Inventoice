@@ -1,0 +1,29 @@
+@startuml ManageInventory
+left to right direction
+
+actor :Quản lí: as Manager
+actor :Quản trị viên: as Admin
+
+usecase ManageInventory as "Quản lý tồn kho"
+usecase EditInventory as "Sửa tồn kho"
+
+usecase ImportInventory as "Nhập hàng"
+usecase ReturnImportInventory as "Trả hàng nhập"
+
+usecase ExportInventory as "Xuất hàng"
+
+usecase AuditInventory as "Kiểm kho"
+
+Admin -- EditInventory
+EditInventory ..> ManageInventory : <<extend>>
+
+Manager -- ImportInventory
+ImportInventory ..> ManageInventory : <<extend>>
+ReturnImportInventory .l.> ImportInventory : <<extend>>
+
+Manager -- ExportInventory
+ExportInventory ..> ManageInventory : <<extend>>
+
+Manager -- AuditInventory
+AuditInventory ..> ManageInventory : <<extend>>
+@enduml

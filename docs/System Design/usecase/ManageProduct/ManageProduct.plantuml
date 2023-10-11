@@ -1,0 +1,15 @@
+@startuml ManageProduct
+left to right direction
+
+actor :Quản lý: as Manager
+
+usecase ManageProduct as "Quản lý sản phẩm"
+usecase CreateProduct as "Thêm sản phẩm"
+usecase EditProduct as "Sửa sản phẩm"
+usecase DeleteProduct as "Xóa sản phẩm"
+
+Manager -- ManageProduct
+ManageProduct ..> CreateProduct : <<include>>
+ManageProduct <.. EditProduct : <<extend>>
+ManageProduct <.. DeleteProduct : <<extend>>
+@enduml
