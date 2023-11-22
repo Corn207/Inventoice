@@ -1,45 +1,43 @@
-﻿using Core.Entities;
-using MongoDB.Bson;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Parameters;
+using Domain.Entities;
+using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class ClientRepository
+public class ClientRepository : Repository<Client>, IClientRepository
 {
-	private readonly Database _database;
-
-	public ClientRepository(Database database)
+	public ClientRepository(Database database) : base(database)
 	{
-		_database = database;
 	}
 
-	public async Task<List<Client>> GetAllAsync()
+	public async Task<List<Client>> SearchAsync(
+		string nameOrPhonenumber,
+		PaginationParameters pagination,
+		bool isDescending)
 	{
-		return await _database.Clients.Find(_ => true).ToListAsync();
-	}
+		var query = Database.Collection<Client>().AsQueryable();
 
-	public async Task<Client?> GetAsync(string id)
-	{
-		return await _database.Clients.Find(x => x.Id == id).FirstOrDefaultAsync();
-	}
-
-	public async Task<string> CreateAsync(Client client)
-	{
-		await _database.Clients.InsertOneAsync(client);
-		if (client.Id == null)
+		if (!string.IsNullOrWhiteSpace(nameOrPhonenumber))
 		{
-			throw new NullReferenceException(nameof(client.Id));
+			query = query.Where(x => x.Name.Contains(nameOrPhonenumber) || x.PhoneNumber.Contains(nameOrPhonenumber));
 		}
-		return client.Id;
-	}
 
-	public async Task ReplaceAsync(string id, Client client)
-	{
-		await _database.Clients.ReplaceOneAsync(x => x.Id == id, client);
-	}
+		if (isDescending)
+		{
+			query = query.OrderByDescending(p => p.Name);
+		}
+		else
+		{
+			query = query.OrderBy(p => p.Name);
+		}
 
-	public async Task<bool> DeleteAsync(string id)
-	{
-		var result = await _database.Clients.DeleteOneAsync(x => x.Id == id);
-		return result.DeletedCount > 0;
+		var clients = await query
+			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
+			.Take(pagination.PageSize)
+			.ToListAsync();
+
+		return clients;
 	}
 }

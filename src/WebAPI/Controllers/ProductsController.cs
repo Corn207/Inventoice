@@ -1,52 +1,36 @@
-﻿using Core.Entities;
-using Infrastructure;
-using Infrastructure.Repositories;
+﻿using Application.Interfaces.Repositories.Parameters;
+using Application.Services;
+using Domain.DTOs.Products;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs.Products;
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class ProductsController : ControllerBase
 {
-	private readonly ProductRepository _productRepository;
+	private readonly ProductService _productService;
 
-	public ProductsController(ProductRepository productRepository)
+	public ProductsController(ProductService productService)
 	{
-		_productRepository = productRepository;
+		_productService = productService;
 	}
 
 	[HttpGet]
-	public async Task<IEnumerable<ProductShort>> Search(
+	public async Task<IEnumerable<ProductShort>> Get(
 		[FromQuery] string? search = null,
-		[FromQuery] int pageSize = 15,
-		[FromQuery] int pageNumber = 1,
-		[FromQuery] ProductRepository.OrderedBy orderedBy = ProductRepository.OrderedBy.Name,
+		[FromQuery] ushort pageNumber = 1,
+		[FromQuery] ushort pageSize = 15,
+		[FromQuery] ProductOrderByParameter orderBy = ProductOrderByParameter.Name,
 		[FromQuery] bool isDescending = false)
 	{
-		var pagination = new PaginationParameters(pageSize, pageNumber);
-		var products = await _productRepository.SearchAsync(
-			pagination,
-			search,
-			orderedBy,
-			isDescending);
-
-		var dtos = products.Select(x => new ProductShort()
-		{
-			Id = x.Id!,
-			Barcode = x.Barcode,
-			Name = x.Name,
-			SellingPrice = x.SellingPrice,
-			StockCount = x.StockCount,
-		});
-
-		return dtos;
+		return await _productService.SearchAsync(search, pageNumber, pageSize, orderBy, isDescending);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Product>> Get(string id)
 	{
-		var product = await _productRepository.GetAsync(id);
+		var product = await _productService.GetAsync(id);
 		if (product is null)
 		{
 			return NotFound();
@@ -56,66 +40,43 @@ public class ProductsController : ControllerBase
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Post([FromBody] ProductCreateUpdateRequest body)
+	public async Task<IActionResult> Post([FromBody] ProductCreateUpdate body)
 	{
-		var product = new Product()
-		{
-			Barcode = body.Barcode,
-			Name = body.Name,
-			Group = body.Group,
-			Brand = body.Brand,
-			LastImportedPrice = body.LastImportedPrice,
-			SellingPrice = body.SellingPrice,
-			StockCount = body.StockCount,
-			StoragePosition = body.StoragePosition,
-			Description	= body.Description,
-			DateCreated = DateTime.Now
-		};
-
-		var newId = await _productRepository.CreateAsync(product);
-		return CreatedAtAction(nameof(Get), new { id = newId }, product);
+		var newId = await _productService.CreateAsync(body);
+		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
 	[HttpPut("{id}")]
-	public async Task<IActionResult> Put(string id, [FromBody] ProductCreateUpdateRequest body)
+	public async Task<IActionResult> Put(string id, [FromBody] ProductCreateUpdate body)
 	{
-		var product = new Product()
+		try
 		{
-			Id = id,
-			Barcode = body.Barcode,
-			Name = body.Name,
-			Group = body.Group,
-			Brand = body.Brand,
-			LastImportedPrice = body.LastImportedPrice,
-			SellingPrice = body.SellingPrice,
-			StockCount = body.StockCount,
-			StoragePosition = body.StoragePosition,
-			Description = body.Description,
-			DateCreated = DateTime.Now
-		};
-
-		var isSuccess = await _productRepository.ReplaceAsync(id, product);
-		if (isSuccess)
-		{
-			return NoContent();
+			await _productService.ReplaceAsync(id, body);
 		}
-		else
+		catch (KeyNotFoundException)
+		{
+			return NotFound();
+		}
+		catch (Exception)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
+
+		return NoContent();
 	}
 
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(string id)
 	{
-		var result = await _productRepository.DeleteAsync(id);
-		if (result)
+		try
 		{
-			return NoContent();
+			await _productService.DeleteAsync(id);
 		}
-		else
+		catch (Exception)
 		{
 			return NotFound();
 		}
+
+		return NoContent();
 	}
 }

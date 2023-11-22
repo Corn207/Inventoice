@@ -1,35 +1,34 @@
-﻿using Core.Entities;
-using Infrastructure.Repositories;
+﻿using Application.Services;
+using Domain.DTOs.Clients;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs.Clients;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class ClientsController : ControllerBase
 {
-	private readonly ClientRepository _clientRepository;
+	private readonly ClientService _clientService;
 
-	public ClientsController(ClientRepository clientRepository)
+	public ClientsController(ClientService clientService)
 	{
-		_clientRepository = clientRepository;
+		_clientService = clientService;
 	}
 
-	// GET: api/<ClientsController>
 	[HttpGet]
-	public async Task<IEnumerable<Client>> Get()
+	public async Task<IEnumerable<ClientShort>> Get(
+		[FromQuery] string? search = null,
+		[FromQuery] ushort pageNumber = 1,
+		[FromQuery] ushort pageSize = 15,
+		[FromQuery] bool isDescending = false)
 	{
-		var clients = await _clientRepository.GetAllAsync();
-		return clients;
+		return await _clientService.SearchAsync(search, pageNumber, pageSize, isDescending);
 	}
 
-	// GET api/<ClientsController>/5
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Client>> Get(string id)
 	{
-		var client = await _clientRepository.GetAsync(id);
+		var client = await _clientService.GetAsync(id);
 		if (client is null)
 		{
 			return NotFound();
@@ -38,39 +37,44 @@ public class ClientsController : ControllerBase
 		return client;
 	}
 
-	// POST api/<ClientsController>
 	[HttpPost]
-	public async Task<IActionResult> Post([FromBody] CreateRequest body)
+	public async Task<IActionResult> Post([FromBody] ClientCreateUpdate body)
 	{
-		var client = new Client()
-		{
-			Name = body.Name,
-			PhoneNumber = body.PhoneNumber,
-			Description = body.Description,
-			Email = body.Email,
-			Address = body.Address,
-			Gender = body.Gender,
-		};
-
-		var newId = await _clientRepository.CreateAsync(client);
-		return CreatedAtAction(nameof(Get), new { id = newId }, client);
+		var newId = await _clientService.CreateAsync(body);
+		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
-	// PUT api/<ClientsController>/5
 	[HttpPut("{id}")]
-	public void Put(int id, [FromBody] string value)
+	public async Task<IActionResult> Put(string id, [FromBody] ClientCreateUpdate body)
 	{
+		try
+		{
+			await _clientService.ReplaceAsync(id, body);
+		}
+		catch (KeyNotFoundException)
+		{
+			return NotFound();
+		}
+		catch (Exception)
+		{
+			return StatusCode(StatusCodes.Status500InternalServerError);
+		}
+
+		return NoContent();
 	}
 
-	// DELETE api/<ClientsController>/5
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(string id)
 	{
-		var result = await _clientRepository.DeleteAsync(id);
-		if (result == true)
+		try
 		{
-			return NoContent();
+			await _clientService.DeleteAsync(id);
 		}
-		return NotFound();
+		catch (KeyNotFoundException)
+		{
+			return NotFound();
+		}
+
+		return NoContent();
 	}
 }
