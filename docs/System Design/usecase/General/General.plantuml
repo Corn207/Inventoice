@@ -4,38 +4,33 @@ left to right direction
 actor :Người dùng: as User
 actor :Quản lý: as Manager
 actor :Nhân viên: as Staff
-actor :Quản trị viên: as Admin
 
-usecase ManageProduct as "Quản lý sản phẩm"
+rectangle Product as "Sản phẩm" {
 
-usecase ManageInventory as "Quản lý tồn kho"
-
-usecase ManageInvoice as "Quản lý hóa đơn"
-
-usecase ManageClient as "Quản lý khách hàng"
-
-usecase GetStatistic as "Xem thống kê"
-
-usecase ManageAccount as "Quản lý tài khoản"
-usecase LoginLogout as "Đăng nhập/xuất"
+}
+rectangle Client as "Khách hàng" {
+    
+}
+rectangle AuditReport as "Báo cáo kiểm kho" {
+    
+}
+rectangle ExportReport as "Báo cáo xuất kho" {
+    
+}
+rectangle ImportReport as "Báo cáo nhập kho" {
+    
+}
+rectangle Invoice as "Hóa đơn" {
+    
+}
 
 Manager --|> User
 Staff --|> User
 
-User -- LoginLogout
-LoginLogout -- Admin
-
-ManageAccount -- Admin
-User -- ManageAccount
-
-Manager -- ManageProduct
-
-ManageInventory -- Admin
-Manager -- ManageInventory
-
-User -- ManageInvoice
-
-User -- ManageClient
-
-User -- GetStatistic
+Manager -- AuditReport
+Manager -- ExportReport
+Manager -- ImportReport
+User -- Client
+User -- Product
+User -- Invoice
 @enduml

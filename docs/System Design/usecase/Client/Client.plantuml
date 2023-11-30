@@ -1,0 +1,27 @@
+@startuml Client
+left to right direction
+
+actor User as "Người dùng"
+actor Manager as "Quản lý"
+actor Staff as "Nhân viên"
+
+rectangle Client as "Khách hàng" {
+    usecase ClientSearch as "Tìm kiếm khách hàng"
+    usecase ClientSearchByName as "Tìm bằng tên"
+    usecase ClientSearchByPhonenumber as "Tìm bằng số điện thoại"
+    usecase ClientView as "Xem khách hàng"
+    usecase ClientCreate as "Thêm khách hàng"
+    usecase ClientEdit as "Sửa khách hàng"
+    usecase ClientDelete as "Xóa khách hàng"
+}
+
+Manager --|> User
+Staff --|> User
+User -- ClientSearch
+User -- ClientView
+User -- ClientCreate
+User -- ClientEdit
+User -- ClientDelete
+ClientSearch <|-- ClientSearchByName
+ClientSearch <|-- ClientSearchByPhonenumber
+@enduml

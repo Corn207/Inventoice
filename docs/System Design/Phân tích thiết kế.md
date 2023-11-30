@@ -8,22 +8,26 @@
 
 ### Các biểu đồ Use-case phân rã
 
-1. Quản lý tài khoản
+1. Sản phẩm
 
-   ![Biểu đồ use-case quản lý tài khoản](usecase/ManageAccount/ManageAccount.png)
+   ![Biểu đồ use-case sản phẩm](usecase/Product/Product.png)
 
-1. Quản lý khách hàng
+1. Khách hàng
 
-   ![Biểu đồ use-case quản lý khách hàng](usecase/ManageClient/ManageClient.png)
+   ![Biểu đồ use-case khách hàng](usecase/Client/Client.png)
 
-1. Quản lý tồn kho
+1. Báo cáo kiểm kho
 
-   ![Biểu đồ use-case quản lý tồn kho](usecase/ManageInventory/ManageInventory.png)
+   ![Biểu đồ use-case báo cáo kiểm kho](usecase/AuditReport/AuditReport.png)
 
-1. Quản lý hóa đơn
+1. Báo cáo xuất kho
 
-   ![Biểu đồ use-case quản lý hóa đơn](usecase/ManageInvoice/ManageInvoice.png)
+   ![Biểu đồ use-case báo cáo xuất kho](usecase/ExportReport/ExportReport.png)
 
-1. Quản lý sản phẩm
+1. Báo cáo nhập kho
 
-   ![Biểu đồ use-case quản lý sản phẩm](usecase/ManageProduct/ManageProduct.png)
+   ![Biểu đồ use-case báo cáo nhập kho](usecase/ImportReport/ImportReport.png)
+
+1. Hóa đơn
+
+   ![Biểu đồ use-case hóa đơn](usecase/Invoice/Invoice.png)

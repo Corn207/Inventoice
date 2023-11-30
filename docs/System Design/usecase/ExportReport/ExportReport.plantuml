@@ -1,0 +1,30 @@
+@startuml ExportReport
+left to right direction
+
+actor Manager as "Quản lý"
+
+rectangle ExportReport as "Báo cáo xuất kho" {
+    usecase ExportReportSearch as "Tìm kiếm báo cáo"
+    usecase ExportReportSearchByName as "Tìm bằng tên"
+    usecase ExportReportSearchByBarcode as "Tìm bằng mã hàng"
+    usecase ExportReportFilterStartDate as "Lọc từ ngày"
+    usecase ExportReportFilterEndDate as "Lọc đến ngày"
+    usecase ExportReportView as "Xem báo cáo"
+    usecase ExportReportCreate as "Thêm báo cáo"
+    usecase ExportReportDelete as "Xóa báo cáo"
+    usecase ExportReportCancel as "Hủy báo cáo (Trả hàng xuất)"
+    usecase ProductUpdateStock as "Cập nhật tồn kho sản phẩm"
+}
+
+Manager -- ExportReportSearch
+Manager -- ExportReportView
+Manager -- ExportReportCreate
+Manager -- ExportReportDelete
+Manager -- ExportReportCancel
+ExportReportSearch <|-- ExportReportSearchByName
+ExportReportSearch <|-- ExportReportSearchByBarcode
+ExportReportSearch <|-- ExportReportFilterStartDate
+ExportReportSearch <|-- ExportReportFilterEndDate
+ExportReportCancel ..> ProductUpdateStock : <<include>>
+ExportReportCreate ..> ProductUpdateStock : <<include>>
+@enduml
