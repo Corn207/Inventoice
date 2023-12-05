@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces.Repositories.Bases;
-using Application.Interfaces.Repositories.Parameters;
 using Domain.DTOs.Invoices;
 using Domain.Entities;
+using Domain.Parameters;
 
 namespace Application.Interfaces.Repositories;
 public interface IInvoiceRepository : ISoftDeletableRepository<Invoice>

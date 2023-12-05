@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Parameters;
 using Domain.DTOs.Products;
 using Domain.Entities;
 using Domain.Mappers;
+using Domain.Parameters;
 
 namespace Application.Services;
 public class ProductService

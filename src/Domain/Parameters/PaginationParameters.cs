@@ -1,4 +1,4 @@
-﻿namespace Application.Interfaces.Repositories.Parameters;
+﻿namespace Domain.Parameters;
 public readonly struct PaginationParameters
 {
 	public PaginationParameters(ushort pageNumber, ushort pageSize)

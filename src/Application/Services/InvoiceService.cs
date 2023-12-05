@@ -1,8 +1,8 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Parameters;
 using Domain.DTOs.Invoices;
 using Domain.Entities;
+using Domain.Parameters;
 
 namespace Application.Services;
 public class InvoiceService

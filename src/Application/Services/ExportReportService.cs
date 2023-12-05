@@ -1,9 +1,9 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Parameters;
 using Domain.DTOs.ExportReports;
 using Domain.Entities;
 using Domain.Mappers;
+using Domain.Parameters;
 
 namespace Application.Services;
 public class ExportReportService

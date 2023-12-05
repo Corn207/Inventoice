@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Repositories.Bases;
-using Application.Interfaces.Repositories.Parameters;
 using Domain.Entities;
+using Domain.Parameters;
 
 namespace Application.Interfaces.Repositories;
 public interface IClientRepository : IRepository<Client>

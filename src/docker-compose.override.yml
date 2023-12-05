@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  webapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoConnection__ConnectionString=mongodb://database:27017
+    ports:
+      - "5000:80"
+  database:
+    ports:
+      - "27017:27017"

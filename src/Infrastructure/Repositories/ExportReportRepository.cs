@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Parameters;
 using Domain.Entities;
+using Domain.Parameters;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;

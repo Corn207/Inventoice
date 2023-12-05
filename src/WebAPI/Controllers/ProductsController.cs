@@ -1,7 +1,7 @@
-﻿using Application.Interfaces.Repositories.Parameters;
-using Application.Services;
+﻿using Application.Services;
 using Domain.DTOs.Products;
 using Domain.Entities;
+using Domain.Parameters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
