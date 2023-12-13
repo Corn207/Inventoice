@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.8'
 
 services:
   webapi:
@@ -6,7 +6,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoConnection__ConnectionString=mongodb://database:27017
     ports:
-      - "5000:80"
+      - "21080:8080"
   database:
     ports:
       - "27017:27017"
+    volumes:
+      - ~/volumes/inventoice:/data/db

@@ -1,7 +1,8 @@
 ﻿namespace Domain.DTOs.Invoices;
-public enum InvoiceStatus : byte
+public enum InvoiceStatus
 {
-	Pending = 0,
-	Paid = 1,
-	Cancelled = 2
+	All = 0,
+	Pending = 1,
+	Paid = 2,
+	Cancelled = 3
 }

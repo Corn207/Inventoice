@@ -1,36 +1,34 @@
 ﻿using Application.Services;
+using Domain.DTOs;
 using Domain.DTOs.Products;
 using Domain.Entities;
-using Domain.Parameters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class ProductsController : ControllerBase
+public class ProductsController(ProductService productService) : ControllerBase
 {
-	private readonly ProductService _productService;
-
-	public ProductsController(ProductService productService)
-	{
-		_productService = productService;
-	}
-
 	[HttpGet]
 	public async Task<IEnumerable<ProductShort>> Get(
 		[FromQuery] string? search = null,
 		[FromQuery] ushort pageNumber = 1,
 		[FromQuery] ushort pageSize = 15,
-		[FromQuery] ProductOrderByParameter orderBy = ProductOrderByParameter.Name,
-		[FromQuery] bool isDescending = false)
+		[FromQuery] ProductSortBy sortBy = ProductSortBy.Name,
+		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
 	{
-		return await _productService.SearchAsync(search, pageNumber, pageSize, orderBy, isDescending);
+		return await productService.SearchAsync(
+			search ?? string.Empty,
+			pageNumber,
+			pageSize,
+			sortBy,
+			orderBy);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Product>> Get(string id)
 	{
-		var product = await _productService.GetAsync(id);
+		var product = await productService.GetAsync(id);
 		if (product is null)
 		{
 			return NotFound();
@@ -42,7 +40,7 @@ public class ProductsController : ControllerBase
 	[HttpPost]
 	public async Task<IActionResult> Post([FromBody] ProductCreateUpdate body)
 	{
-		var newId = await _productService.CreateAsync(body);
+		var newId = await productService.CreateAsync(body);
 		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
@@ -51,7 +49,7 @@ public class ProductsController : ControllerBase
 	{
 		try
 		{
-			await _productService.ReplaceAsync(id, body);
+			await productService.ReplaceAsync(id, body);
 		}
 		catch (KeyNotFoundException)
 		{
@@ -70,7 +68,7 @@ public class ProductsController : ControllerBase
 	{
 		try
 		{
-			await _productService.DeleteAsync(id);
+			await productService.DeleteAsync(id);
 		}
 		catch (Exception)
 		{

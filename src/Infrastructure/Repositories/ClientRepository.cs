@@ -1,21 +1,17 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.DTOs;
 using Domain.Entities;
-using Domain.Parameters;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class ClientRepository : Repository<Client>, IClientRepository
+public class ClientRepository(Database database) : Repository<Client>(database), IClientRepository
 {
-	public ClientRepository(Database database) : base(database)
-	{
-	}
-
 	public async Task<List<Client>> SearchAsync(
 		string nameOrPhonenumber,
-		PaginationParameters pagination,
-		bool isDescending)
+		Pagination pagination,
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<Client>().AsQueryable();
 
@@ -24,13 +20,13 @@ public class ClientRepository : Repository<Client>, IClientRepository
 			query = query.Where(x => x.Name.Contains(nameOrPhonenumber) || x.PhoneNumber.Contains(nameOrPhonenumber));
 		}
 
-		if (isDescending)
+		if (orderBy == OrderBy.Ascending)
 		{
-			query = query.OrderByDescending(p => p.Name);
+			query = query.OrderBy(p => p.Name);
 		}
 		else
 		{
-			query = query.OrderBy(p => p.Name);
+			query = query.OrderByDescending(p => p.Name);
 		}
 
 		var clients = await query

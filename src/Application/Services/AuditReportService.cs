@@ -1,46 +1,37 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.DTOs;
 using Domain.DTOs.AuditReports;
 using Domain.Entities;
 using Domain.Mappers;
-using Domain.Parameters;
 
 namespace Application.Services;
-public class AuditReportService
+public class AuditReportService(
+	IAuditReportRepository auditReportRepository,
+	IProductRepository productRepository)
 {
-	private readonly IAuditReportRepository _auditReportRepository;
-	private readonly IProductRepository _productRepository;
-
-	public AuditReportService(
-		IAuditReportRepository auditReportRepository,
-		IProductRepository productRepository)
-	{
-		_auditReportRepository = auditReportRepository;
-		_productRepository = productRepository;
-	}
-
 	public async Task<IEnumerable<AuditReportShort>> SearchAsync(
-		string? nameOrBarcode = null,
-		ushort pageNumber = 1,
-		ushort pageSize = 15,
-		DateTime? startDate = null,
-		DateTime? endDate = null,
-		bool isDescending = false)
+		string nameOrBarcode,
+		ushort pageNumber,
+		ushort pageSize,
+		DateTime startDate,
+		DateTime endDate,
+		OrderBy orderBy)
 	{
-		var pagination = new PaginationParameters(pageNumber, pageSize);
-		var timeRange = new TimeRangeParameters(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue);
-		var entities = await _auditReportRepository.SearchAsync(nameOrBarcode ?? string.Empty, pagination, timeRange, isDescending);
+		var pagination = new Pagination(pageNumber, pageSize);
+		var timeRange = new TimeRange(startDate, endDate);
+		var entities = await auditReportRepository.SearchAsync(nameOrBarcode, pagination, timeRange, orderBy);
 
 		return entities.Select(AuditReportMapper.ToShortForm);
 	}
 
 	public async Task<AuditReport?> GetAsync(string id)
 	{
-		return await _auditReportRepository.GetAsync(id);
+		return await auditReportRepository.GetAsync(id);
 	}
 
 	public async Task<string> CreateAsync(AuditReportCreate create)
 	{
-		var products = await _productRepository
+		var products = await productRepository
 			.GetByIdsAsync(
 				create.ProductItems.Select(x => x.ProductId),
 				product => new
@@ -85,8 +76,8 @@ public class AuditReportService
 		#endregion
 
 		var tasks = create.ProductItems
-			.Select(x => _productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.AdjustedQuantity))
-			.Append(_auditReportRepository.CreateAsync(entity));
+			.Select(x => productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.AdjustedQuantity))
+			.Append(auditReportRepository.CreateAsync(entity));
 		await Task.WhenAll(tasks);
 
 		return entity.Id!;
@@ -96,7 +87,7 @@ public class AuditReportService
 	{
 		try
 		{
-			await _auditReportRepository.SoftDeleteAsync(id);
+			await auditReportRepository.SoftDeleteAsync(id);
 		}
 		catch (KeyNotFoundException)
 		{

@@ -1,5 +1,6 @@
 ﻿using Application.Exceptions;
 using Application.Services;
+using Domain.DTOs;
 using Domain.DTOs.ImportReports;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -7,15 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class ImportReportsController : ControllerBase
+public class ImportReportsController(ImportReportService service) : ControllerBase
 {
-	private readonly ImportReportService _service;
-
-	public ImportReportsController(ImportReportService service)
-	{
-		_service = service;
-	}
-
 	[HttpGet]
 	public async Task<IEnumerable<ImportReportShort>> Get(
 		[FromQuery] string? search = null,
@@ -23,15 +17,21 @@ public class ImportReportsController : ControllerBase
 		[FromQuery] ushort pageSize = 15,
 		[FromQuery] DateTime? startDate = null,
 		[FromQuery] DateTime? endDate = null,
-		[FromQuery] bool isDescending = false)
+		[FromQuery] OrderBy orderBy = OrderBy.Descending)
 	{
-		return await _service.SearchAsync(search, pageNumber, pageSize, startDate, endDate, isDescending);
+		return await service.SearchAsync(
+			search ?? string.Empty,
+			pageNumber,
+			pageSize,
+			startDate ?? DateTime.MinValue,
+			endDate ?? DateTime.MaxValue,
+			orderBy);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<ActionResult<ImportReport>> Get(string id)
 	{
-		var entity = await _service.GetAsync(id);
+		var entity = await service.GetAsync(id);
 		if (entity is null)
 		{
 			return NotFound();
@@ -45,7 +45,7 @@ public class ImportReportsController : ControllerBase
 	{
 		try
 		{
-			var newId = await _service.CreateAsync(body);
+			var newId = await service.CreateAsync(body);
 			return CreatedAtAction(nameof(Get), new { id = newId }, null);
 		}
 		catch (KeyNotFoundException ex)
@@ -63,7 +63,7 @@ public class ImportReportsController : ControllerBase
 	{
 		try
 		{
-			await _service.DeleteAsync(id);
+			await service.DeleteAsync(id);
 		}
 		catch (KeyNotFoundException ex)
 		{
@@ -82,7 +82,7 @@ public class ImportReportsController : ControllerBase
 	{
 		try
 		{
-			await _service.CancelAsync(id);
+			await service.CancelAsync(id);
 		}
 		catch (KeyNotFoundException ex)
 		{

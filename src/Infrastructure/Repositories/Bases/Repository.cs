@@ -4,14 +4,9 @@ using MongoDB.Driver;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.Bases;
-public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : IEntity
+public abstract class Repository<TEntity>(Database database) : IRepository<TEntity> where TEntity : IEntity
 {
-	protected readonly Database Database;
-
-	public Repository(Database database)
-	{
-		Database = database;
-	}
+	protected readonly Database Database = database;
 
 	#region Get
 	public virtual async Task<List<TEntity>> GetByIdsAsync(

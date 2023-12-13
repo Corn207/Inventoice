@@ -4,14 +4,11 @@ using MongoDB.Driver;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.Bases;
-public abstract class SoftDeletableRepository<TEntity> :
-	Repository<TEntity>,
+public abstract class SoftDeletableRepository<TEntity>(Database database) :
+	Repository<TEntity>(database),
 	ISoftDeletableRepository<TEntity>
 	where TEntity : IEntity, ISoftDeletableEntity
 {
-	public SoftDeletableRepository(Database database) : base(database)
-	{
-	}
 
 	#region Get
 	public override async Task<List<TEntity>> GetByIdsAsync(

@@ -1,48 +1,39 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
+using Domain.DTOs;
 using Domain.DTOs.ExportReports;
 using Domain.Entities;
 using Domain.Mappers;
-using Domain.Parameters;
 
 namespace Application.Services;
-public class ExportReportService
+public class ExportReportService(
+	IExportReportRepository exportReportRepository,
+	IProductRepository productRepository)
 {
-	private readonly IExportReportRepository _exportReportRepository;
-	private readonly IProductRepository _productRepository;
-
-	public ExportReportService(
-		IExportReportRepository exportReportRepository,
-		IProductRepository productRepository)
-	{
-		_exportReportRepository = exportReportRepository;
-		_productRepository = productRepository;
-	}
-
 	public async Task<IEnumerable<ExportReportShort>> SearchAsync(
-		string? nameOrBarcode = null,
-		ushort pageNumber = 1,
-		ushort pageSize = 15,
-		DateTime? startDate = null,
-		DateTime? endDate = null,
-		bool isDescending = false)
+		string nameOrBarcode,
+		ushort pageNumber,
+		ushort pageSize,
+		DateTime startDate,
+		DateTime endDate,
+		OrderBy orderBy)
 	{
-		var pagination = new PaginationParameters(pageNumber, pageSize);
-		var timeRange = new TimeRangeParameters(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue);
-		var entities = await _exportReportRepository.SearchAsync(nameOrBarcode ?? string.Empty, pagination, timeRange, isDescending);
+		var pagination = new Pagination(pageNumber, pageSize);
+		var timeRange = new TimeRange(startDate, endDate);
+		var entities = await exportReportRepository.SearchAsync(nameOrBarcode, pagination, timeRange, orderBy);
 
 		return entities.Select(ExportReportMapper.ToShortForm);
 	}
 
 	public async Task<ExportReport?> GetAsync(string id)
 	{
-		return await _exportReportRepository.GetAsync(id);
+		return await exportReportRepository.GetAsync(id);
 	}
 
 	public async Task<string> CreateAsync(ExportReportCreate create)
 	{
 		var createIds = create.ProductItems.Select(x => x.ProductId).ToArray();
-		var products = await _productRepository
+		var products = await productRepository
 			.GetByIdsAsync(
 				createIds,
 				x => new
@@ -112,8 +103,8 @@ public class ExportReportService
 		#endregion
 
 		var tasks = changes
-			.Select(x => _productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.StockCount - x.Quantity))
-			.Append(_exportReportRepository.CreateAsync(entity));
+			.Select(x => productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.StockCount - x.Quantity))
+			.Append(exportReportRepository.CreateAsync(entity));
 		await Task.WhenAll(tasks);
 
 		return entity.Id!;
@@ -123,7 +114,7 @@ public class ExportReportService
 	{
 		try
 		{
-			await _exportReportRepository.SoftDeleteAsync(id);
+			await exportReportRepository.SoftDeleteAsync(id);
 		}
 		catch (KeyNotFoundException)
 		{
@@ -137,7 +128,7 @@ public class ExportReportService
 
 	public async Task CancelAsync(string id)
 	{
-		var reportProducts = await _exportReportRepository.GetAsync(
+		var reportProducts = await exportReportRepository.GetAsync(
 			id,
 			x => x.ProductItems.Select(i => new
 			{
@@ -146,7 +137,7 @@ public class ExportReportService
 			}).ToArray(),
 			x => x.DateCancelled == null) ?? throw new KeyNotFoundException("Id was not found or cancelled or deleted.");
 
-		var products = await _productRepository.GetByIdsAsync(
+		var products = await productRepository.GetByIdsAsync(
 			reportProducts.Select(x => x.ProductId),
 			x => new
 			{
@@ -159,8 +150,8 @@ public class ExportReportService
 				reportProducts,
 				product => product.Id,
 				report => report.ProductId,
-				(product, report) => _productRepository.UpdateAsync(product.Id, x => x.StockCount, product.StockCount + report.Quantity))
-			.Append(_exportReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.Now));
+				(product, report) => productRepository.UpdateAsync(product.Id, x => x.StockCount, product.StockCount + report.Quantity))
+			.Append(exportReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.Now));
 
 		await Task.WhenAll(tasks);
 	}

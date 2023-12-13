@@ -1,22 +1,18 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.DTOs;
 using Domain.Entities;
-using Domain.Parameters;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class AuditReportRepository : SoftDeletableRepository<AuditReport>, IAuditReportRepository
+public class AuditReportRepository(Database database) : SoftDeletableRepository<AuditReport>(database), IAuditReportRepository
 {
-	public AuditReportRepository(Database database) : base(database)
-	{
-	}
-
 	public async Task<List<AuditReport>> SearchAsync(
 		string nameOrBarcode,
-		PaginationParameters pagination,
-		TimeRangeParameters timeRange,
-		bool isDescending)
+		Pagination pagination,
+		TimeRange timeRange,
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<AuditReport>().AsQueryable()
 			.Where(x => x.DateDeleted == null);
@@ -36,13 +32,13 @@ public class AuditReportRepository : SoftDeletableRepository<AuditReport>, IAudi
 			query = query.Where(p => p.DateCreated <= timeRange.To);
 		}
 
-		if (isDescending)
+		if (orderBy == OrderBy.Ascending)
 		{
-			query = query.OrderByDescending(p => p.DateCreated);
+			query = query.OrderBy(p => p.DateCreated);
 		}
 		else
 		{
-			query = query.OrderBy(p => p.DateCreated);
+			query = query.OrderByDescending(p => p.DateCreated);
 		}
 
 		var entity = await query

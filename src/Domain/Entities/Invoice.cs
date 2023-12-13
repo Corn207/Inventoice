@@ -12,7 +12,7 @@ public class Invoice : IEntity, ISoftDeletableEntity, ICancellableEntity
 	public InvoiceClientInfo? Client { get; set; }
 	public required string ExportReportId { get; set; }
 	public required List<InvoiceProductItem> ProductItems { get; set; }
-	public uint PaidAmount { get; set; }
+	public uint GrandTotal { get; set; }
 	public DateTime DateCreated { get; set; }
 	public DateTime? DatePaid { get; set; }
 	public DateTime? DateCancelled { get; set; }

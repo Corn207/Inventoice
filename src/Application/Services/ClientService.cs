@@ -1,61 +1,54 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.DTOs;
 using Domain.DTOs.Clients;
 using Domain.Entities;
 using Domain.Mappers;
-using Domain.Parameters;
 
 namespace Application.Services;
-public class ClientService
+public class ClientService(IClientRepository clientRepository)
 {
-	private readonly IClientRepository _clientRepository;
-
-	public ClientService(IClientRepository clientRepository)
-	{
-		_clientRepository = clientRepository;
-	}
-
 	public async Task<IEnumerable<ClientShort>> SearchAsync(
-		string? nameOrPhonenumber = null,
-		ushort pageNumber = 1,
-		ushort pageSize = 15,
-		bool isDescending = false)
+		string nameOrPhonenumber,
+		ushort pageNumber,
+		ushort pageSize,
+		OrderBy orderBy)
 	{
-		var pagination = new PaginationParameters(pageNumber, pageSize);
-		var entities = await _clientRepository.SearchAsync(nameOrPhonenumber ?? string.Empty, pagination, isDescending);
+		var pagination = new Pagination(pageNumber, pageSize);
+		var entities = await clientRepository.SearchAsync(nameOrPhonenumber, pagination, orderBy);
 
 		return entities.Select(ClientMapper.ToShortForm);
 	}
 
 	public async Task<Client?> GetAsync(string id)
 	{
-		return await _clientRepository.GetAsync(id);
+		return await clientRepository.GetAsync(id);
 	}
 
 	public async Task<string> CreateAsync(ClientCreateUpdate create)
 	{
 		var entity = ClientMapper.ToEntity(create);
 		entity.DateCreated = DateTime.Now;
-		await _clientRepository.CreateAsync(entity);
+		await clientRepository.CreateAsync(entity);
 
 		return entity.Id!;
 	}
 
 	public async Task ReplaceAsync(string id, ClientCreateUpdate update)
 	{
-		var entity = await _clientRepository.GetAsync(id) ?? throw new KeyNotFoundException();
+		var entity = await clientRepository.GetAsync(id) ?? throw new KeyNotFoundException();
 		ClientMapper.ToEntity(update, entity);
-		await _clientRepository.ReplaceAsync(entity);
+		await clientRepository.ReplaceAsync(entity);
 	}
 
 	public async Task DeleteAsync(string id)
 	{
 		try
 		{
-			await _clientRepository.DeleteAsync(id);
+			await clientRepository.DeleteAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (KeyNotFoundException)
 		{
-			throw ex;
+			throw;
 		}
 	}
 }

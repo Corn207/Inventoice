@@ -1,44 +1,43 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.DTOs;
 using Domain.DTOs.Invoices;
 using Domain.Entities;
-using Domain.Parameters;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class InvoiceRepository : SoftDeletableRepository<Invoice>, IInvoiceRepository
+public class InvoiceRepository(Database database) : SoftDeletableRepository<Invoice>(database), IInvoiceRepository
 {
-	public InvoiceRepository(Database database) : base(database)
-	{
-	}
-
-	public async Task<List<InvoiceShort>> SearchAsync(
-		InvoiceFilterParameters filter,
-		PaginationParameters pagination,
-		TimeRangeParameters timeRange,
-		bool isDescending)
+	public async Task<List<Invoice>> SearchAsync(
+		string productNameOrBarcode,
+		string clientNameOrPhonenumber,
+		string authorName,
+		InvoiceStatus status,
+		Pagination pagination,
+		TimeRange timeRange,
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<Invoice>().AsQueryable();
 
-		if (!string.IsNullOrWhiteSpace(filter.ProductNameOrBarcode))
+		if (!string.IsNullOrWhiteSpace(productNameOrBarcode))
 		{
-			query = query.Where(x => x.ProductItems.Any(p => p.Barcode.Contains(filter.ProductNameOrBarcode) || p.Name.Contains(filter.ProductNameOrBarcode)));
+			query = query.Where(x => x.ProductItems.Any(p => p.Barcode.Contains(productNameOrBarcode) || p.Name.Contains(productNameOrBarcode)));
 		}
 
-		if (!string.IsNullOrWhiteSpace(filter.ClientNameOrPhonenumber))
+		if (!string.IsNullOrWhiteSpace(clientNameOrPhonenumber))
 		{
-			query = query.Where(x => x.Client != null && (x.Client.Name.Contains(filter.ClientNameOrPhonenumber) || x.Client.PhoneNumber.Contains(filter.ClientNameOrPhonenumber)));
+			query = query.Where(x => x.Client != null && (x.Client.Name.Contains(clientNameOrPhonenumber) || x.Client.PhoneNumber.Contains(clientNameOrPhonenumber)));
 		}
 
-		if (!string.IsNullOrWhiteSpace(filter.AuthorName))
+		if (!string.IsNullOrWhiteSpace(authorName))
 		{
-			query = query.Where(x => x.Author.Name.Contains(filter.AuthorName));
+			query = query.Where(x => x.Author.Name.Contains(authorName));
 		}
 
-		if (filter.Status is not null)
+		if (status != InvoiceStatus.All)
 		{
-			switch (filter.Status)
+			switch (status)
 			{
 				case InvoiceStatus.Pending:
 					query = query.Where(x => x.DatePaid == null && x.DateCancelled == null); break;
@@ -55,25 +54,21 @@ public class InvoiceRepository : SoftDeletableRepository<Invoice>, IInvoiceRepos
 		{
 			query = query.Where(p => p.DateCreated >= timeRange.From);
 		}
-
 		if (timeRange.To != DateTime.MaxValue)
 		{
 			query = query.Where(p => p.DateCreated <= timeRange.To);
 		}
 
-		var projectedQuery = query.Select(x => new InvoiceShort()
+		if (orderBy == OrderBy.Ascending)
 		{
-			Id = x.Id!,
-			Status = x.DateCancelled != null ? InvoiceStatus.Cancelled : x.DatePaid != null ? InvoiceStatus.Paid : InvoiceStatus.Pending,
-			ClientName = x.Client != null ? x.Client.Name : null,
-			DateCreated = x.DateCreated,
-			PaidAmount = x.PaidAmount,
-			TotalProduct = (ushort)x.ProductItems.Count,
-			FirstProductName = x.ProductItems[0].Name,
-			FirstProductQuantity = x.ProductItems[0].Quantity
-		});
+			query = query.OrderBy(p => p.DateCreated);
+		}
+		else
+		{
+			query = query.OrderByDescending(p => p.DateCreated);
+		}
 
-		var products = await projectedQuery
+		var products = await query
 			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
 			.Take(pagination.PageSize)
 			.ToListAsync();

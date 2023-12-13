@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Domain.DTOs;
 using Domain.DTOs.Clients;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -6,29 +7,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class ClientsController : ControllerBase
+public class ClientsController(ClientService clientService) : ControllerBase
 {
-	private readonly ClientService _clientService;
-
-	public ClientsController(ClientService clientService)
-	{
-		_clientService = clientService;
-	}
-
 	[HttpGet]
 	public async Task<IEnumerable<ClientShort>> Get(
 		[FromQuery] string? search = null,
 		[FromQuery] ushort pageNumber = 1,
 		[FromQuery] ushort pageSize = 15,
-		[FromQuery] bool isDescending = false)
+		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
 	{
-		return await _clientService.SearchAsync(search, pageNumber, pageSize, isDescending);
+		return await clientService.SearchAsync(
+			search ?? string.Empty,
+			pageNumber,
+			pageSize,
+			orderBy);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Client>> Get(string id)
 	{
-		var client = await _clientService.GetAsync(id);
+		var client = await clientService.GetAsync(id);
 		if (client is null)
 		{
 			return NotFound();
@@ -40,7 +38,7 @@ public class ClientsController : ControllerBase
 	[HttpPost]
 	public async Task<IActionResult> Post([FromBody] ClientCreateUpdate body)
 	{
-		var newId = await _clientService.CreateAsync(body);
+		var newId = await clientService.CreateAsync(body);
 		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
@@ -49,7 +47,7 @@ public class ClientsController : ControllerBase
 	{
 		try
 		{
-			await _clientService.ReplaceAsync(id, body);
+			await clientService.ReplaceAsync(id, body);
 		}
 		catch (KeyNotFoundException)
 		{
@@ -68,7 +66,7 @@ public class ClientsController : ControllerBase
 	{
 		try
 		{
-			await _clientService.DeleteAsync(id);
+			await clientService.DeleteAsync(id);
 		}
 		catch (KeyNotFoundException)
 		{

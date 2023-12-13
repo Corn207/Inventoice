@@ -4,7 +4,8 @@ public record struct InvoiceCreate
 	public required string AuthorUserId { get; set; }
 	public required string ClientId { get; set; }
 	public InvoiceCreateProductItem[] ProductItems { get; set; }
-	public uint? PaidAmount { get; set; }
+	public uint GrandTotal { get; set; }
+	public bool IsPaid { get; set; }
 }
 
 public record struct InvoiceCreateProductItem

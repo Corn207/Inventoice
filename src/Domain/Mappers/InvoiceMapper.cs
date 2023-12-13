@@ -24,7 +24,7 @@ public static partial class InvoiceMapper
 			Status = status,
 			ClientName = source.Client?.Name,
 			DateCreated = source.DateCreated,
-			PaidAmount = source.PaidAmount,
+			GrandTotal = source.GrandTotal,
 			TotalProduct = (ushort)source.ProductItems.Count,
 			FirstProductName = source.ProductItems[0].Name,
 			FirstProductQuantity = source.ProductItems[0].Quantity

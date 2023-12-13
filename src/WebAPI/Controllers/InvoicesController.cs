@@ -1,5 +1,6 @@
 ﻿using Application.Exceptions;
 using Application.Services;
+using Domain.DTOs;
 using Domain.DTOs.Invoices;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -7,43 +8,36 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class InvoicesController : ControllerBase
+public class InvoicesController(InvoiceService service) : ControllerBase
 {
-	private readonly InvoiceService _service;
-
-	public InvoicesController(InvoiceService service)
-	{
-		_service = service;
-	}
-
 	[HttpGet]
 	public async Task<IEnumerable<InvoiceShort>> Get(
 		[FromQuery] string? product = null,
 		[FromQuery] string? client = null,
 		[FromQuery] string? author = null,
-		[FromQuery] InvoiceStatus? status = null,
+		[FromQuery] InvoiceStatus status = InvoiceStatus.All,
 		[FromQuery] ushort pageNumber = 1,
 		[FromQuery] ushort pageSize = 15,
-		[FromQuery] DateTime? from = null,
-		[FromQuery] DateTime? to = null,
-		[FromQuery] bool isDescending = false)
+		[FromQuery] DateTime? startDate = null,
+		[FromQuery] DateTime? endDate = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Descending)
 	{
-		return await _service.SearchAsync(
+		return await service.SearchAsync(
 			product,
 			client,
 			author,
 			status,
 			pageNumber,
 			pageSize,
-			from,
-			to,
-			isDescending);
+			startDate ?? DateTime.MinValue,
+			endDate ?? DateTime.MaxValue,
+			orderBy);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Invoice>> Get(string id)
 	{
-		var entity = await _service.GetAsync(id);
+		var entity = await service.GetAsync(id);
 		if (entity is null)
 		{
 			return NotFound();
@@ -57,7 +51,7 @@ public class InvoicesController : ControllerBase
 	{
 		try
 		{
-			var newId = await _service.CreateAsync(body);
+			var newId = await service.CreateAsync(body);
 			return CreatedAtAction(nameof(Get), new { id = newId }, null);
 		}
 		catch (InvalidIdException ex)
@@ -79,7 +73,7 @@ public class InvoicesController : ControllerBase
 	{
 		try
 		{
-			await _service.DeleteAsync(id);
+			await service.DeleteAsync(id);
 		}
 		catch (KeyNotFoundException ex)
 		{
@@ -98,7 +92,7 @@ public class InvoicesController : ControllerBase
 	{
 		try
 		{
-			await _service.CancelAsync(id);
+			await service.CancelAsync(id);
 		}
 		catch (KeyNotFoundException ex)
 		{
@@ -113,11 +107,11 @@ public class InvoicesController : ControllerBase
 	}
 
 	[HttpPatch("{id}/pay")]
-	public async Task<IActionResult> Pay(string id, [FromBody] uint amount)
+	public async Task<IActionResult> Pay(string id)
 	{
 		try
 		{
-			await _service.PayAsync(id, amount);
+			await service.PayAsync(id);
 		}
 		catch (KeyNotFoundException ex)
 		{

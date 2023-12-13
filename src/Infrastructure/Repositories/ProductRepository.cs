@@ -1,23 +1,20 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.DTOs;
+using Domain.DTOs.Products;
 using Domain.Entities;
-using Domain.Parameters;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories;
-public class ProductRepository : Repository<Product>, IProductRepository
+public class ProductRepository(Database database) : Repository<Product>(database), IProductRepository
 {
-	public ProductRepository(Database database) : base(database)
-	{
-	}
-
 	public async Task<List<Product>> SearchAsync(
 		string nameOrBarcode,
-		PaginationParameters pagination,
-		ProductOrderByParameter orderBy,
-		bool isDescending)
+		Pagination pagination,
+		ProductSortBy sortBy,
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<Product>().AsQueryable();
 
@@ -26,19 +23,19 @@ public class ProductRepository : Repository<Product>, IProductRepository
 			query = query.Where(p => p.Barcode.Contains(nameOrBarcode) || p.Name.Contains(nameOrBarcode));
 		}
 
-		Expression<Func<Product, object>> expression = orderBy switch
+		Expression<Func<Product, object>> expression = sortBy switch
 		{
-			ProductOrderByParameter.DateCreated => x => x.DateCreated,
+			ProductSortBy.DateCreated => x => x.DateCreated,
 			_ => x => x.Name,
 		};
 
-		if (isDescending)
+		if (orderBy == OrderBy.Ascending)
 		{
-			query = query.OrderByDescending(expression);
+			query = query.OrderBy(expression);
 		}
 		else
 		{
-			query = query.OrderBy(expression);
+			query = query.OrderByDescending(expression);
 		}
 
 		var entities = await query
