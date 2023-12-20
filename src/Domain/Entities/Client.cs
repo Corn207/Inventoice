@@ -9,15 +9,16 @@ public class Client : IEntity
 	[BsonRepresentation(BsonType.ObjectId)]
 	public string? Id { get; set; }
 	public required string Name { get; set; }
-	public required string PhoneNumber { get; set; }
+	public required string Phonenumber { get; set; }
+	public required DateTime DateCreated { get; set; }
 	public string? Email { get; set; }
 	public string? Address { get; set; }
 	public string? Description { get; set; }
-	public ClientGenderType? Gender { get; set; }
-	public DateTime DateCreated { get; set; }
 }
 
-public enum ClientGenderType
+public class ClientInfo
 {
-	Male, Female
+	public required string Id { get; set; }
+	public required string Name { get; set; }
+	public required string Phonenumber { get; set; }
 }

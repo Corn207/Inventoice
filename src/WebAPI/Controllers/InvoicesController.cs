@@ -12,26 +12,27 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 {
 	[HttpGet]
 	public async Task<IEnumerable<InvoiceShort>> Get(
-		[FromQuery] string? product = null,
-		[FromQuery] string? client = null,
-		[FromQuery] string? author = null,
+		[FromQuery] string? productNameOrBarcode = null,
+		[FromQuery] string? clientNameOrPhonenumber = null,
+		[FromQuery] string? authorName = null,
 		[FromQuery] InvoiceStatus status = InvoiceStatus.All,
 		[FromQuery] ushort pageNumber = 1,
 		[FromQuery] ushort pageSize = 15,
-		[FromQuery] DateTime? startDate = null,
-		[FromQuery] DateTime? endDate = null,
+		[FromQuery] DateTime? dateStart = null,
+		[FromQuery] DateTime? dateEnd = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Descending)
 	{
+		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
+		var pagination = new Pagination(pageNumber, pageSize);
+
 		return await service.SearchAsync(
-			product,
-			client,
-			author,
+			productNameOrBarcode ?? string.Empty,
+			clientNameOrPhonenumber ?? string.Empty,
+			authorName ?? string.Empty,
 			status,
-			pageNumber,
-			pageSize,
-			startDate ?? DateTime.MinValue,
-			endDate ?? DateTime.MaxValue,
-			orderBy);
+			timeRange,
+			orderBy,
+			pagination);
 	}
 
 	[HttpGet("{id}")]
@@ -56,15 +57,11 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 		}
 		catch (InvalidIdException ex)
 		{
-			return BadRequest(ex.Message);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
 		catch (OutOfStockException ex)
 		{
 			return BadRequest(ex.Message);
-		}
-		catch (Exception)
-		{
-			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
 	}
 
@@ -75,11 +72,11 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 		{
 			await service.DeleteAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException ex)
 		{
-			return NotFound(ex.Message);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
@@ -94,11 +91,11 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 		{
 			await service.CancelAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException ex)
 		{
-			return NotFound(ex.Message);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
@@ -113,11 +110,11 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 		{
 			await service.PayAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException ex)
 		{
-			return NotFound(ex.Message);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}

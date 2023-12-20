@@ -7,6 +7,6 @@ public interface IClientRepository : IRepository<Client>
 {
 	Task<List<Client>> SearchAsync(
 		string nameOrPhonenumber,
-		Pagination pagination,
-		OrderBy orderBy);
+		OrderBy orderBy,
+		Pagination pagination);
 }

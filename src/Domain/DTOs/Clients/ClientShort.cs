@@ -1,7 +1,5 @@
 ﻿namespace Domain.DTOs.Clients;
-public record struct ClientShort
-{
-	public required string Id { get; set; }
-	public required string Name { get; set; }
-	public required string PhoneNumber { get; set; }
-}
+public readonly record struct ClientShort(
+	string Id,
+	string Name,
+	string Phonenumber);

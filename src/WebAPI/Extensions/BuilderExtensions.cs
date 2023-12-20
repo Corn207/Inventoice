@@ -30,6 +30,7 @@ public static class BuilderExtensions
 		services.AddScoped<IExportReportRepository, ExportReportRepository>();
 		services.AddScoped<IImportReportRepository, ImportReportRepository>();
 		services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+		services.AddScoped<IUserRepository, UserRepository>();
 
 		return services;
 	}
@@ -42,6 +43,7 @@ public static class BuilderExtensions
 		services.AddScoped<ExportReportService>();
 		services.AddScoped<ImportReportService>();
 		services.AddScoped<InvoiceService>();
+		services.AddScoped<UserService>();
 
 		return services;
 	}

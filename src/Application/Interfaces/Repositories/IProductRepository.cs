@@ -8,7 +8,6 @@ public interface IProductRepository : IRepository<Product>
 {
 	Task<List<Product>> SearchAsync(
 		string nameOrBarcode,
-		Pagination pagination,
-		ProductSortBy sortBy,
-		OrderBy orderBy);
+		OrderBy orderBy,
+		Pagination pagination);
 }

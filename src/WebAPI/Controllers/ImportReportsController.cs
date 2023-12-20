@@ -12,20 +12,21 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 {
 	[HttpGet]
 	public async Task<IEnumerable<ImportReportShort>> Get(
-		[FromQuery] string? search = null,
+		[FromQuery] string? productNameOrBarcode = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Descending,
+		[FromQuery] DateTime? dateStart = null,
+		[FromQuery] DateTime? dateEnd = null,
 		[FromQuery] ushort pageNumber = 1,
-		[FromQuery] ushort pageSize = 15,
-		[FromQuery] DateTime? startDate = null,
-		[FromQuery] DateTime? endDate = null,
-		[FromQuery] OrderBy orderBy = OrderBy.Descending)
+		[FromQuery] ushort pageSize = 15)
 	{
+		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
+		var pagination = new Pagination(pageNumber, pageSize);
+
 		return await service.SearchAsync(
-			search ?? string.Empty,
-			pageNumber,
-			pageSize,
-			startDate ?? DateTime.MinValue,
-			endDate ?? DateTime.MaxValue,
-			orderBy);
+			productNameOrBarcode ?? string.Empty,
+			timeRange,
+			orderBy,
+			pagination);
 	}
 
 	[HttpGet("{id}")]
@@ -48,13 +49,9 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 			var newId = await service.CreateAsync(body);
 			return CreatedAtAction(nameof(Get), new { id = newId }, null);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException ex)
 		{
-			return NotFound(ex.Message);
-		}
-		catch (Exception)
-		{
-			return StatusCode(StatusCodes.Status500InternalServerError);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
 	}
 
@@ -65,11 +62,11 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 		{
 			await service.DeleteAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException ex)
 		{
-			return NotFound(ex.Message);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
@@ -84,17 +81,13 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 		{
 			await service.CancelAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException ex)
 		{
-			return NotFound(ex.Message);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
 		catch (OutOfStockException ex)
 		{
 			return BadRequest(ex.Ids);
-		}
-		catch (Exception)
-		{
-			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
 
 		return NoContent();

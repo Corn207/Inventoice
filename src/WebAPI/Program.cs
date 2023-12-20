@@ -9,6 +9,10 @@ builder.Services.Configure<MongoDBConnectionOptions>(builder.Configuration.GetSe
 builder.Services.AddDatabase();
 builder.Services.AddRepositories();
 builder.Services.AddEntityServices();
+builder.Services.AddCors(options =>
+{
+	options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -20,6 +24,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();

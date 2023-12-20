@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Exceptions;
+using Application.Services;
 using Domain.DTOs;
 using Domain.DTOs.Products;
 using Domain.Entities;
@@ -11,18 +12,17 @@ public class ProductsController(ProductService productService) : ControllerBase
 {
 	[HttpGet]
 	public async Task<IEnumerable<ProductShort>> Get(
-		[FromQuery] string? search = null,
+		[FromQuery] string? nameOrBarcode = null,
 		[FromQuery] ushort pageNumber = 1,
 		[FromQuery] ushort pageSize = 15,
-		[FromQuery] ProductSortBy sortBy = ProductSortBy.Name,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
 	{
+		var pagination = new Pagination(pageNumber, pageSize);
+
 		return await productService.SearchAsync(
-			search ?? string.Empty,
-			pageNumber,
-			pageSize,
-			sortBy,
-			orderBy);
+			nameOrBarcode ?? string.Empty,
+			orderBy,
+			pagination);
 	}
 
 	[HttpGet("{id}")]
@@ -51,13 +51,9 @@ public class ProductsController(ProductService productService) : ControllerBase
 		{
 			await productService.ReplaceAsync(id, body);
 		}
-		catch (KeyNotFoundException)
+		catch (InvalidIdException ex)
 		{
-			return NotFound();
-		}
-		catch (Exception)
-		{
-			return StatusCode(StatusCodes.Status500InternalServerError);
+			return NotFound(new { ex.Message, ex.Ids });
 		}
 
 		return NoContent();
@@ -70,9 +66,9 @@ public class ProductsController(ProductService productService) : ControllerBase
 		{
 			await productService.DeleteAsync(id);
 		}
-		catch (Exception)
+		catch (InvalidIdException ex)
 		{
-			return NotFound();
+			return NotFound(new { ex.Message, ex.Ids });
 		}
 
 		return NoContent();

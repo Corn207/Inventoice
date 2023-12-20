@@ -9,28 +9,21 @@ public class Invoice : IEntity, ISoftDeletableEntity, ICancellableEntity
 	[BsonRepresentation(BsonType.ObjectId)]
 	public string? Id { get; set; }
 	public required UserInfo Author { get; set; }
-	public InvoiceClientInfo? Client { get; set; }
 	public required string ExportReportId { get; set; }
 	public required List<InvoiceProductItem> ProductItems { get; set; }
-	public uint GrandTotal { get; set; }
-	public DateTime DateCreated { get; set; }
+	public required uint GrandTotal { get; set; }
+	public required DateTime DateCreated { get; set; }
+	public ClientInfo? Client { get; set; }
 	public DateTime? DatePaid { get; set; }
 	public DateTime? DateCancelled { get; set; }
 	public DateTime? DateDeleted { get; set; }
 }
 
-public class InvoiceClientInfo
-{
-	public required string ClientId { get; set; }
-	public required string Name { get; set; }
-	public required string PhoneNumber { get; set; }
-}
-
 public class InvoiceProductItem
 {
-	public required string ProductId { get; set; }
+	public required string Id { get; set; }
 	public required string Name { get; set; }
 	public required string Barcode { get; set; }
-	public uint UnitPrice { get; set; }
-	public uint Quantity { get; set; }
+	public required uint Price { get; set; }
+	public required uint Quantity { get; set; }
 }

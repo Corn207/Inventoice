@@ -10,32 +10,28 @@ public class InvoiceService(
 	IInvoiceRepository invoiceRepository,
 	IClientRepository clientRepository,
 	IProductRepository productRepository,
-	IExportReportRepository exportReportRepository)
+	IExportReportRepository exportReportRepository,
+	IUserRepository userRepository)
 {
 	public async Task<IEnumerable<InvoiceShort>> SearchAsync(
 		string productNameOrBarcode,
 		string clientNameOrPhonenumber,
 		string authorName,
 		InvoiceStatus status,
-		ushort pageNumber,
-		ushort pageSize,
-		DateTime startDate,
-		DateTime endDate,
-		OrderBy orderBy)
+		TimeRange timeRange,
+		OrderBy orderBy,
+		Pagination pagination)
 	{
-		var pagination = new Pagination(pageNumber, pageSize);
-		var timeRange = new TimeRange(startDate, endDate);
-
 		var entities = await invoiceRepository.SearchAsync(
 			productNameOrBarcode,
 			clientNameOrPhonenumber,
 			authorName,
 			status,
-			pagination,
 			timeRange,
-			orderBy);
+			orderBy,
+			pagination);
 
-		return entities.Select(InvoiceMapper.ToShortForm);
+		return entities.Select(InvoiceMapper.ToShort);
 	}
 
 	public async Task<Invoice?> GetAsync(string id)
@@ -43,68 +39,67 @@ public class InvoiceService(
 		return await invoiceRepository.GetAsync(id);
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="create"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="OutOfStockException"></exception>
 	public async Task<string> CreateAsync(InvoiceCreate create)
 	{
-		var createIds = create.ProductItems.Select(x => x.ProductId).ToArray();
-		var products = await productRepository
-			.GetByIdsAsync(
-				createIds,
-				x => new
-				{
-					ProductId = x.Id!,
-					Name = x.Name,
-					Barcode = x.Barcode,
-					StockCount = x.StockCount,
-					SellingPrice = x.SellingPrice
-				});
+		var user = await userRepository.GetAsync(create.AuthorUserId)
+			?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
+
+		ClientInfo? clientInfo = null;
+		if (create.ClientId is not null)
+		{
+			var client = await clientRepository.GetAsync(create.ClientId)
+				?? throw new InvalidIdException("ClientId was not found.", [create.ClientId]);
+			clientInfo = ClientMapper.ToInfo(client);
+		}
+
+		var createIds = create.ProductItems.Select(x => x.Id).ToArray();
+		var products = await productRepository.GetByIdsAsync(createIds);
 
 		if (products.Count != create.ProductItems.Length)
 		{
-			var nonExistingIds = createIds.Except(products.Select(x => x.ProductId));
-			throw new InvalidIdException(nonExistingIds.ToArray());
+			var nonExistingIds = createIds.Except(products.Select(x => x.Id!));
+			throw new InvalidIdException("ProductIds were not found.", nonExistingIds.ToArray());
 		}
 
 		var changes = products
 			.Join(
 				create.ProductItems,
-				product => product.ProductId,
-				create => create.ProductId,
+				product => product.Id,
+				create => create.Id,
 				(product, create) => new
 				{
-					ProductId = product.ProductId,
+					Id = create.Id,
 					Name = product.Name,
 					Barcode = product.Barcode,
-					StockCount = product.StockCount,
+					InStock = product.InStock,
 					SellingPrice = product.SellingPrice,
 					Quantity = create.Quantity
 				})
 			.ToArray();
 
 		var outOfStockProductIds = changes
-			.Where(x => x.StockCount < x.Quantity)
-			.Select(x => x.ProductId)
+			.Where(x => x.InStock < x.Quantity)
+			.Select(x => x.Id)
 			.ToArray();
 		if (outOfStockProductIds.Length > 0)
 		{
 			throw new OutOfStockException(outOfStockProductIds);
 		}
 
-		var user = new User()
-		{
-			Id = "testId",
-			Name = "Test User Name"
-		};
-		var userInfo = new UserInfo()
-		{
-			UserId = user.Id,
-			Name = user.Name,
-		};
+		var userInfo = UserMapper.ToInfo(user);
 
 		#region Creating export report
 		var exportReportProductItems = changes
 			.Select(x => new ExportReportProductItem()
 			{
-				ProductId = x.ProductId,
+				Id = x.Id,
 				Name = x.Name,
 				Barcode = x.Barcode,
 				Quantity = x.Quantity
@@ -121,22 +116,13 @@ public class InvoiceService(
 		#endregion
 
 		#region Creating invoice
-		var clientInfo = await clientRepository
-			.GetAsync(
-				create.ClientId,
-				x => new InvoiceClientInfo()
-				{
-					ClientId = x.Id!,
-					Name = x.Name,
-					PhoneNumber = x.PhoneNumber,
-				});
 		var invoiceProductItems = changes
 			.Select(x => new InvoiceProductItem()
 			{
-				ProductId = x.ProductId,
+				Id = x.Id,
 				Name = x.Name,
 				Barcode = x.Barcode,
-				UnitPrice = x.SellingPrice,
+				Price = x.SellingPrice,
 				Quantity = x.Quantity
 			})
 			.ToList();
@@ -153,72 +139,80 @@ public class InvoiceService(
 		#endregion
 
 		var tasks = changes
-			.Select(x => productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.StockCount - x.Quantity))
+			.Select(change => productRepository.UpdateAsync(change.Id, x => x.InStock, change.InStock - change.Quantity))
 			.Append(invoiceRepository.CreateAsync(invoiceEntity));
 		await Task.WhenAll(tasks);
 
 		return invoiceEntity.Id!;
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task DeleteAsync(string id)
 	{
 		try
 		{
 			await invoiceRepository.SoftDeleteAsync(id);
 		}
-		catch (KeyNotFoundException)
+		catch (InvalidIdException)
 		{
 			throw;
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			throw;
 		}
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task CancelAsync(string id)
 	{
-		var invoice = await invoiceRepository.GetAsync(
-			id,
-			x => new
-			{
-				Id = x.Id,
-				ExportReportId = x.ExportReportId,
-				ProductItems = x.ProductItems.Select(i => new
-				{
-					ProductId = i.ProductId,
-					Quantity = i.Quantity
-				}).ToArray()
-			},
-			x => x.DateCancelled == null) ?? throw new KeyNotFoundException("Id was not found or cancelled or deleted.");
+		var invoice = await invoiceRepository.GetAsync(id, x => x.DateCancelled == null)
+			?? throw new InvalidIdException("Id was not found or cancelled or deleted.", [id]);
 
-		var products = await productRepository.GetByIdsAsync(
-			invoice.ProductItems.Select(x => x.ProductId),
-			x => new
-			{
-				Id = x.Id!,
-				StockCount = x.StockCount
-			});
+		var products = await productRepository.GetByIdsAsync(invoice.ProductItems.Select(x => x.Id));
 
 		var timeCancelled = DateTime.Now;
 		var tasks = products
 			.Join(
 				invoice.ProductItems,
 				product => product.Id,
-				invoice => invoice.ProductId,
-				(product, invoice) => productRepository.UpdateAsync(product.Id, x => x.StockCount, product.StockCount + invoice.Quantity))
-			.Append(exportReportRepository.UpdateAsync(invoice.ExportReportId, x => x.DateCancelled, timeCancelled))
+				invoiceProductItem => invoiceProductItem.Id,
+				(product, invoiceProductItem) => productRepository.UpdateAsync(invoiceProductItem.Id, x => x.InStock, product.InStock + invoiceProductItem.Quantity))
 			.Append(invoiceRepository.UpdateAsync(id, x => x.DateCancelled, timeCancelled));
+		await Task.WhenAll(tasks);
 
 		try
 		{
-			await Task.WhenAll(tasks);
+			await exportReportRepository.UpdateAsync(invoice.ExportReportId, x => x.DateCancelled, timeCancelled);
 		}
-		catch (KeyNotFoundException)
+		catch (InvalidIdException)
 		{
+		}
+		catch (UnknownException)
+		{
+			throw;
 		}
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task PayAsync(string id)
 	{
 		try
@@ -227,9 +221,13 @@ public class InvoiceService(
 				id,
 				x => x.DatePaid,
 				DateTime.Now,
-				x => !x.DatePaid.HasValue && !x.DateCancelled.HasValue);
+				x => x.DatePaid == null && x.DateCancelled == null);
 		}
-		catch (KeyNotFoundException)
+		catch (InvalidIdException)
+		{
+			throw;
+		}
+		catch (UnknownException)
 		{
 			throw;
 		}

@@ -1,8 +1,8 @@
-﻿namespace Domain.DTOs.AuditReports;
-public record struct AuditReportShort
-{
-	public required string Id { get; set; }
-	public required string AuthorName { get; set; }
-	public ushort TotalProduct { get; set; }
-	public DateTime DateCreated { get; set; }
-}
+﻿using Domain.DTOs.Users;
+
+namespace Domain.DTOs.AuditReports;
+public readonly record struct AuditReportShort(
+	string Id,
+	UserShort Author,
+	uint TotalProduct,
+	DateTime DateCreated);

@@ -7,84 +7,69 @@ using Domain.Mappers;
 
 namespace Application.Services;
 public class ImportReportService(
-	IImportReportRepository ImportReportRepository,
-	IProductRepository productRepository)
+	IImportReportRepository importReportRepository,
+	IProductRepository productRepository,
+	IUserRepository userRepository)
 {
 	public async Task<IEnumerable<ImportReportShort>> SearchAsync(
-		string nameOrBarcode,
-		ushort pageNumber,
-		ushort pageSize,
-		DateTime startDate,
-		DateTime endDate,
-		OrderBy orderBy)
+		string productNameOrBarcode,
+		TimeRange timeRange,
+		OrderBy orderBy,
+		Pagination pagination)
 	{
-		var pagination = new Pagination(pageNumber, pageSize);
-		var timeRange = new TimeRange(startDate, endDate);
-		var entities = await ImportReportRepository.SearchAsync(nameOrBarcode, pagination, timeRange, orderBy);
+		var entities = await importReportRepository.SearchAsync(productNameOrBarcode, timeRange, orderBy, pagination);
 
-		return entities.Select(ImportReportMapper.ToShortForm);
+		return entities.Select(ImportReportMapper.ToShort);
 	}
 
 	public async Task<ImportReport?> GetAsync(string id)
 	{
-		return await ImportReportRepository.GetAsync(id);
+		return await importReportRepository.GetAsync(id);
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="create"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
 	public async Task<string> CreateAsync(ImportReportCreate create)
 	{
-		var createIds = create.ProductItems.Select(x => x.ProductId).ToArray();
-		var products = await productRepository
-			.GetByIdsAsync(
-				createIds,
-				x => new
-				{
-					ProductId = x.Id!,
-					Name = x.Name,
-					Barcode = x.Barcode,
-					StockCount = x.StockCount
-				});
-
+		var user = await userRepository.GetAsync(create.AuthorUserId) ?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
+		var createIds = create.ProductItems.Select(x => x.Id).ToArray();
+		var products = await productRepository.GetByIdsAsync(createIds);
 		if (products.Count != create.ProductItems.Length)
 		{
-			var nonExistingIds = createIds.Except(products.Select(x => x.ProductId));
-			throw new InvalidIdException(nonExistingIds.ToArray());
+			var nonExistingIds = createIds.Except(products.Select(x => x.Id!));
+			throw new InvalidIdException("ProductIds were not found.", nonExistingIds.ToArray());
 		}
 
 		var changes = products
 			.Join(
 				create.ProductItems,
-				product => product.ProductId,
-				create => create.ProductId,
+				product => product.Id,
+				create => create.Id,
 				(product, create) => new
 				{
-					ProductId = product.ProductId,
+					Id = create.Id,
 					Name = product.Name,
 					Barcode = product.Barcode,
-					StockCount = product.StockCount,
+					InStock = product.InStock,
 					Quantity = create.Quantity,
-					UnitPrice = create.UnitPrice
+					Price = create.Price
 				})
 			.ToArray();
 
 		#region Creating entity
-		var user = new User()
-		{
-			Id = "testId",
-			Name = "Test User Name"
-		};
-		var userInfo = new UserInfo()
-		{
-			UserId = user.Id,
-			Name = user.Name,
-		};
+		var userInfo = UserMapper.ToInfo(user);
 		var items = changes
 			.Select(x => new ImportReportProductItem()
 			{
-				ProductId = x.ProductId,
+				Id = x.Id,
 				Name = x.Name,
 				Barcode = x.Barcode,
 				Quantity = x.Quantity,
-				UnitPrice = x.UnitPrice
+				Price = x.Price
 			})
 			.ToList();
 		var entity = new ImportReport()
@@ -96,64 +81,65 @@ public class ImportReportService(
 		#endregion
 
 		var tasks = changes
-			.Select(x => productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.StockCount + x.Quantity, x => x.LastImportedPrice, x.UnitPrice))
-			.Append(ImportReportRepository.CreateAsync(entity));
+			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.InStock + x.Quantity, x => x.BuyingPrice, x.Price))
+			.Append(importReportRepository.CreateAsync(entity));
 		await Task.WhenAll(tasks);
 
 		return entity.Id!;
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task DeleteAsync(string id)
 	{
 		try
 		{
-			await ImportReportRepository.SoftDeleteAsync(id);
+			await importReportRepository.SoftDeleteAsync(id);
 		}
-		catch (KeyNotFoundException)
+		catch (InvalidIdException)
 		{
 			throw;
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			throw;
 		}
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="OutOfStockException"></exception>
 	public async Task CancelAsync(string id)
 	{
-		var reportProducts = await ImportReportRepository.GetAsync(
-			id,
-			x => x.ProductItems.Select(i => new
-			{
-				ProductId = i.ProductId,
-				Quantity = i.Quantity,
-			}).ToArray(),
-			x => x.DateCancelled == null) ?? throw new KeyNotFoundException("Id was not found or cancelled or deleted.");
-
-		var products = await productRepository.GetByIdsAsync(
-			reportProducts.Select(x => x.ProductId),
-			x => new
-			{
-				ProductId = x.Id!,
-				StockCount = x.StockCount,
-			});
+		var report = await importReportRepository.GetAsync(id, x => x.DateCancelled == null)
+			?? throw new InvalidIdException("Id was not found or cancelled or deleted.", [id]);
+		var products = await productRepository.GetByIdsAsync(report.ProductItems.Select(x => x.Id));
 
 		var changes = products
 			.Join(
-				reportProducts,
-				product => product.ProductId,
-				reportProduct => reportProduct.ProductId,
+				report.ProductItems,
+				product => product.Id,
+				reportProduct => reportProduct.Id,
 				(product, reportProduct) => new
 				{
-					ProductId = product.ProductId,
-					StockCount = product.StockCount,
+					Id = reportProduct.Id,
+					InStock = product.InStock,
 					Quantity = reportProduct.Quantity
 				})
 			.ToArray();
 
 		var outOfStockProductIds = changes
-			.Where(x => x.StockCount < x.Quantity)
-			.Select(x => x.ProductId)
+			.Where(x => x.InStock < x.Quantity)
+			.Select(x => x.Id)
 			.ToArray();
 		if (outOfStockProductIds.Length > 0)
 		{
@@ -161,8 +147,8 @@ public class ImportReportService(
 		}
 
 		var tasks = changes
-			.Select(x => productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.StockCount - x.Quantity))
-			.Append(ImportReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.Now));
+			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.InStock - x.Quantity))
+			.Append(importReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.Now));
 
 		await Task.WhenAll(tasks);
 	}

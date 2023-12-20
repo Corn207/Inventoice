@@ -12,11 +12,10 @@ public class Product : IEntity
 	public required string Barcode { get; set; }
 	public string? Group { get; set; }
 	public string? Brand { get; set; }
-	public uint LastImportedPrice { get; set; }
-	public uint SellingPrice { get; set; }
-	public uint StockCount { get; set; }
 	public string? StoragePosition { get; set; }
 	public string? Description { get; set; }
-	public DateTime DateCreated { get; set; }
-	public DateTime DateModified { get; set; }
+	public required uint BuyingPrice { get; set; }
+	public required uint SellingPrice { get; set; }
+	public required uint InStock { get; set; }
+	public required DateTime DateCreated { get; set; }
 }

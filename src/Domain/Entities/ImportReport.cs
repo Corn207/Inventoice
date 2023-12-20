@@ -10,16 +10,16 @@ public class ImportReport : IEntity, ISoftDeletableEntity, ICancellableEntity
 	public string? Id { get; set; }
 	public required UserInfo Author { get; set; }
 	public required List<ImportReportProductItem> ProductItems { get; set; }
-	public DateTime DateCreated { get; set; }
+	public required DateTime DateCreated { get; set; }
 	public DateTime? DateCancelled { get; set; }
 	public DateTime? DateDeleted { get; set; }
 }
 
 public class ImportReportProductItem
 {
-	public required string ProductId { get; set; }
+	public required string Id { get; set; }
 	public required string Name { get; set; }
 	public required string Barcode { get; set; }
-	public uint UnitPrice { get; set; }
-	public uint Quantity { get; set; }
+	public required uint Price { get; set; }
+	public required uint Quantity { get; set; }
 }

@@ -1,13 +1,9 @@
 ﻿namespace Domain.DTOs.ImportReports;
-public record struct ImportReportCreate
-{
-	public required string AuthorUserId { get; set; }
-	public ImportReportProductItemCreate[] ProductItems { get; set; }
-}
+public readonly record struct ImportReportCreate(
+	string AuthorUserId,
+	ImportReportCreateProductItem[] ProductItems);
 
-public record struct ImportReportProductItemCreate
-{
-	public required string ProductId { get; set; }
-	public uint UnitPrice { get; set; }
-	public uint Quantity { get; set; }
-}
+public readonly record struct ImportReportCreateProductItem(
+	string Id,
+	uint Price,
+	uint Quantity);

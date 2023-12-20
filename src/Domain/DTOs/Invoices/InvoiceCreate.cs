@@ -1,15 +1,12 @@
 ﻿namespace Domain.DTOs.Invoices;
-public record struct InvoiceCreate
-{
-	public required string AuthorUserId { get; set; }
-	public required string ClientId { get; set; }
-	public InvoiceCreateProductItem[] ProductItems { get; set; }
-	public uint GrandTotal { get; set; }
-	public bool IsPaid { get; set; }
-}
 
-public record struct InvoiceCreateProductItem
-{
-	public required string ProductId { get; set; }
-	public uint Quantity { get; set; }
-}
+public readonly record struct InvoiceCreate(
+	string AuthorUserId,
+	string? ClientId,
+	InvoiceCreateProductItem[] ProductItems,
+	uint GrandTotal,
+	bool IsPaid);
+
+public readonly record struct InvoiceCreateProductItem(
+	string Id,
+	uint Quantity);

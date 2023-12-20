@@ -6,8 +6,8 @@ namespace Application.Interfaces.Repositories;
 public interface IAuditReportRepository : ISoftDeletableRepository<AuditReport>
 {
 	Task<List<AuditReport>> SearchAsync(
-		string nameOrBarcode,
-		Pagination pagination,
+		string productNameOrBarcode,
 		TimeRange timeRange,
-		OrderBy orderBy);
+		OrderBy orderBy,
+		Pagination pagination);
 }

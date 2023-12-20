@@ -11,7 +11,7 @@ public interface IInvoiceRepository : ISoftDeletableRepository<Invoice>
 		string clientNameOrPhonenumber,
 		string authorName,
 		InvoiceStatus status,
-		Pagination pagination,
 		TimeRange timeRange,
-		OrderBy orderBy);
+		OrderBy orderBy,
+		Pagination pagination);
 }

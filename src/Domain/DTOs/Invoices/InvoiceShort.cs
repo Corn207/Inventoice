@@ -5,6 +5,6 @@ public readonly record struct InvoiceShort(
 	string? ClientName,
 	DateTime DateCreated,
 	uint GrandTotal,
-	ushort TotalProduct,
+	uint TotalProduct,
 	string FirstProductName,
 	uint FirstProductQuantity);

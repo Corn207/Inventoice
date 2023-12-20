@@ -3,11 +3,10 @@ using Domain.DTOs;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories;
-public interface IImportReportRepository : ISoftDeletableRepository<ImportReport>
+public interface IUserRepository : IRepository<User>
 {
-	Task<List<ImportReport>> SearchAsync(
-		string productNameOrBarcode,
-		TimeRange timeRange,
+	Task<List<User>> SearchAsync(
+		string name,
 		OrderBy orderBy,
 		Pagination pagination);
 }

@@ -9,4 +9,13 @@ public class User : IEntity
 	[BsonRepresentation(BsonType.ObjectId)]
 	public string? Id { get; set; }
 	public required string Name { get; set; }
+	public required string Phonenumber { get; set; }
+	public required string Username { get; set; }
+	public required string Password { get; set; }
+}
+
+public class UserInfo
+{
+	public required string Id { get; set; }
+	public required string Name { get; set; }
 }

@@ -9,17 +9,17 @@ namespace Infrastructure.Repositories;
 public class AuditReportRepository(Database database) : SoftDeletableRepository<AuditReport>(database), IAuditReportRepository
 {
 	public async Task<List<AuditReport>> SearchAsync(
-		string nameOrBarcode,
-		Pagination pagination,
+		string productNameOrBarcode,
 		TimeRange timeRange,
-		OrderBy orderBy)
+		OrderBy orderBy,
+		Pagination pagination)
 	{
 		var query = Database.Collection<AuditReport>().AsQueryable()
 			.Where(x => x.DateDeleted == null);
 
-		if (!string.IsNullOrWhiteSpace(nameOrBarcode))
+		if (!string.IsNullOrWhiteSpace(productNameOrBarcode))
 		{
-			query = query.Where(x => x.ProductItems.Any(i => i.Name.Contains(nameOrBarcode) || i.Barcode.Contains(nameOrBarcode)));
+			query = query.Where(x => x.ProductItems.Any(i => i.Name.Contains(productNameOrBarcode) || i.Barcode.Contains(productNameOrBarcode)));
 		}
 
 		if (timeRange.From != DateTime.MinValue)

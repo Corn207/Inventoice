@@ -6,27 +6,27 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class ProductRepository(Database database) : Repository<Product>(database), IProductRepository
+public class UserRepository(Database database) : Repository<User>(database), IUserRepository
 {
-	public async Task<List<Product>> SearchAsync(
-		string nameOrBarcode,
+	public async Task<List<User>> SearchAsync(
+		string name,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = Database.Collection<Product>().AsQueryable();
+		var query = Database.Collection<User>().AsQueryable();
 
-		if (!string.IsNullOrWhiteSpace(nameOrBarcode))
+		if (!string.IsNullOrWhiteSpace(name))
 		{
-			query = query.Where(p => p.Barcode.Contains(nameOrBarcode) || p.Name.Contains(nameOrBarcode));
+			query = query.Where(p => p.Name.Contains(name));
 		}
 
 		if (orderBy == OrderBy.Ascending)
 		{
-			query = query.OrderBy(x => x.DateCreated);
+			query = query.OrderBy(x => x.Name);
 		}
 		else
 		{
-			query = query.OrderByDescending(x => x.DateCreated);
+			query = query.OrderByDescending(x => x.Name);
 		}
 
 		var entities = await query

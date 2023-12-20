@@ -11,4 +11,8 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ~/volumes/inventoice:/data/db
+      - invoice-dev:/data/db
+
+volumes:
+  invoice-dev:
+    external: true

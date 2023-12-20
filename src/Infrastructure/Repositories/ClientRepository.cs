@@ -10,14 +10,14 @@ public class ClientRepository(Database database) : Repository<Client>(database),
 {
 	public async Task<List<Client>> SearchAsync(
 		string nameOrPhonenumber,
-		Pagination pagination,
-		OrderBy orderBy)
+		OrderBy orderBy,
+		Pagination pagination)
 	{
 		var query = Database.Collection<Client>().AsQueryable();
 
 		if (!string.IsNullOrWhiteSpace(nameOrPhonenumber))
 		{
-			query = query.Where(x => x.Name.Contains(nameOrPhonenumber) || x.PhoneNumber.Contains(nameOrPhonenumber));
+			query = query.Where(x => x.Name.Contains(nameOrPhonenumber) || x.Phonenumber.Contains(nameOrPhonenumber));
 		}
 
 		if (orderBy == OrderBy.Ascending)

@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Exceptions;
+using Application.Interfaces.Repositories;
 using Domain.DTOs;
 using Domain.DTOs.AuditReports;
 using Domain.Entities;
@@ -7,21 +8,18 @@ using Domain.Mappers;
 namespace Application.Services;
 public class AuditReportService(
 	IAuditReportRepository auditReportRepository,
-	IProductRepository productRepository)
+	IProductRepository productRepository,
+	IUserRepository userRepository)
 {
 	public async Task<IEnumerable<AuditReportShort>> SearchAsync(
-		string nameOrBarcode,
-		ushort pageNumber,
-		ushort pageSize,
-		DateTime startDate,
-		DateTime endDate,
-		OrderBy orderBy)
+		string productNameOrBarcode,
+		TimeRange timeRange,
+		OrderBy orderBy,
+		Pagination pagination)
 	{
-		var pagination = new Pagination(pageNumber, pageSize);
-		var timeRange = new TimeRange(startDate, endDate);
-		var entities = await auditReportRepository.SearchAsync(nameOrBarcode, pagination, timeRange, orderBy);
+		var entities = await auditReportRepository.SearchAsync(productNameOrBarcode, timeRange, orderBy, pagination);
 
-		return entities.Select(AuditReportMapper.ToShortForm);
+		return entities.Select(AuditReportMapper.ToShort);
 	}
 
 	public async Task<AuditReport?> GetAsync(string id)
@@ -29,42 +27,31 @@ public class AuditReportService(
 		return await auditReportRepository.GetAsync(id);
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="create"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
 	public async Task<string> CreateAsync(AuditReportCreate create)
 	{
-		var products = await productRepository
-			.GetByIdsAsync(
-				create.ProductItems.Select(x => x.ProductId),
-				product => new
-				{
-					ProductId = product.Id!,
-					Name = product.Name,
-					Barcode = product.Barcode,
-					StockCount = product.StockCount
-				});
+		var user = await userRepository.GetAsync(create.AuthorUserId) ?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
+		var products = await productRepository.GetByIdsAsync(create.ProductItems.Select(x => x.Id));
 
 		#region Creating entity
-		var user = new User()
-		{
-			Id = "testId",
-			Name = "Test User Name"
-		};
-		var userInfo = new UserInfo()
-		{
-			UserId = user.Id,
-			Name = user.Name,
-		};
+		var userInfo = UserMapper.ToInfo(user);
 		var items = products
 			.Join(
 				create.ProductItems,
-				product => product.ProductId,
-				create => create.ProductId,
+				product => product.Id,
+				create => create.Id,
 				(product, create) => new AuditReportProductItem()
 				{
-					ProductId = product.ProductId,
+					Id = product.Id!,
 					Name = product.Name,
 					Barcode = product.Barcode,
-					OriginalQuantity = product.StockCount,
-					AdjustedQuantity = create.AdjustedQuantity
+					OriginalQuantity = product.InStock,
+					AdjustedQuantity = create.Quantity
 				})
 			.ToList();
 		var entity = new AuditReport()
@@ -76,24 +63,30 @@ public class AuditReportService(
 		#endregion
 
 		var tasks = create.ProductItems
-			.Select(x => productRepository.UpdateAsync(x.ProductId, x => x.StockCount, x.AdjustedQuantity))
+			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.Quantity))
 			.Append(auditReportRepository.CreateAsync(entity));
 		await Task.WhenAll(tasks);
 
 		return entity.Id!;
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
+	/// <returns></returns>
 	public async Task DeleteAsync(string id)
 	{
 		try
 		{
 			await auditReportRepository.SoftDeleteAsync(id);
 		}
-		catch (KeyNotFoundException)
+		catch (InvalidIdException)
 		{
 			throw;
 		}
-		catch (Exception)
+		catch (UnknownException)
 		{
 			throw;
 		}

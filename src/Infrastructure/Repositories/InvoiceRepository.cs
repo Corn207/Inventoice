@@ -14,9 +14,9 @@ public class InvoiceRepository(Database database) : SoftDeletableRepository<Invo
 		string clientNameOrPhonenumber,
 		string authorName,
 		InvoiceStatus status,
-		Pagination pagination,
 		TimeRange timeRange,
-		OrderBy orderBy)
+		OrderBy orderBy,
+		Pagination pagination)
 	{
 		var query = Database.Collection<Invoice>().AsQueryable();
 
@@ -27,7 +27,7 @@ public class InvoiceRepository(Database database) : SoftDeletableRepository<Invo
 
 		if (!string.IsNullOrWhiteSpace(clientNameOrPhonenumber))
 		{
-			query = query.Where(x => x.Client != null && (x.Client.Name.Contains(clientNameOrPhonenumber) || x.Client.PhoneNumber.Contains(clientNameOrPhonenumber)));
+			query = query.Where(x => x.Client != null && (x.Client.Name.Contains(clientNameOrPhonenumber) || x.Client.Phonenumber.Contains(clientNameOrPhonenumber)));
 		}
 
 		if (!string.IsNullOrWhiteSpace(authorName))

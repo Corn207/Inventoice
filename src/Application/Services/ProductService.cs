@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Exceptions;
+using Application.Interfaces.Repositories;
 using Domain.DTOs;
 using Domain.DTOs.Products;
 using Domain.Entities;
@@ -9,15 +10,12 @@ public class ProductService(IProductRepository productRepository)
 {
 	public async Task<IEnumerable<ProductShort>> SearchAsync(
 		string nameOrBarcode,
-		ushort pageNumber,
-		ushort pageSize,
-		ProductSortBy sortBy,
-		OrderBy orderBy)
+		OrderBy orderBy,
+		Pagination pagination)
 	{
-		var pagination = new Pagination(pageNumber, pageSize);
-		var entities = await productRepository.SearchAsync(nameOrBarcode, pagination, sortBy, orderBy);
+		var entities = await productRepository.SearchAsync(nameOrBarcode, orderBy, pagination);
 
-		return entities.Select(ProductMapper.ToShortForm);
+		return entities.Select(ProductMapper.ToShort);
 	}
 
 	public async Task<Product?> GetAsync(string id)
@@ -34,23 +32,36 @@ public class ProductService(IProductRepository productRepository)
 		return entity.Id!;
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="update"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
 	public async Task ReplaceAsync(string id, ProductCreateUpdate update)
 	{
-		var entity = await productRepository.GetAsync(id) ?? throw new KeyNotFoundException();
+		var entity = await productRepository.GetAsync(id)
+			?? throw new InvalidIdException("ProductId was not found.", [id]);
 		ProductMapper.ToEntity(update, entity);
-		entity.DateModified = DateTime.Now;
 		await productRepository.ReplaceAsync(entity);
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidIdException"></exception>
 	public async Task DeleteAsync(string id)
 	{
 		try
 		{
 			await productRepository.DeleteAsync(id);
 		}
-		catch (KeyNotFoundException ex)
+		catch (InvalidIdException)
 		{
-			throw ex;
+			throw;
 		}
 	}
 }
