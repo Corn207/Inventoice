@@ -25,14 +25,21 @@ public class ClientsController(ClientService service) : ControllerBase
 			pagination);
 	}
 
+	[HttpGet("count")]
+	public async Task<uint> Count(
+		[FromQuery] string? nameOrPhonenumber = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
+	{
+		return await service.CountAsync(
+			nameOrPhonenumber ?? string.Empty,
+			orderBy);
+	}
+
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Client>> Get(string id)
 	{
-		var client = await service.GetAsync(id);
-		if (client is null)
-		{
-			return NotFound();
-		}
+		var client = await service.GetAsync(id)
+			?? throw new InvalidIdException("ClientId was not found.", id);
 
 		return client;
 	}
@@ -41,20 +48,14 @@ public class ClientsController(ClientService service) : ControllerBase
 	public async Task<IActionResult> Post([FromBody] ClientCreateUpdate body)
 	{
 		var newId = await service.CreateAsync(body);
+
 		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
 	[HttpPut("{id}")]
 	public async Task<IActionResult> Put(string id, [FromBody] ClientCreateUpdate body)
 	{
-		try
-		{
-			await service.ReplaceAsync(id, body);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.ReplaceAsync(id, body);
 
 		return NoContent();
 	}
@@ -62,14 +63,7 @@ public class ClientsController(ClientService service) : ControllerBase
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(string id)
 	{
-		try
-		{
-			await service.DeleteAsync(id);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.DeleteAsync(id);
 
 		return NoContent();
 	}

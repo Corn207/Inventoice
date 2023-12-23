@@ -6,18 +6,20 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class ProductRepository(Database database) : Repository<Product>(database), IProductRepository
+public class ProductRepository(Database database)
+	: Repository<Product>(database), IProductRepository
 {
-	public async Task<List<Product>> SearchAsync(
+	private IMongoQueryable<Product> GetSearchQuery(
 		string nameOrBarcode,
-		OrderBy orderBy,
-		Pagination pagination)
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<Product>().AsQueryable();
 
 		if (!string.IsNullOrWhiteSpace(nameOrBarcode))
 		{
-			query = query.Where(p => p.Barcode.Contains(nameOrBarcode) || p.Name.Contains(nameOrBarcode));
+			query = query.Where(p =>
+			p.Barcode.Contains(nameOrBarcode, StringComparison.InvariantCultureIgnoreCase) ||
+			p.Name.Contains(nameOrBarcode, StringComparison.InvariantCultureIgnoreCase));
 		}
 
 		if (orderBy == OrderBy.Ascending)
@@ -29,11 +31,32 @@ public class ProductRepository(Database database) : Repository<Product>(database
 			query = query.OrderByDescending(x => x.DateCreated);
 		}
 
-		var entities = await query
+		return query;
+	}
+
+	public async Task<List<Product>> SearchAsync(
+		string nameOrBarcode,
+		OrderBy orderBy,
+		Pagination pagination)
+	{
+		var query = GetSearchQuery(nameOrBarcode, orderBy);
+
+		var result = await query
 			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
 			.Take(pagination.PageSize)
 			.ToListAsync();
 
-		return entities;
+		return result;
+	}
+
+	public async Task<uint> CountAsync(
+		string nameOrBarcode,
+		OrderBy orderBy)
+	{
+		var query = GetSearchQuery(nameOrBarcode, orderBy);
+
+		var result = await query.CountAsync();
+
+		return Convert.ToUInt32(result);
 	}
 }

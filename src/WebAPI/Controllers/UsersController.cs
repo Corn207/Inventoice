@@ -1,10 +1,9 @@
-﻿using Domain.DTOs.Clients;
-using Domain.DTOs;
-using Microsoft.AspNetCore.Mvc;
+﻿using Application.Exceptions;
 using Application.Services;
+using Domain.DTOs;
 using Domain.DTOs.Users;
 using Domain.Entities;
-using Application.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
@@ -26,14 +25,21 @@ public class UsersController(UserService service) : ControllerBase
 			pagination);
 	}
 
+	[HttpGet("count")]
+	public async Task<uint> Count(
+		[FromQuery] string? name = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
+	{
+		return await service.CountAsync(
+			name ?? string.Empty,
+			orderBy);
+	}
+
 	[HttpGet("{id}")]
 	public async Task<ActionResult<User>> Get(string id)
 	{
-		var entity = await service.GetAsync(id);
-		if (entity is null)
-		{
-			return NotFound();
-		}
+		var entity = await service.GetAsync(id)
+			?? throw new InvalidIdException("UserId was not found.", id);
 
 		return entity;
 	}
@@ -48,14 +54,7 @@ public class UsersController(UserService service) : ControllerBase
 	[HttpPut("{id}")]
 	public async Task<IActionResult> Put(string id, [FromBody] UserUpdate body)
 	{
-		try
-		{
-			await service.ReplaceAsync(id, body);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.ReplaceAsync(id, body);
 
 		return NoContent();
 	}
@@ -63,15 +62,14 @@ public class UsersController(UserService service) : ControllerBase
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(string id)
 	{
-		try
-		{
-			await service.DeleteAsync(id);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.DeleteAsync(id);
 
 		return NoContent();
 	}
+
+	//[HttpGet("me")]
+	//public async Task<User> GetMe()
+	//{
+	//	var entity = await service.GetAsync(User.Claims)
+	//}
 }

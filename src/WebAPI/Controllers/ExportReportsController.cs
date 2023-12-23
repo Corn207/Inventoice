@@ -13,6 +13,7 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 	[HttpGet]
 	public async Task<IEnumerable<ExportReportShort>> Get(
 		[FromQuery] string? productNameOrBarcode = null,
+		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,
 		[FromQuery] DateTime? dateEnd = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Descending,
@@ -24,19 +25,34 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 
 		return await service.SearchAsync(
 			productNameOrBarcode ?? string.Empty,
+			authorName ?? string.Empty,
 			timeRange,
 			orderBy,
 			pagination);
 	}
 
+	[HttpGet("count")]
+	public async Task<uint> Count(
+		[FromQuery] string? productNameOrBarcode = null,
+		[FromQuery] string? authorName = null,
+		[FromQuery] DateTime? dateStart = null,
+		[FromQuery] DateTime? dateEnd = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Descending)
+	{
+		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
+
+		return await service.CountAsync(
+			productNameOrBarcode ?? string.Empty,
+			authorName ?? string.Empty,
+			timeRange,
+			orderBy);
+	}
+
 	[HttpGet("{id}")]
 	public async Task<ActionResult<ExportReport>> Get(string id)
 	{
-		var entity = await service.GetAsync(id);
-		if (entity is null)
-		{
-			return NotFound();
-		}
+		var entity = await service.GetAsync(id)
+			?? throw new InvalidIdException("ExportReportId was not found.", id);
 
 		return entity;
 	}
@@ -44,36 +60,14 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 	[HttpPost]
 	public async Task<IActionResult> Post([FromBody] ExportReportCreate body)
 	{
-		try
-		{
-			var newId = await service.CreateAsync(body);
-			return CreatedAtAction(nameof(Get), new { id = newId }, null);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
-		catch (OutOfStockException ex)
-		{
-			return BadRequest(ex.Ids);
-		}
+		var newId = await service.CreateAsync(body);
+		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(string id)
 	{
-		try
-		{
-			await service.DeleteAsync(id);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
-		catch (UnknownException)
-		{
-			return StatusCode(StatusCodes.Status500InternalServerError);
-		}
+		await service.DeleteAsync(id);
 
 		return NoContent();
 	}
@@ -81,14 +75,7 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 	[HttpPatch("{id}/cancel")]
 	public async Task<IActionResult> Cancel(string id)
 	{
-		try
-		{
-			await service.CancelAsync(id);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.CancelAsync(id);
 
 		return NoContent();
 	}

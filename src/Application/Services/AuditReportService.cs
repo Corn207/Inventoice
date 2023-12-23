@@ -13,13 +13,24 @@ public class AuditReportService(
 {
 	public async Task<IEnumerable<AuditReportShort>> SearchAsync(
 		string productNameOrBarcode,
+		string authorName,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var entities = await auditReportRepository.SearchAsync(productNameOrBarcode, timeRange, orderBy, pagination);
+		var entities = await auditReportRepository.SearchAsync(productNameOrBarcode, authorName, timeRange, orderBy, pagination);
 
 		return entities.Select(AuditReportMapper.ToShort);
+	}
+
+	public async Task<uint> CountAsync(string productNameOrBarcode,
+		string authorName,
+		TimeRange timeRange,
+		OrderBy orderBy)
+	{
+		var count = await auditReportRepository.CountAsync(productNameOrBarcode, authorName, timeRange, orderBy);
+
+		return count;
 	}
 
 	public async Task<AuditReport?> GetAsync(string id)
@@ -33,6 +44,7 @@ public class AuditReportService(
 	/// <param name="create"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task<string> CreateAsync(AuditReportCreate create)
 	{
 		var user = await userRepository.GetAsync(create.AuthorUserId) ?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
@@ -58,7 +70,7 @@ public class AuditReportService(
 		{
 			Author = userInfo,
 			ProductItems = items,
-			DateCreated = DateTime.Now
+			DateCreated = DateTime.UtcNow
 		};
 		#endregion
 
@@ -78,17 +90,6 @@ public class AuditReportService(
 	/// <returns></returns>
 	public async Task DeleteAsync(string id)
 	{
-		try
-		{
-			await auditReportRepository.SoftDeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			throw;
-		}
-		catch (UnknownException)
-		{
-			throw;
-		}
+		await auditReportRepository.SoftDeleteAsync(id);
 	}
 }

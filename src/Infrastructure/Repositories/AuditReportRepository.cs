@@ -6,20 +6,28 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class AuditReportRepository(Database database) : SoftDeletableRepository<AuditReport>(database), IAuditReportRepository
+public class AuditReportRepository(Database database)
+	: SoftDeletableRepository<AuditReport>(database), IAuditReportRepository
 {
-	public async Task<List<AuditReport>> SearchAsync(
+	private IMongoQueryable<AuditReport> GetSearchQuery(
 		string productNameOrBarcode,
+		string authorName,
 		TimeRange timeRange,
-		OrderBy orderBy,
-		Pagination pagination)
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<AuditReport>().AsQueryable()
 			.Where(x => x.DateDeleted == null);
 
 		if (!string.IsNullOrWhiteSpace(productNameOrBarcode))
 		{
-			query = query.Where(x => x.ProductItems.Any(i => i.Name.Contains(productNameOrBarcode) || i.Barcode.Contains(productNameOrBarcode)));
+			query = query.Where(x => x.ProductItems.Any(i =>
+				i.Name.Contains(productNameOrBarcode, StringComparison.InvariantCultureIgnoreCase) ||
+				i.Barcode.Contains(productNameOrBarcode, StringComparison.InvariantCultureIgnoreCase)));
+		}
+
+		if (!string.IsNullOrWhiteSpace(authorName))
+		{
+			query = query.Where(x => x.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase));
 		}
 
 		if (timeRange.From != DateTime.MinValue)
@@ -41,11 +49,36 @@ public class AuditReportRepository(Database database) : SoftDeletableRepository<
 			query = query.OrderByDescending(p => p.DateCreated);
 		}
 
-		var entity = await query
+		return query;
+	}
+
+	public async Task<List<AuditReport>> SearchAsync(
+		string productNameOrBarcode,
+		string authorName,
+		TimeRange timeRange,
+		OrderBy orderBy,
+		Pagination pagination)
+	{
+		var query = GetSearchQuery(productNameOrBarcode, authorName, timeRange, orderBy);
+
+		var result = await query
 			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
 			.Take(pagination.PageSize)
 			.ToListAsync();
 
-		return entity;
+		return result;
+	}
+
+	public async Task<uint> CountAsync(
+		string productNameOrBarcode,
+		string authorName,
+		TimeRange timeRange,
+		OrderBy orderBy)
+	{
+		var query = GetSearchQuery(productNameOrBarcode, authorName, timeRange, orderBy);
+
+		var result = await query.CountAsync();
+
+		return Convert.ToUInt32(result);
 	}
 }

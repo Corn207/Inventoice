@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.Repositories.Bases;
 using Domain.DTOs;
-using Domain.DTOs.Products;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories;
@@ -10,4 +9,8 @@ public interface IProductRepository : IRepository<Product>
 		string nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination);
+
+	Task<uint> CountAsync(
+		string nameOrBarcode,
+		OrderBy orderBy);
 }

@@ -1,7 +1,6 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Domain.DTOs;
-using Domain.DTOs.Clients;
 using Domain.DTOs.Users;
 using Domain.Entities;
 using Domain.Mappers;
@@ -17,6 +16,17 @@ public class UserService(IUserRepository userRepository)
 		var entities = await userRepository.SearchAsync(name, orderBy, pagination);
 
 		return entities.Select(UserMapper.ToShort);
+	}
+
+	public async Task<uint> CountAsync(
+		string name,
+		OrderBy orderBy)
+	{
+		var count = await userRepository.CountAsync(
+			name,
+			orderBy);
+
+		return count;
 	}
 
 	public async Task<User?> GetAsync(string id)
@@ -55,13 +65,6 @@ public class UserService(IUserRepository userRepository)
 	/// <exception cref="InvalidIdException"></exception>
 	public async Task DeleteAsync(string id)
 	{
-		try
-		{
-			await userRepository.DeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			throw;
-		}
+		await userRepository.DeleteAsync(id);
 	}
 }

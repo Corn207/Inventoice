@@ -6,5 +6,7 @@ services:
     build:
       context: .
       dockerfile: WebAPI/Dockerfile
+    depends_on:
+      - database
   database:
     image: mongo:latest

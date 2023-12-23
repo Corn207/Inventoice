@@ -55,6 +55,12 @@ public abstract class Repository<TEntity>(Database database) : IRepository<TEnti
 	#endregion
 
 	#region Update
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <returns></returns>
+	/// <exception cref="UnknownException"></exception>
 	public virtual async Task ReplaceAsync(TEntity entity)
 	{
 		var result = await Database.Collection<TEntity>()

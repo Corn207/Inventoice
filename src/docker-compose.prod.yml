@@ -1,20 +1,23 @@
 version: '3.8'
-name: inventoice-dev
+name: inventoice
 
 services:
   webapi:
+    container_name: inventoice-webapi
+    restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
       - MongoConnection__ConnectionString=mongodb://database:27017
       - TZ=Asia/Ho_Chi_Minh
     ports:
       - "21080:8080"
   database:
+    container_name: inventoice-database
+    restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27017"
     volumes:
-      - inventoice-dev:/data/db
+      - inventoice:/data/db
 
 volumes:
-  inventoice-dev:
+  inventoice:
     external: true

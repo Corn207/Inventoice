@@ -22,7 +22,7 @@ public static partial class ProductMapper
 			BuyingPrice = source.BuyingPrice,
 			SellingPrice = source.SellingPrice,
 			InStock = 0,
-			DateCreated = DateTime.Now,
+			DateCreated = DateTime.UtcNow,
 		};
 
 		return target;

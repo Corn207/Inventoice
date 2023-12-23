@@ -7,32 +7,37 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class InvoiceRepository(Database database) : SoftDeletableRepository<Invoice>(database), IInvoiceRepository
+public class InvoiceRepository(Database database)
+	: SoftDeletableRepository<Invoice>(database), IInvoiceRepository
 {
-	public async Task<List<Invoice>> SearchAsync(
+	private IMongoQueryable<Invoice> GetSearchQuery(
 		string productNameOrBarcode,
 		string clientNameOrPhonenumber,
 		string authorName,
 		InvoiceStatus status,
 		TimeRange timeRange,
-		OrderBy orderBy,
-		Pagination pagination)
+		OrderBy orderBy)
 	{
-		var query = Database.Collection<Invoice>().AsQueryable();
+		var query = Database.Collection<Invoice>().AsQueryable()
+			.Where(x => x.DateDeleted == null);
 
 		if (!string.IsNullOrWhiteSpace(productNameOrBarcode))
 		{
-			query = query.Where(x => x.ProductItems.Any(p => p.Barcode.Contains(productNameOrBarcode) || p.Name.Contains(productNameOrBarcode)));
+			query = query.Where(x => x.ProductItems.Any(p =>
+			p.Barcode.Contains(productNameOrBarcode, StringComparison.InvariantCultureIgnoreCase) ||
+			p.Name.Contains(productNameOrBarcode, StringComparison.InvariantCultureIgnoreCase)));
 		}
 
 		if (!string.IsNullOrWhiteSpace(clientNameOrPhonenumber))
 		{
-			query = query.Where(x => x.Client != null && (x.Client.Name.Contains(clientNameOrPhonenumber) || x.Client.Phonenumber.Contains(clientNameOrPhonenumber)));
+			query = query.Where(x => x.Client != null &&
+				(x.Client.Name.Contains(clientNameOrPhonenumber, StringComparison.InvariantCultureIgnoreCase) ||
+				x.Client.Phonenumber.Contains(clientNameOrPhonenumber, StringComparison.InvariantCultureIgnoreCase)));
 		}
 
 		if (!string.IsNullOrWhiteSpace(authorName))
 		{
-			query = query.Where(x => x.Author.Name.Contains(authorName));
+			query = query.Where(x => x.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase));
 		}
 
 		if (status != InvoiceStatus.All)
@@ -68,11 +73,52 @@ public class InvoiceRepository(Database database) : SoftDeletableRepository<Invo
 			query = query.OrderByDescending(p => p.DateCreated);
 		}
 
-		var products = await query
+		return query;
+	}
+
+	public async Task<List<Invoice>> SearchAsync(
+		string productNameOrBarcode,
+		string clientNameOrPhonenumber,
+		string authorName,
+		InvoiceStatus status,
+		TimeRange timeRange,
+		OrderBy orderBy,
+		Pagination pagination)
+	{
+		var query = GetSearchQuery(
+			productNameOrBarcode,
+			clientNameOrPhonenumber,
+			authorName,
+			status,
+			timeRange,
+			orderBy);
+
+		var result = await query
 			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
 			.Take(pagination.PageSize)
 			.ToListAsync();
 
-		return products;
+		return result;
+	}
+
+	public async Task<uint> CountAsync(
+		string productNameOrBarcode,
+		string clientNameOrPhonenumber,
+		string authorName,
+		InvoiceStatus status,
+		TimeRange timeRange,
+		OrderBy orderBy)
+	{
+		var query = GetSearchQuery(
+			productNameOrBarcode,
+			clientNameOrPhonenumber,
+			authorName,
+			status,
+			timeRange,
+			orderBy);
+
+		var result = await query.CountAsync();
+
+		return Convert.ToUInt32(result);
 	}
 }

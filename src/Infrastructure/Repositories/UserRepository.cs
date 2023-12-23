@@ -6,18 +6,18 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
-public class UserRepository(Database database) : Repository<User>(database), IUserRepository
+public class UserRepository(Database database)
+	: Repository<User>(database), IUserRepository
 {
-	public async Task<List<User>> SearchAsync(
+	private IMongoQueryable<User> GetSearchQuery(
 		string name,
-		OrderBy orderBy,
-		Pagination pagination)
+		OrderBy orderBy)
 	{
 		var query = Database.Collection<User>().AsQueryable();
 
 		if (!string.IsNullOrWhiteSpace(name))
 		{
-			query = query.Where(p => p.Name.Contains(name));
+			query = query.Where(p => p.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase));
 		}
 
 		if (orderBy == OrderBy.Ascending)
@@ -29,11 +29,32 @@ public class UserRepository(Database database) : Repository<User>(database), IUs
 			query = query.OrderByDescending(x => x.Name);
 		}
 
-		var entities = await query
+		return query;
+	}
+
+	public async Task<List<User>> SearchAsync(
+		string name,
+		OrderBy orderBy,
+		Pagination pagination)
+	{
+		var query = GetSearchQuery(name, orderBy);
+
+		var result = await query
 			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
 			.Take(pagination.PageSize)
 			.ToListAsync();
 
-		return entities;
+		return result;
+	}
+
+	public async Task<uint> CountAsync(
+		string name,
+		OrderBy orderBy)
+	{
+		var query = GetSearchQuery(name, orderBy);
+
+		var result = await query.CountAsync();
+
+		return Convert.ToUInt32(result);
 	}
 }

@@ -15,7 +15,7 @@ public static partial class ClientMapper
 		{
 			Name = source.Name,
 			Phonenumber = source.Phonenumber,
-			DateCreated = DateTime.Now,
+			DateCreated = DateTime.UtcNow,
 			Email = source.Email,
 			Address = source.Address,
 			Description = source.Description,

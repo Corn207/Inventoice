@@ -8,31 +8,38 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class ProductsController(ProductService productService) : ControllerBase
+public class ProductsController(ProductService service) : ControllerBase
 {
 	[HttpGet]
 	public async Task<IEnumerable<ProductShort>> Get(
 		[FromQuery] string? nameOrBarcode = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,
-		[FromQuery] ushort pageSize = 15,
-		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
+		[FromQuery] ushort pageSize = 15)
 	{
 		var pagination = new Pagination(pageNumber, pageSize);
 
-		return await productService.SearchAsync(
+		return await service.SearchAsync(
 			nameOrBarcode ?? string.Empty,
 			orderBy,
 			pagination);
 	}
 
+	[HttpGet("count")]
+	public async Task<uint> Count(
+		[FromQuery] string? nameOrBarcode = null,
+		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
+	{
+		return await service.CountAsync(
+			nameOrBarcode ?? string.Empty,
+			orderBy);
+	}
+
 	[HttpGet("{id}")]
 	public async Task<ActionResult<Product>> Get(string id)
 	{
-		var product = await productService.GetAsync(id);
-		if (product is null)
-		{
-			return NotFound();
-		}
+		var product = await service.GetAsync(id)
+			?? throw new InvalidIdException("ProductId was not found.", id);
 
 		return product;
 	}
@@ -40,21 +47,14 @@ public class ProductsController(ProductService productService) : ControllerBase
 	[HttpPost]
 	public async Task<IActionResult> Post([FromBody] ProductCreateUpdate body)
 	{
-		var newId = await productService.CreateAsync(body);
+		var newId = await service.CreateAsync(body);
 		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
 	[HttpPut("{id}")]
 	public async Task<IActionResult> Put(string id, [FromBody] ProductCreateUpdate body)
 	{
-		try
-		{
-			await productService.ReplaceAsync(id, body);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.ReplaceAsync(id, body);
 
 		return NoContent();
 	}
@@ -62,14 +62,7 @@ public class ProductsController(ProductService productService) : ControllerBase
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(string id)
 	{
-		try
-		{
-			await productService.DeleteAsync(id);
-		}
-		catch (InvalidIdException ex)
-		{
-			return NotFound(new { ex.Message, ex.Ids });
-		}
+		await service.DeleteAsync(id);
 
 		return NoContent();
 	}

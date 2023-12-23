@@ -9,4 +9,8 @@ public interface IClientRepository : IRepository<Client>
 		string nameOrPhonenumber,
 		OrderBy orderBy,
 		Pagination pagination);
+
+	Task<uint> CountAsync(
+		string nameOrPhonenumber,
+		OrderBy orderBy);
 }

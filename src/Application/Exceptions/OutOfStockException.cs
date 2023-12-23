@@ -1,10 +1,5 @@
 ﻿namespace Application.Exceptions;
-public class OutOfStockException : Exception
+public class OutOfStockException(params string[] ids) : Exception
 {
-	public OutOfStockException(string[] ids)
-	{
-		Ids = ids;
-	}
-
-	public string[] Ids { get; }
+	public string[] Ids { get; } = ids;
 }

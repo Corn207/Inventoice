@@ -10,7 +10,6 @@ public abstract class SoftDeletableRepository<TEntity>(Database database) :
 	ISoftDeletableRepository<TEntity>
 	where TEntity : IEntity, ISoftDeletableEntity
 {
-
 	#region Get
 	public override async Task<List<TEntity>> GetByIdsAsync(
 		IEnumerable<string> ids)
@@ -52,6 +51,12 @@ public abstract class SoftDeletableRepository<TEntity>(Database database) :
 	#endregion
 
 	#region Update
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <returns></returns>
+	/// <exception cref="UnknownException"></exception>
 	public override async Task ReplaceAsync(TEntity entity)
 	{
 		var result = await Database.Collection<TEntity>()
@@ -165,7 +170,7 @@ public abstract class SoftDeletableRepository<TEntity>(Database database) :
 	/// <exception cref="UnknownException"></exception>
 	public virtual async Task SoftDeleteAsync(string id)
 	{
-		var update = Builders<TEntity>.Update.Set(x => x.DateDeleted, DateTime.Now);
+		var update = Builders<TEntity>.Update.Set(x => x.DateDeleted, DateTime.UtcNow);
 		var result = await Database.Collection<TEntity>()
 			.UpdateOneAsync(x => x.Id == id && x.DateDeleted == null, update);
 

@@ -9,9 +9,15 @@ public interface IRepository<TEntity> where TEntity : IEntity
 	Task<TEntity?> GetAsync(
 		string id,
 		Expression<Func<TEntity, bool>>? filter = null);
-	
+
 	Task CreateAsync(TEntity entity);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <returns></returns>
+	/// <exception cref="UnknownException"></exception>
 	Task ReplaceAsync(TEntity entity);
 
 	/// <summary>

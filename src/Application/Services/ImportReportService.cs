@@ -13,13 +13,29 @@ public class ImportReportService(
 {
 	public async Task<IEnumerable<ImportReportShort>> SearchAsync(
 		string productNameOrBarcode,
+		string authorName,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var entities = await importReportRepository.SearchAsync(productNameOrBarcode, timeRange, orderBy, pagination);
+		var entities = await importReportRepository.SearchAsync(productNameOrBarcode, authorName, timeRange, orderBy, pagination);
 
 		return entities.Select(ImportReportMapper.ToShort);
+	}
+
+	public async Task<uint> CountAsync(
+		string productNameOrBarcode,
+		string authorName,
+		TimeRange timeRange,
+		OrderBy orderBy)
+	{
+		var count = await importReportRepository.CountAsync(
+			productNameOrBarcode,
+			authorName,
+			timeRange,
+			orderBy);
+
+		return count;
 	}
 
 	public async Task<ImportReport?> GetAsync(string id)
@@ -33,9 +49,11 @@ public class ImportReportService(
 	/// <param name="create"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task<string> CreateAsync(ImportReportCreate create)
 	{
-		var user = await userRepository.GetAsync(create.AuthorUserId) ?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
+		var user = await userRepository.GetAsync(create.AuthorUserId)
+			?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
 		var createIds = create.ProductItems.Select(x => x.Id).ToArray();
 		var products = await productRepository.GetByIdsAsync(createIds);
 		if (products.Count != create.ProductItems.Length)
@@ -76,7 +94,7 @@ public class ImportReportService(
 		{
 			Author = userInfo,
 			ProductItems = items,
-			DateCreated = DateTime.Now
+			DateCreated = DateTime.UtcNow
 		};
 		#endregion
 
@@ -97,18 +115,7 @@ public class ImportReportService(
 	/// <exception cref="UnknownException"></exception>
 	public async Task DeleteAsync(string id)
 	{
-		try
-		{
-			await importReportRepository.SoftDeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			throw;
-		}
-		catch (UnknownException)
-		{
-			throw;
-		}
+		await importReportRepository.SoftDeleteAsync(id);
 	}
 
 	/// <summary>
@@ -118,6 +125,7 @@ public class ImportReportService(
 	/// <returns></returns>
 	/// <exception cref="InvalidIdException"></exception>
 	/// <exception cref="OutOfStockException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task CancelAsync(string id)
 	{
 		var report = await importReportRepository.GetAsync(id, x => x.DateCancelled == null)
@@ -148,7 +156,7 @@ public class ImportReportService(
 
 		var tasks = changes
 			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.InStock - x.Quantity))
-			.Append(importReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.Now));
+			.Append(importReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.UtcNow));
 
 		await Task.WhenAll(tasks);
 	}

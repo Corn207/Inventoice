@@ -18,6 +18,17 @@ public class ProductService(IProductRepository productRepository)
 		return entities.Select(ProductMapper.ToShort);
 	}
 
+	public async Task<uint> CountAsync(
+		string nameOrBarcode,
+		OrderBy orderBy)
+	{
+		var count = await productRepository.CountAsync(
+			nameOrBarcode,
+			orderBy);
+
+		return count;
+	}
+
 	public async Task<Product?> GetAsync(string id)
 	{
 		return await productRepository.GetAsync(id);
@@ -26,7 +37,7 @@ public class ProductService(IProductRepository productRepository)
 	public async Task<string> CreateAsync(ProductCreateUpdate create)
 	{
 		var entity = ProductMapper.ToEntity(create);
-		entity.DateCreated = DateTime.Now;
+		entity.DateCreated = DateTime.UtcNow;
 		await productRepository.CreateAsync(entity);
 
 		return entity.Id!;
@@ -55,13 +66,6 @@ public class ProductService(IProductRepository productRepository)
 	/// <exception cref="InvalidIdException"></exception>
 	public async Task DeleteAsync(string id)
 	{
-		try
-		{
-			await productRepository.DeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			throw;
-		}
+		await productRepository.DeleteAsync(id);
 	}
 }

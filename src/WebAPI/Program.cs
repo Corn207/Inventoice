@@ -1,5 +1,6 @@
 using WebAPI.Configurations;
 using WebAPI.Extensions;
+using WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.Configure<MongoDBConnectionOptions>(builder.Configuration.GetSe
 builder.Services.AddDatabase();
 builder.Services.AddRepositories();
 builder.Services.AddEntityServices();
+builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddCors(options =>
 {
 	options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
@@ -26,6 +28,7 @@ app.UseSwaggerUI();
 
 app.UseCors();
 app.UseAuthorization();
+app.UseExceptionHandler(_ => { });
 
 app.MapControllers();
 

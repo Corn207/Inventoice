@@ -18,6 +18,15 @@ public class ClientService(IClientRepository clientRepository)
 		return entities.Select(ClientMapper.ToShort);
 	}
 
+	public async Task<uint> CountAsync(
+		string nameOrPhonenumber,
+		OrderBy orderBy)
+	{
+		var count = await clientRepository.CountAsync(nameOrPhonenumber, orderBy);
+
+		return count;
+	}
+
 	public async Task<Client?> GetAsync(string id)
 	{
 		return await clientRepository.GetAsync(id);
@@ -26,7 +35,7 @@ public class ClientService(IClientRepository clientRepository)
 	public async Task<string> CreateAsync(ClientCreateUpdate create)
 	{
 		var entity = ClientMapper.ToEntity(create);
-		entity.DateCreated = DateTime.Now;
+		entity.DateCreated = DateTime.UtcNow;
 		await clientRepository.CreateAsync(entity);
 
 		return entity.Id!;
@@ -39,6 +48,7 @@ public class ClientService(IClientRepository clientRepository)
 	/// <param name="update"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="UnknownException"></exception>
 	public async Task ReplaceAsync(string id, ClientCreateUpdate update)
 	{
 		var entity = await clientRepository.GetAsync(id) ?? throw new InvalidIdException("CliendId was not found.", [id]);
@@ -54,13 +64,6 @@ public class ClientService(IClientRepository clientRepository)
 	/// <exception cref="InvalidIdException"></exception>
 	public async Task DeleteAsync(string id)
 	{
-		try
-		{
-			await clientRepository.DeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			throw;
-		}
+		await clientRepository.DeleteAsync(id);
 	}
 }
