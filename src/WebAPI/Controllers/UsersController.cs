@@ -27,12 +27,16 @@ public class UsersController(UserService service) : ControllerBase
 
 	[HttpGet("count")]
 	public async Task<uint> Count(
-		[FromQuery] string? name = null,
-		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
+		[FromQuery] string? name = null)
 	{
 		return await service.CountAsync(
-			name ?? string.Empty,
-			orderBy);
+			name ?? string.Empty);
+	}
+
+	[HttpGet("count/all")]
+	public async Task<uint> CountAll()
+	{
+		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]

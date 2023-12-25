@@ -11,10 +11,8 @@ public interface IImportReportRepository : ISoftDeletableRepository<ImportReport
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination);
-
 	Task<uint> CountAsync(
 		string productNameOrBarcode,
 		string authorName,
-		TimeRange timeRange,
-		OrderBy orderBy);
+		TimeRange timeRange);
 }

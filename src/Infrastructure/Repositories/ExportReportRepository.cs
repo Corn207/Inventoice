@@ -2,6 +2,7 @@
 using Domain.DTOs;
 using Domain.Entities;
 using Infrastructure.Repositories.Bases;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -9,49 +10,6 @@ namespace Infrastructure.Repositories;
 public class ExportReportRepository(Database database)
 	: SoftDeletableRepository<ExportReport>(database), IExportReportRepository
 {
-	private IMongoQueryable<ExportReport> GetSearchQuery(
-		string productNameOrBarcode,
-		string authorName,
-		TimeRange timeRange,
-		OrderBy orderBy)
-	{
-		var query = Database.Collection<ExportReport>().AsQueryable()
-			.Where(x => x.DateDeleted == null);
-
-		if (!string.IsNullOrWhiteSpace(productNameOrBarcode))
-		{
-			query = query.Where(x => x.ProductItems.Any(i =>
-				i.Name.Contains(productNameOrBarcode, StringComparison.InvariantCultureIgnoreCase) ||
-				i.Barcode.Contains(productNameOrBarcode, StringComparison.InvariantCultureIgnoreCase)));
-		}
-
-		if (!string.IsNullOrWhiteSpace(authorName))
-		{
-			query = query.Where(x => x.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase));
-		}
-
-		if (timeRange.From != DateTime.MinValue)
-		{
-			query = query.Where(p => p.DateCreated >= timeRange.From);
-		}
-
-		if (timeRange.To != DateTime.MaxValue)
-		{
-			query = query.Where(p => p.DateCreated <= timeRange.To);
-		}
-
-		if (orderBy == OrderBy.Ascending)
-		{
-			query = query.OrderBy(p => p.DateCreated);
-		}
-		else
-		{
-			query = query.OrderByDescending(p => p.DateCreated);
-		}
-
-		return query;
-	}
-
 	public async Task<List<ExportReport>> SearchAsync(
 		string productNameOrBarcode,
 		string authorName,
@@ -59,12 +17,19 @@ public class ExportReportRepository(Database database)
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = GetSearchQuery(productNameOrBarcode, authorName, timeRange, orderBy);
-
-		var result = await query
-			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
-			.Take(pagination.PageSize)
-			.ToListAsync();
+		var query = Database.Collection<ExportReport>();
+		var pipelineBuilder = new PipelineBuilder<ExportReport>()
+			.Match(Builders<ExportReport>.Filter.Eq(nameof(ExportReport.DateDeleted), BsonNull.Value))
+			.MatchOr<ExportReportProductItem>(
+				nameof(ExportReport.ProductItems),
+				(nameof(ExportReportProductItem.Name), productNameOrBarcode),
+				(nameof(ExportReportProductItem.Barcode), productNameOrBarcode))
+			.MatchOr((nameof(ExportReport.Author.Name), authorName))
+			.Match(nameof(ExportReport.DateCreated), timeRange)
+			.Sort(nameof(ExportReport.DateCreated), orderBy)
+			.Paging(pagination);
+		var pipeline = pipelineBuilder.Build();
+		var result = await query.Aggregate(pipeline).ToListAsync();
 
 		return result;
 	}
@@ -72,13 +37,20 @@ public class ExportReportRepository(Database database)
 	public async Task<uint> CountAsync(
 		string productNameOrBarcode,
 		string authorName,
-		TimeRange timeRange,
-		OrderBy orderBy)
+		TimeRange timeRange)
 	{
-		var query = GetSearchQuery(productNameOrBarcode, authorName, timeRange, orderBy);
+		var query = Database.Collection<ExportReport>();
+		var pipelineBuilder = new PipelineBuilder<ExportReport>()
+			.Match(Builders<ExportReport>.Filter.Eq(nameof(ExportReport.DateDeleted), BsonNull.Value))
+			.MatchOr<ExportReportProductItem>(
+				nameof(ExportReport.ProductItems),
+				(nameof(ExportReportProductItem.Name), productNameOrBarcode),
+				(nameof(ExportReportProductItem.Barcode), productNameOrBarcode))
+			.MatchOr((nameof(ExportReport.Author.Name), authorName))
+			.Match(nameof(ExportReport.DateCreated), timeRange);
+		var pipeline = pipelineBuilder.BuildCount();
+		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
 
-		var result = await query.CountAsync();
-
-		return Convert.ToUInt32(result);
+		return Convert.ToUInt32(result.Count);
 	}
 }

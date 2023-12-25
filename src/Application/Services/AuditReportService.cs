@@ -18,17 +18,31 @@ public class AuditReportService(
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var entities = await auditReportRepository.SearchAsync(productNameOrBarcode, authorName, timeRange, orderBy, pagination);
+		var entities = await auditReportRepository.SearchAsync(
+			productNameOrBarcode,
+			authorName,
+			timeRange,
+			orderBy,
+			pagination);
 
 		return entities.Select(AuditReportMapper.ToShort);
 	}
 
 	public async Task<uint> CountAsync(string productNameOrBarcode,
 		string authorName,
-		TimeRange timeRange,
-		OrderBy orderBy)
+		TimeRange timeRange)
 	{
-		var count = await auditReportRepository.CountAsync(productNameOrBarcode, authorName, timeRange, orderBy);
+		var count = await auditReportRepository.CountAsync(
+			productNameOrBarcode,
+			authorName,
+			timeRange);
+
+		return count;
+	}
+
+	public async Task<uint> CountAllAsync()
+	{
+		var count = await auditReportRepository.CountAllAsync();
 
 		return count;
 	}

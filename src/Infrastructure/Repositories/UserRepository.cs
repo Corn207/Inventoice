@@ -9,52 +9,31 @@ namespace Infrastructure.Repositories;
 public class UserRepository(Database database)
 	: Repository<User>(database), IUserRepository
 {
-	private IMongoQueryable<User> GetSearchQuery(
-		string name,
-		OrderBy orderBy)
-	{
-		var query = Database.Collection<User>().AsQueryable();
-
-		if (!string.IsNullOrWhiteSpace(name))
-		{
-			query = query.Where(p => p.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase));
-		}
-
-		if (orderBy == OrderBy.Ascending)
-		{
-			query = query.OrderBy(x => x.Name);
-		}
-		else
-		{
-			query = query.OrderByDescending(x => x.Name);
-		}
-
-		return query;
-	}
-
 	public async Task<List<User>> SearchAsync(
 		string name,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = GetSearchQuery(name, orderBy);
-
-		var result = await query
-			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
-			.Take(pagination.PageSize)
-			.ToListAsync();
+		var query = Database.Collection<User>();
+		var pipelineBuilder = new PipelineBuilder<User>()
+			.MatchOr((nameof(User.Name), name))
+			.Sort(nameof(User.Name), orderBy)
+			.Paging(pagination);
+		var pipeline = pipelineBuilder.Build();
+		var result = await query.Aggregate(pipeline).ToListAsync();
 
 		return result;
 	}
 
 	public async Task<uint> CountAsync(
-		string name,
-		OrderBy orderBy)
+		string name)
 	{
-		var query = GetSearchQuery(name, orderBy);
+		var query = Database.Collection<User>();
+		var pipelineBuilder = new PipelineBuilder<User>()
+			.MatchOr((nameof(User.Name), name));
+		var pipeline = pipelineBuilder.BuildCount();
+		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
 
-		var result = await query.CountAsync();
-
-		return Convert.ToUInt32(result);
+		return Convert.ToUInt32(result.Count);
 	}
 }

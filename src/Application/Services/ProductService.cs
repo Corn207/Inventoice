@@ -19,12 +19,17 @@ public class ProductService(IProductRepository productRepository)
 	}
 
 	public async Task<uint> CountAsync(
-		string nameOrBarcode,
-		OrderBy orderBy)
+		string nameOrBarcode)
 	{
 		var count = await productRepository.CountAsync(
-			nameOrBarcode,
-			orderBy);
+			nameOrBarcode);
+
+		return count;
+	}
+
+	public async Task<uint> CountAllAsync()
+	{
+		var count = await productRepository.CountAllAsync();
 
 		return count;
 	}

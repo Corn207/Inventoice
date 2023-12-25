@@ -184,4 +184,13 @@ public abstract class SoftDeletableRepository<TEntity>(Database database) :
 		}
 	}
 	#endregion
+
+	public override async Task<uint> CountAllAsync()
+	{
+		var query = Database.Collection<TEntity>()
+			.Find(x => x.DateDeleted == null);
+		var result = await query.CountDocumentsAsync();
+
+		return Convert.ToUInt32(result);
+	}
 }

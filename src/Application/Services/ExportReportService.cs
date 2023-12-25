@@ -18,7 +18,12 @@ public class ExportReportService(
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var entities = await exportReportRepository.SearchAsync(productNameOrBarcode, authorName, timeRange, orderBy, pagination);
+		var entities = await exportReportRepository.SearchAsync(
+			productNameOrBarcode,
+			authorName,
+			timeRange,
+			orderBy,
+			pagination);
 
 		return entities.Select(ExportReportMapper.ToShort);
 	}
@@ -26,10 +31,19 @@ public class ExportReportService(
 	public async Task<uint> CountAsync(
 		string productNameOrBarcode,
 		string authorName,
-		TimeRange timeRange,
-		OrderBy orderBy)
+		TimeRange timeRange)
 	{
-		var count = await exportReportRepository.CountAsync(productNameOrBarcode, authorName, timeRange, orderBy);
+		var count = await exportReportRepository.CountAsync(
+			productNameOrBarcode,
+			authorName,
+			timeRange);
+
+		return count;
+	}
+
+	public async Task<uint> CountAllAsync()
+	{
+		var count = await exportReportRepository.CountAllAsync();
 
 		return count;
 	}

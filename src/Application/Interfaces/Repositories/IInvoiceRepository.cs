@@ -14,12 +14,10 @@ public interface IInvoiceRepository : ISoftDeletableRepository<Invoice>
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination);
-
 	Task<uint> CountAsync(
 		string productNameOrBarcode,
 		string clientNameOrPhonenumber,
 		string authorName,
 		InvoiceStatus status,
-		TimeRange timeRange,
-		OrderBy orderBy);
+		TimeRange timeRange);
 }

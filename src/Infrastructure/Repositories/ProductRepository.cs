@@ -9,54 +9,35 @@ namespace Infrastructure.Repositories;
 public class ProductRepository(Database database)
 	: Repository<Product>(database), IProductRepository
 {
-	private IMongoQueryable<Product> GetSearchQuery(
-		string nameOrBarcode,
-		OrderBy orderBy)
-	{
-		var query = Database.Collection<Product>().AsQueryable();
-
-		if (!string.IsNullOrWhiteSpace(nameOrBarcode))
-		{
-			query = query.Where(p =>
-			p.Barcode.Contains(nameOrBarcode, StringComparison.InvariantCultureIgnoreCase) ||
-			p.Name.Contains(nameOrBarcode, StringComparison.InvariantCultureIgnoreCase));
-		}
-
-		if (orderBy == OrderBy.Ascending)
-		{
-			query = query.OrderBy(x => x.DateCreated);
-		}
-		else
-		{
-			query = query.OrderByDescending(x => x.DateCreated);
-		}
-
-		return query;
-	}
-
 	public async Task<List<Product>> SearchAsync(
 		string nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = GetSearchQuery(nameOrBarcode, orderBy);
-
-		var result = await query
-			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
-			.Take(pagination.PageSize)
-			.ToListAsync();
+		var query = Database.Collection<Product>();
+		var pipelineBuilder = new PipelineBuilder<Product>()
+			.MatchOr(
+				(nameof(Product.Name), nameOrBarcode),
+				(nameof(Product.Barcode), nameOrBarcode))
+			.Sort(nameof(Product.Name), orderBy)
+			.Paging(pagination);
+		var pipeline = pipelineBuilder.Build();
+		var result = await query.Aggregate(pipeline).ToListAsync();
 
 		return result;
 	}
 
 	public async Task<uint> CountAsync(
-		string nameOrBarcode,
-		OrderBy orderBy)
+		string nameOrBarcode)
 	{
-		var query = GetSearchQuery(nameOrBarcode, orderBy);
+		var query = Database.Collection<Product>();
+		var pipelineBuilder = new PipelineBuilder<Product>()
+			.MatchOr(
+				(nameof(Product.Name), nameOrBarcode),
+				(nameof(Product.Barcode), nameOrBarcode));
+		var pipeline = pipelineBuilder.Build().Count();
+		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
 
-		var result = await query.CountAsync();
-
-		return Convert.ToUInt32(result);
+		return Convert.ToUInt32(result.Count);
 	}
 }

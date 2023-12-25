@@ -15,6 +15,5 @@ public interface IAuditReportRepository : ISoftDeletableRepository<AuditReport>
 	Task<uint> CountAsync(
 		string productNameOrBarcode,
 		string authorName,
-		TimeRange timeRange,
-		OrderBy orderBy);
+		TimeRange timeRange);
 }

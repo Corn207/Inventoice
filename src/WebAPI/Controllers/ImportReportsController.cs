@@ -36,16 +36,20 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,
-		[FromQuery] DateTime? dateEnd = null,
-		[FromQuery] OrderBy orderBy = OrderBy.Descending)
+		[FromQuery] DateTime? dateEnd = null)
 	{
 		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
 
 		return await service.CountAsync(
 			productNameOrBarcode ?? string.Empty,
 			authorName ?? string.Empty,
-			timeRange,
-			orderBy);
+			timeRange);
+	}
+
+	[HttpGet("count/all")]
+	public async Task<uint> CountAll()
+	{
+		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]

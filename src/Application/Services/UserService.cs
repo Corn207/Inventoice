@@ -19,12 +19,16 @@ public class UserService(IUserRepository userRepository)
 	}
 
 	public async Task<uint> CountAsync(
-		string name,
-		OrderBy orderBy)
+		string name)
 	{
-		var count = await userRepository.CountAsync(
-			name,
-			orderBy);
+		var count = await userRepository.CountAsync(name);
+
+		return count;
+	}
+
+	public async Task<uint> CountAllAsync()
+	{
+		var count = await userRepository.CountAllAsync();
 
 		return count;
 	}

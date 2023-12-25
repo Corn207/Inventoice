@@ -12,6 +12,7 @@ public class User : IEntity
 	public required string Phonenumber { get; set; }
 	public required string Username { get; set; }
 	public required string Password { get; set; }
+	public required DateTime DateCreated { get; set; }
 }
 
 public class UserInfo

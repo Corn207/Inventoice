@@ -27,12 +27,16 @@ public class ProductsController(ProductService service) : ControllerBase
 
 	[HttpGet("count")]
 	public async Task<uint> Count(
-		[FromQuery] string? nameOrBarcode = null,
-		[FromQuery] OrderBy orderBy = OrderBy.Ascending)
+		[FromQuery] string? nameOrBarcode = null)
 	{
 		return await service.CountAsync(
-			nameOrBarcode ?? string.Empty,
-			orderBy);
+			nameOrBarcode ?? string.Empty);
+	}
+
+	[HttpGet("count/all")]
+	public async Task<uint> CountAll()
+	{
+		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]

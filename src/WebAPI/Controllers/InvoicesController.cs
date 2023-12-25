@@ -43,8 +43,7 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 		[FromQuery] string? authorName = null,
 		[FromQuery] InvoiceStatus status = InvoiceStatus.All,
 		[FromQuery] DateTime? dateStart = null,
-		[FromQuery] DateTime? dateEnd = null,
-		[FromQuery] OrderBy orderBy = OrderBy.Descending)
+		[FromQuery] DateTime? dateEnd = null)
 	{
 		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
 
@@ -53,8 +52,13 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 			clientNameOrPhonenumber ?? string.Empty,
 			authorName ?? string.Empty,
 			status,
-			timeRange,
-			orderBy);
+			timeRange);
+	}
+
+	[HttpGet("count/all")]
+	public async Task<uint> CountAll()
+	{
+		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]

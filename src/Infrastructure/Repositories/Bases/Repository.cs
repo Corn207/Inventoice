@@ -182,4 +182,12 @@ public abstract class Repository<TEntity>(Database database) : IRepository<TEnti
 		}
 	}
 	#endregion
+
+	public virtual async Task<uint> CountAllAsync()
+	{
+		var query = Database.Collection<TEntity>();
+		var result = await query.EstimatedDocumentCountAsync();
+
+		return Convert.ToUInt32(result);
+	}
 }

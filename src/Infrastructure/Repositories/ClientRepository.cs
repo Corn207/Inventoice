@@ -9,54 +9,35 @@ namespace Infrastructure.Repositories;
 public class ClientRepository(Database database)
 	: Repository<Client>(database), IClientRepository
 {
-	private IMongoQueryable<Client> GetSearchQuery(
-		string nameOrPhonenumber,
-		OrderBy orderBy)
-	{
-		var query = Database.Collection<Client>().AsQueryable();
-
-		if (!string.IsNullOrWhiteSpace(nameOrPhonenumber))
-		{
-			query = query.Where(x =>
-				x.Name.Contains(nameOrPhonenumber, StringComparison.InvariantCultureIgnoreCase) ||
-				x.Phonenumber.Contains(nameOrPhonenumber, StringComparison.InvariantCultureIgnoreCase));
-		}
-
-		if (orderBy == OrderBy.Ascending)
-		{
-			query = query.OrderBy(p => p.Name);
-		}
-		else
-		{
-			query = query.OrderByDescending(p => p.Name);
-		}
-
-		return query;
-	}
-
 	public async Task<List<Client>> SearchAsync(
 		string nameOrPhonenumber,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = GetSearchQuery(nameOrPhonenumber, orderBy);
-
-		var result = await query
-			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
-			.Take(pagination.PageSize)
-			.ToListAsync();
+		var query = Database.Collection<Client>();
+		var pipelineBuilder = new PipelineBuilder<Client>()
+			.MatchOr(
+				(nameof(Client.Name), nameOrPhonenumber),
+				(nameof(Client.Phonenumber), nameOrPhonenumber))
+			.Sort(nameof(Client.Name), orderBy)
+			.Paging(pagination);
+		var pipeline = pipelineBuilder.Build();
+		var result = await query.Aggregate(pipeline).ToListAsync();
 
 		return result;
 	}
 
 	public async Task<uint> CountAsync(
-		string nameOrPhonenumber,
-		OrderBy orderBy)
+		string nameOrPhonenumber)
 	{
-		var query = GetSearchQuery(nameOrPhonenumber, orderBy);
+		var query = Database.Collection<Client>();
+		var pipelineBuilder = new PipelineBuilder<Client>()
+			.MatchOr(
+				(nameof(Client.Name), nameOrPhonenumber),
+				(nameof(Client.Phonenumber), nameOrPhonenumber));
+		var pipeline = pipelineBuilder.BuildCount();
+		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
 
-		var result = await query.CountAsync();
-
-		return Convert.ToUInt32(result);
+		return Convert.ToUInt32(result.Count);
 	}
 }

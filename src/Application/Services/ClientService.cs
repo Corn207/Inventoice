@@ -13,16 +13,25 @@ public class ClientService(IClientRepository clientRepository)
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var entities = await clientRepository.SearchAsync(nameOrPhonenumber, orderBy, pagination);
+		var entities = await clientRepository.SearchAsync(
+			nameOrPhonenumber,
+			orderBy,
+			pagination);
 
 		return entities.Select(ClientMapper.ToShort);
 	}
 
 	public async Task<uint> CountAsync(
-		string nameOrPhonenumber,
-		OrderBy orderBy)
+		string nameOrPhonenumber)
 	{
-		var count = await clientRepository.CountAsync(nameOrPhonenumber, orderBy);
+		var count = await clientRepository.CountAsync(nameOrPhonenumber);
+
+		return count;
+	}
+
+	public async Task<uint> CountAllAsync()
+	{
+		var count = await clientRepository.CountAllAsync();
 
 		return count;
 	}

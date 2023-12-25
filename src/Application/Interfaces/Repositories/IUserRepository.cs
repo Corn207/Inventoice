@@ -9,8 +9,6 @@ public interface IUserRepository : IRepository<User>
 		string name,
 		OrderBy orderBy,
 		Pagination pagination);
-
 	Task<uint> CountAsync(
-		string name,
-		OrderBy orderBy);
+		string name);
 }

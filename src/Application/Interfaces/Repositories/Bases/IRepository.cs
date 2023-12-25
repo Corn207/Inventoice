@@ -66,4 +66,6 @@ public interface IRepository<TEntity> where TEntity : IEntity
 	/// <returns></returns>
 	/// <exception cref="InvalidIdException"></exception>
 	Task DeleteAsync(string id);
+
+	Task<uint> CountAllAsync();
 }

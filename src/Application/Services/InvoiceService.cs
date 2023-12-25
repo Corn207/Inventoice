@@ -39,16 +39,21 @@ public class InvoiceService(
 		string clientNameOrPhonenumber,
 		string authorName,
 		InvoiceStatus status,
-		TimeRange timeRange,
-		OrderBy orderBy)
+		TimeRange timeRange)
 	{
 		var count = await invoiceRepository.CountAsync(
 			productNameOrBarcode,
 			clientNameOrPhonenumber,
 			authorName,
 			status,
-			timeRange,
-			orderBy);
+			timeRange);
+
+		return count;
+	}
+
+	public async Task<uint> CountAllAsync()
+	{
+		var count = await invoiceRepository.CountAllAsync();
 
 		return count;
 	}

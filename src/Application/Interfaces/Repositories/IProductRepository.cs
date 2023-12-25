@@ -9,8 +9,6 @@ public interface IProductRepository : IRepository<Product>
 		string nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination);
-
 	Task<uint> CountAsync(
-		string nameOrBarcode,
-		OrderBy orderBy);
+		string nameOrBarcode);
 }
