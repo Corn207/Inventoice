@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 namespace Infrastructure;
 internal class PipelineBuilder<T>
 {
-	private PipelineDefinition<T, T>? _pipeline;
+	private PipelineDefinition<T, T> _pipeline = new EmptyPipelineDefinition<T>();
 	private readonly List<FilterDefinition<T>> _filters = [];
 	private SortDefinition<T>? _sort;
 	private Pagination? _pagination;
@@ -118,25 +118,21 @@ internal class PipelineBuilder<T>
 	{
 		if (_filters.Count == 1)
 		{
-			_pipeline ??= new EmptyPipelineDefinition<T>();
 			_pipeline = _pipeline.Match(_filters[0]);
 		}
 		else if (_filters.Count > 1)
 		{
-			_pipeline ??= new EmptyPipelineDefinition<T>();
 			var filter = Builders<T>.Filter.And(_filters);
 			_pipeline = _pipeline.Match(filter);
 		}
 
 		if (_sort is not null)
 		{
-			_pipeline ??= new EmptyPipelineDefinition<T>();
 			_pipeline = _pipeline.Sort(_sort);
 		}
 
 		if (_pagination is not null)
 		{
-			_pipeline ??= new EmptyPipelineDefinition<T>();
 			_pipeline = _pipeline
 				.Skip((_pagination.Value.PageNumber - 1) * _pagination.Value.PageSize)
 				.Limit(_pagination.Value.PageSize);
