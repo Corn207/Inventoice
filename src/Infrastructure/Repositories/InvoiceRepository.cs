@@ -81,9 +81,6 @@ public class InvoiceRepository(Database database)
 		}
 		pipelineBuilder
 			.Match(nameof(Invoice.DateCreated), timeRange);
-		var pipeline = pipelineBuilder.BuildCount();
-		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
-
-		return Convert.ToUInt32(result.Count);
+		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

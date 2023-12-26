@@ -114,7 +114,7 @@ internal class PipelineBuilder<T>
 		return this;
 	}
 
-	public PipelineDefinition<T, T>? Build()
+	public PipelineDefinition<T, T> Build()
 	{
 		if (_filters.Count == 1)
 		{
@@ -141,8 +141,11 @@ internal class PipelineBuilder<T>
 		return _pipeline;
 	}
 
-	public PipelineDefinition<T, AggregateCountResult>? BuildCount()
+	public async Task<uint> BuildAndCount(IMongoCollection<T> mongoCollection)
 	{
-		return Build().Count();
+		var pipeline = Build().Count();
+		var result = await mongoCollection.Aggregate(pipeline).FirstOrDefaultAsync();
+		if (result == null) return 0;
+		return Convert.ToUInt32(result.Count);
 	}
 }

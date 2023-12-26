@@ -48,9 +48,6 @@ public class AuditReportRepository(Database database)
 				(nameof(AuditReportProductItem.Barcode), productNameOrBarcode))
 			.MatchOr((nameof(AuditReport.Author.Name), authorName))
 			.Match(nameof(AuditReport.DateCreated), timeRange);
-		var pipeline = pipelineBuilder.BuildCount();
-		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
-
-		return Convert.ToUInt32(result.Count);
+		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

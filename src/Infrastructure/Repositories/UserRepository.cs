@@ -31,9 +31,6 @@ public class UserRepository(Database database)
 		var query = Database.Collection<User>();
 		var pipelineBuilder = new PipelineBuilder<User>()
 			.MatchOr((nameof(User.Name), name));
-		var pipeline = pipelineBuilder.BuildCount();
-		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
-
-		return Convert.ToUInt32(result.Count);
+		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

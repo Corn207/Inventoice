@@ -48,9 +48,6 @@ public class ExportReportRepository(Database database)
 				(nameof(ExportReportProductItem.Barcode), productNameOrBarcode))
 			.MatchOr((nameof(ExportReport.Author.Name), authorName))
 			.Match(nameof(ExportReport.DateCreated), timeRange);
-		var pipeline = pipelineBuilder.BuildCount();
-		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
-
-		return Convert.ToUInt32(result.Count);
+		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

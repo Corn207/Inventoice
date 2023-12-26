@@ -3,7 +3,6 @@ using Domain.DTOs;
 using Domain.Entities;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
 public class ProductRepository(Database database)
@@ -35,9 +34,6 @@ public class ProductRepository(Database database)
 			.MatchOr(
 				(nameof(Product.Name), nameOrBarcode),
 				(nameof(Product.Barcode), nameOrBarcode));
-		var pipeline = pipelineBuilder.Build().Count();
-		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
-
-		return Convert.ToUInt32(result.Count);
+		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

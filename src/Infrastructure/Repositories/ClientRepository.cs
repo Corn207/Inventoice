@@ -35,9 +35,6 @@ public class ClientRepository(Database database)
 			.MatchOr(
 				(nameof(Client.Name), nameOrPhonenumber),
 				(nameof(Client.Phonenumber), nameOrPhonenumber));
-		var pipeline = pipelineBuilder.BuildCount();
-		var result = await query.Aggregate(pipeline).FirstOrDefaultAsync();
-
-		return Convert.ToUInt32(result.Count);
+		return await pipelineBuilder.BuildAndCount(query);
 	}
 }
