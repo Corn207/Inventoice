@@ -10,6 +10,7 @@ namespace Infrastructure.Repositories;
 public class ExportReportRepository(Database database)
 	: SoftDeletableRepository<ExportReport>(database), IExportReportRepository
 {
+	// TODO Whether if allow cancel auto created
 	public async Task<List<ExportReport>> SearchAsync(
 		string productNameOrBarcode,
 		string authorName,

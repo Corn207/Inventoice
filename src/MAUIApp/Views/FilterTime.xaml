@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:Card
+    x:Class="MAUIApp.Views.FilterTime"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:MAUIApp.Views"
+    x:Name="this"
+    BodyPadding="16,0"
+    ControlTemplate="{StaticResource CardControlTemplate}"
+    HeaderTitle="Thời gian">
+    <Grid
+        BindingContext="{x:Reference this}"
+        ColumnDefinitions="1*, 2*, 1*"
+        ColumnSpacing="16"
+        RowDefinitions="1*, Auto, 1*">
+        <Grid.Resources>
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+            </Style>
+            <Style TargetType="{x:Type DatePicker}">
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+            </Style>
+            <Style TargetType="{x:Type Picker}">
+                <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+            </Style>
+        </Grid.Resources>
+
+        <Picker
+            Title="Chọn ngày"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Grid.Column="2"
+            HorizontalOptions="Center"
+            SelectedIndex="{Binding SelectedOptionIndex, Mode=TwoWay}"
+            SelectedIndexChanged="OptionSelectedIndexChanged"
+            VerticalOptions="Center">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Toàn thời gian</x:String>
+                    <x:String>Hôm nay</x:String>
+                    <x:String>Hôm qua</x:String>
+                    <x:String>Tuần này</x:String>
+                    <x:String>Tuần trước</x:String>
+                    <x:String>Tháng này</x:String>
+                    <x:String>Năm này</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+        <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="Từ ngày" />
+        <DatePicker
+            Grid.Row="0"
+            Grid.Column="1"
+            Date="{Binding From, Mode=TwoWay}" />
+        <views:Separator
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="2" />
+        <Label
+            Grid.Row="2"
+            Grid.Column="0"
+            Text="Đến ngày" />
+        <DatePicker
+            Grid.Row="2"
+            Grid.Column="1"
+            Date="{Binding To, Mode=TwoWay}" />
+    </Grid>
+</views:Card>

@@ -3,15 +3,24 @@ using Application.Services;
 using Domain.DTOs;
 using Domain.DTOs.Users;
 using Domain.Entities;
+using Identity.Application.Exceptions;
+using Identity.Application.Services;
+using Identity.Domain.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController(UserService service) : ControllerBase
+public class UsersController(
+	UserService service,
+	IdentityService identityService) : ControllerBase
 {
 	[HttpGet]
-	public async Task<IEnumerable<UserShort>> Get(
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType<IEnumerable<UserShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<UserShort>> Search(
 		[FromQuery] string? name = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,
@@ -26,6 +35,8 @@ public class UsersController(UserService service) : ControllerBase
 	}
 
 	[HttpGet("count")]
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
 	public async Task<uint> Count(
 		[FromQuery] string? name = null)
 	{
@@ -34,46 +45,88 @@ public class UsersController(UserService service) : ControllerBase
 	}
 
 	[HttpGet("count/all")]
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
 	public async Task<uint> CountAll()
 	{
 		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType<User>(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<User>> Get(string id)
 	{
-		var entity = await service.GetAsync(id)
-			?? throw new InvalidIdException("UserId was not found.", id);
+		var entity = await service.GetAsync(id);
+		if (entity == null)
+		{
+			return NotFound();
+		};
 
 		return entity;
 	}
 
-	[HttpPost]
-	public async Task<IActionResult> Post([FromBody] UserCreate body)
-	{
-		var newId = await service.CreateAsync(body);
-		return CreatedAtAction(nameof(Get), new { id = newId }, null);
-	}
-
-	[HttpPut("{id}")]
-	public async Task<IActionResult> Put(string id, [FromBody] UserUpdate body)
-	{
-		await service.ReplaceAsync(id, body);
-
-		return NoContent();
-	}
-
 	[HttpDelete("{id}")]
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete(string id)
 	{
-		await service.DeleteAsync(id);
+		try
+		{
+			await service.DeleteAsync(id);
+		}
+		catch (InvalidIdException)
+		{
+			return NotFound();
+		}
+		try
+		{
+			await identityService.DeleteIdentityAsync(id);
+		}
+		catch (EntityNotFoundException)
+		{
+			return NotFound();
+		}
 
 		return NoContent();
 	}
 
-	//[HttpGet("me")]
-	//public async Task<User> GetMe()
-	//{
-	//	var entity = await service.GetAsync(User.Claims)
-	//}
+	#region Me
+	[HttpGet("me")]
+	[Authorize]
+	[ProducesResponseType<User>(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<ActionResult<User>> GetMe()
+	{
+		var userId = this.GetUserId();
+		var entity = await service.GetAsync(userId);
+		if (entity == null)
+		{
+			return StatusCode(StatusCodes.Status500InternalServerError, "UserId was not found.");
+		}
+
+		return entity;
+	}
+
+	[HttpPut("me")]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> EditMe([FromBody] UserCreateUpdate body)
+	{
+		var userId = this.GetUserId();
+		try
+		{
+			await service.ReplaceAsync(userId, body);
+		}
+		catch (InvalidIdException)
+		{
+			return StatusCode(StatusCodes.Status500InternalServerError, "UserId was not found.");
+		}
+
+		return NoContent();
+	}
+	#endregion
 }

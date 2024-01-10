@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.Products.SearchPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:dtos="clr-namespace:Domain.DTOs.Products;assembly=Domain"
+	xmlns:localviews="clr-namespace:MAUIApp.Views.Products"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Products"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:SearchViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="ModalAnimated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}" Style="{StaticResource SearchNavigationBar}">
+			<Border
+				BackgroundColor="{StaticResource BackgroundSecondary}"
+				StrokeShape="RoundRectangle 8"
+				StrokeThickness="0">
+				<Grid ColumnDefinitions="1*, Auto">
+					<SearchBar
+						FontSize="Medium"
+						SearchCommand="{Binding SearchCommand}"
+						Text="{Binding SearchTerm}" />
+					<ImageButton
+						Grid.Column="1"
+						Margin="8,0,12,0"
+						Command="{Static baseviewmodels:StaticViewModel.ToBarcodeScannerPageCommand}"
+						HeightRequest="30"
+						Source="barcode_scanner.png">
+						<ImageButton.Behaviors>
+							<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+						</ImageButton.Behaviors>
+					</ImageButton>
+				</Grid>
+			</Border>
+		</views:NavigationBar>
+
+
+		<views:Card Grid.Row="1" Style="{StaticResource ListViewCard}">
+			<ListView
+				HasUnevenRows="True"
+				ItemsSource="{Binding Shorts, Mode=OneWay}"
+				SelectionMode="None">
+				<ListView.Behaviors>
+					<toolkit:EventToCommandBehavior
+						Command="{Binding ReturnCommand}"
+						EventArgsConverter="{StaticResource ItemTappedEventArgsConverter}"
+						EventName="ItemTapped" />
+				</ListView.Behaviors>
+
+				<ListView.ItemTemplate>
+					<DataTemplate x:DataType="{x:Type dtos:ProductShort}">
+						<ViewCell>
+							<localviews:ProductShortView
+								Name="{Binding Name}"
+								Barcode="{Binding Barcode}"
+								InStock="{Binding InStock}"
+								Price="{Binding Price}" />
+						</ViewCell>
+					</DataTemplate>
+				</ListView.ItemTemplate>
+			</ListView>
+		</views:Card>
+	</Grid>
+</ContentPage>

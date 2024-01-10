@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.AuditReports.ListPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
+	xmlns:dtos="clr-namespace:Domain.DTOs.AuditReports;assembly=Domain"
+	xmlns:models="clr-namespace:MAUIApp.Models"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.AuditReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:ListViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Kiểm kho" BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}">
+			<HorizontalStackLayout>
+				<ImageButton
+					Command="{Binding ToFilterPageCommand}"
+					Source="search.png"
+					Style="{StaticResource ContextTitlePageImageButton}">
+					<ImageButton.Behaviors>
+						<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+					</ImageButton.Behaviors>
+				</ImageButton>
+				<ImageButton
+					Command="{Binding ToCreatePageCommand}"
+					Source="add.png"
+					Style="{StaticResource ContextTitlePageImageButton}">
+					<ImageButton.Behaviors>
+						<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+					</ImageButton.Behaviors>
+				</ImageButton>
+			</HorizontalStackLayout>
+
+			<views:NavigationBar.Footer>
+				<views:TotalItemBar
+					TotalAll="{Binding TotalAllItems, TargetNullValue='N/A'}"
+					TotalSearch="{Binding TotalFoundItems, TargetNullValue='N/A'}"
+					UnitTitle="phiếu đơn" />
+			</views:NavigationBar.Footer>
+		</views:NavigationBar>
+
+
+		<RefreshView
+			Grid.Row="1"
+			Command="{Binding LoadDataCommand}"
+			IsRefreshing="{Binding IsRefreshing}">
+			<CollectionView
+				EmptyView="Không có phiếu đơn nào"
+				ItemsSource="{Binding Items}"
+				Style="{StaticResource ShortCollectionView}">
+				<CollectionView.ItemTemplate>
+					<DataTemplate x:DataType="{x:Type models:GroupingByDate`1}">
+						<VerticalStackLayout>
+							<Label Style="{StaticResource CardHeaderLabel}" Text="{Binding Key, Converter={StaticResource DateTimeToWeekDayStringConverter}, Mode=OneTime}" />
+							<Border Style="{StaticResource TemplatedLayoutCardBorder}">
+								<VerticalStackLayout BindableLayout.ItemsSource="{Binding}">
+									<BindableLayout.ItemTemplate>
+										<DataTemplate x:DataType="{x:Type dtos:AuditReportShort}">
+											<views:InventoryReportShortView
+												AuthorName="{Binding Author.Name}"
+												DateCreated="{Binding DateCreated}"
+												TotalProduct="{Binding TotalProduct}">
+												<views:InventoryReportShortView.GestureRecognizers>
+													<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToAuditReportDetailsPageCommand}" CommandParameter="{Binding Id}" />
+												</views:InventoryReportShortView.GestureRecognizers>
+											</views:InventoryReportShortView>
+										</DataTemplate>
+									</BindableLayout.ItemTemplate>
+								</VerticalStackLayout>
+							</Border>
+						</VerticalStackLayout>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</RefreshView>
+	</Grid>
+</ContentPage>

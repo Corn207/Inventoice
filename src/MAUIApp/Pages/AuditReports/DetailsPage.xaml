@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.AuditReports.DetailsPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:entities="clr-namespace:Domain.Entities;assembly=Domain"
+	xmlns:localviews="clr-namespace:MAUIApp.Views.AuditReports"
+	xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.AuditReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:DetailsViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Chi tiết phiếu kiểm" BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}">
+			<ImageButton
+				the49:ContextMenu.ShowMenuOnClick="True"
+				Source="more_vert.png"
+				Style="{StaticResource ContextTitlePageImageButton}">
+				<ImageButton.Behaviors>
+					<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+				</ImageButton.Behaviors>
+
+				<the49:ContextMenu.Menu>
+					<DataTemplate>
+						<the49:Menu>
+							<!--<the49:Action
+								Title="Hủy đơn"
+								Command="{Binding CancelCommand}"
+								Icon="contract_delete.png"
+								IsVisible="{Binding CanExecuteCancel}" />-->
+							<the49:Action
+								Title="Xóa đơn"
+								Command="{Binding DeleteCommand}"
+								Icon="delete.png"
+								IsVisible="{Binding CanExecuteDelete}" />
+						</the49:Menu>
+					</DataTemplate>
+				</the49:ContextMenu.Menu>
+			</ImageButton>
+		</views:NavigationBar>
+
+
+		<RefreshView
+			Grid.Row="1"
+			Command="{Binding LoadDataCommand}"
+			IsRefreshing="{Binding IsRefreshing}">
+			<ScrollView>
+				<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+					<views:Card Grid.Row="0" Style="{StaticResource FieldCard}">
+						<VerticalStackLayout>
+							<views:ValueField Title="Người nhập kho" Value="{Binding Model.Author.Name}" />
+							<views:Separator />
+							<views:ValueField Title="Ngày tạo" Value="{Binding Model.DateCreated, Converter={StaticResource DateTimeToDetailedStringConverter}}" />
+						</VerticalStackLayout>
+					</views:Card>
+
+					<views:Card Grid.Row="1" Style="{StaticResource ItemsTemplateCard}">
+						<VerticalStackLayout>
+							<localviews:TotalBarView
+								Padding="8"
+								TotalAdjusted="{Binding TotalAdjusted}"
+								TotalOriginal="{Binding TotalOriginal}"
+								TotalProduct="{Binding TotalProduct}" />
+							<views:Separator />
+							<ListView
+								HasUnevenRows="True"
+								ItemsSource="{Binding Model.ProductItems}"
+								SelectionMode="None"
+								VerticalOptions="Fill">
+								<ListView.ItemTemplate>
+									<DataTemplate x:DataType="{x:Type entities:AuditReportProductItem}">
+										<ViewCell>
+											<localviews:ProductItemView
+												Name="{Binding Name, Mode=OneTime}"
+												AdjustedQuantity="{Binding AdjustedQuantity, Mode=OneTime}"
+												Barcode="{Binding Barcode, Mode=OneTime}"
+												OriginalQuantity="{Binding OriginalQuantity, Mode=OneTime}">
+												<localviews:ProductItemView.GestureRecognizers>
+													<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToProductDetailsPageCommand}" CommandParameter="{Binding Id}" />
+												</localviews:ProductItemView.GestureRecognizers>
+											</localviews:ProductItemView>
+										</ViewCell>
+									</DataTemplate>
+								</ListView.ItemTemplate>
+							</ListView>
+						</VerticalStackLayout>
+					</views:Card>
+				</Grid>
+			</ScrollView>
+		</RefreshView>
+	</Grid>
+</ContentPage>

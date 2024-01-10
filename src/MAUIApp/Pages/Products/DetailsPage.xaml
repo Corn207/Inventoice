@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.Products.DetailsPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Products"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:DetailsViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Chi tiết sản phẩm" BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}">
+			<ImageButton
+				the49:ContextMenu.ShowMenuOnClick="True"
+				Source="more_vert.png"
+				Style="{StaticResource ContextTitlePageImageButton}">
+				<ImageButton.Behaviors>
+					<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+				</ImageButton.Behaviors>
+
+				<the49:ContextMenu.Menu>
+					<DataTemplate>
+						<the49:Menu>
+							<the49:Action
+								Title="Sửa"
+								Command="{Binding ToEditPageCommand}"
+								Icon="edit.png"
+								IsVisible="{Binding CanExecuteToEditPage}" />
+							<the49:Action
+								Title="Xóa"
+								Command="{Binding DeleteCommand}"
+								Icon="delete.png"
+								IsVisible="{Binding CanExecuteDelete}" />
+						</the49:Menu>
+					</DataTemplate>
+				</the49:ContextMenu.Menu>
+			</ImageButton>
+		</views:NavigationBar>
+
+
+		<RefreshView
+			Grid.Row="1"
+			Command="{Binding LoadDataCommand}"
+			IsRefreshing="{Binding IsRefreshing}">
+			<ScrollView>
+				<VerticalStackLayout Spacing="16">
+					<VerticalStackLayout.Resources>
+						<Style TargetType="Editor">
+							<Setter Property="IsReadOnly" Value="True" />
+							<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+							<Setter Property="FontSize" Value="Body" />
+							<Setter Property="MinimumHeightRequest" Value="60" />
+						</Style>
+					</VerticalStackLayout.Resources>
+
+					<views:Card BodyPadding="16,0,16,8">
+						<Grid ColumnDefinitions="3*, 5*" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto">
+							<Grid.Resources>
+								<Style TargetType="{x:Type Label}">
+									<Setter Property="Grid.Column" Value="0" />
+									<Setter Property="VerticalOptions" Value="Center" />
+									<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+								</Style>
+								<Style TargetType="{x:Type Entry}">
+									<Setter Property="Grid.Column" Value="1" />
+									<Setter Property="IsReadOnly" Value="True" />
+									<Setter Property="FontSize" Value="Body" />
+									<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+								</Style>
+								<Style TargetType="{x:Type views:Separator}">
+									<Setter Property="Grid.Column" Value="1" />
+									<Setter Property="VerticalOptions" Value="End" />
+								</Style>
+							</Grid.Resources>
+
+							<Label
+								Grid.Row="0"
+								Grid.Column="0"
+								Grid.ColumnSpan="2"
+								Margin="0,8"
+								FontAttributes="Bold"
+								FontSize="Medium"
+								Text="{Binding Model.Name}" />
+							<views:Separator
+								Grid.Row="0"
+								Grid.Column="0"
+								Grid.ColumnSpan="2"
+								Margin="0,8,0,0" />
+
+							<Label Grid.Row="1" Text="Mã vạch" />
+							<Entry
+								Grid.Row="1"
+								Keyboard="Numeric"
+								Text="{Binding Model.Barcode}" />
+							<views:Separator Grid.Row="1" />
+
+							<Label Grid.Row="2" Text="Nhóm hàng" />
+							<Entry Grid.Row="2" Text="{Binding Model.Group}" />
+							<views:Separator Grid.Row="2" />
+
+							<Label Grid.Row="3" Text="Thương hiệu" />
+							<Entry Grid.Row="3" Text="{Binding Model.Brand}" />
+							<views:Separator Grid.Row="3" />
+
+							<Label Grid.Row="4" Text="Giá nhập" />
+							<Entry
+								Grid.Row="4"
+								Keyboard="Numeric"
+								Text="{Binding Model.BuyingPrice}" />
+							<views:Separator Grid.Row="4" />
+
+							<Label Grid.Row="5" Text="Giá bán" />
+							<Entry
+								Grid.Row="5"
+								Keyboard="Numeric"
+								Text="{Binding Model.SellingPrice}" />
+							<views:Separator Grid.Row="5" />
+
+							<Label Grid.Row="6" Text="Tồn kho" />
+							<Entry
+								Grid.Row="6"
+								Keyboard="Numeric"
+								Text="{Binding Model.InStock}" />
+							<views:Separator Grid.Row="6" />
+						</Grid>
+					</views:Card>
+
+					<views:Card HeaderTitle="Vị trí">
+						<Editor Text="{Binding Model.StoragePosition}" />
+					</views:Card>
+
+					<views:Card HeaderTitle="Mô tả">
+						<Editor Text="{Binding Model.Description}" />
+					</views:Card>
+				</VerticalStackLayout>
+			</ScrollView>
+		</RefreshView>
+	</Grid>
+</ContentPage>

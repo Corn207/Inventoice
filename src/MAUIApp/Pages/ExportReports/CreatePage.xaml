@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.ExportReports.CreatePage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:productmodels="clr-namespace:MAUIApp.Models.Products"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.ExportReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:CreateViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="ModalAnimated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar
+			Title="Tạo phiếu xuất"
+			BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}"
+			Style="{StaticResource CloseNavigationBar}">
+			<Button Command="{Binding SaveCommand}" Style="{StaticResource SaveButton}" />
+		</views:NavigationBar>
+
+
+		<ScrollView Grid.Row="1">
+			<VerticalStackLayout Spacing="16">
+				<Border Style="{StaticResource ValueFieldCardBorder}">
+					<VerticalStackLayout>
+						<views:ValueField Title="Tổng số hàng" Value="{Binding TotalItem}" />
+						<views:Separator />
+						<views:ValueField Title="Tổng sản phẩm" Value="{Binding TotalProduct}" />
+					</VerticalStackLayout>
+				</Border>
+
+				<Border Style="{StaticResource BaseCardBorder}">
+					<VerticalStackLayout>
+						<views:AddClearBar
+							AddCommand="{Static baseviewmodels:StaticViewModel.ToProductSearchPageCommand}"
+							AddCommandParameter="{Static viewmodels:CreateViewModel.QueryAddProduct}"
+							ClearCommand="{Binding ClearItemsCommand}" />
+						<views:Separator />
+						<ListView
+							HasUnevenRows="True"
+							ItemsSource="{Binding Items, Mode=OneTime}"
+							SelectionMode="None">
+							<ListView.Behaviors>
+								<toolkit:EventToCommandBehavior
+									Command="{Binding OpenEditItemPopupCommand}"
+									EventArgsConverter="{StaticResource ItemTappedEventArgsConverter}"
+									EventName="ItemTapped" />
+							</ListView.Behaviors>
+
+							<ListView.ItemTemplate>
+								<DataTemplate x:DataType="{x:Type productmodels:ProductItem}">
+									<ViewCell>
+										<SwipeView Threshold="100">
+											<SwipeView.LeftItems>
+												<SwipeItems Mode="Execute">
+													<SwipeItem
+														BackgroundColor="{StaticResource Blue}"
+														Command="{Static baseviewmodels:StaticViewModel.ToProductDetailsPageCommand}"
+														CommandParameter="{Binding Id}"
+														IconImageSource="info.png"
+														Text="Info" />
+												</SwipeItems>
+											</SwipeView.LeftItems>
+											<SwipeView.RightItems>
+												<SwipeItems Mode="Execute">
+													<SwipeItem
+														BackgroundColor="{StaticResource Red}"
+														Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CreateViewModel}}, Path=RemoveItemCommand}"
+														CommandParameter="{Binding}"
+														IconImageSource="delete.png"
+														Text="Xóa" />
+												</SwipeItems>
+											</SwipeView.RightItems>
+
+											<views:ProductItemView
+												Name="{Binding Name}"
+												Barcode="{Binding Barcode}"
+												ControlTemplate="{StaticResource ProductItemViewQuantityInStockControlTemplate}"
+												InStock="{Binding InStock}"
+												Quantity="{Binding Quantity}" />
+										</SwipeView>
+									</ViewCell>
+								</DataTemplate>
+							</ListView.ItemTemplate>
+						</ListView>
+					</VerticalStackLayout>
+				</Border>
+			</VerticalStackLayout>
+		</ScrollView>
+	</Grid>
+</ContentPage>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="MAUIApp.Views.BarcodeEntry"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels"
+    x:Name="this">
+    <Grid BindingContext="{x:Reference this}">
+        <Entry
+            FontSize="Body"
+            Placeholder="Tên hoặc mã vạch sản phẩm"
+            Text="{Binding Text}" />
+        <ImageButton
+            Margin="0,0,0,4"
+            Command="{Static viewmodels:StaticViewModel.ToBarcodeScannerPageCommand}"
+            CommandParameter="{Binding ReturnId}"
+            HeightRequest="24"
+            HorizontalOptions="End"
+            Source="barcode_scanner.png"
+            VerticalOptions="Center">
+            <ImageButton.Behaviors>
+                <toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+            </ImageButton.Behaviors>
+        </ImageButton>
+    </Grid>
+</ContentView>

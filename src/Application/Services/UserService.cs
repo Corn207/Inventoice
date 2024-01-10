@@ -38,7 +38,7 @@ public class UserService(IUserRepository userRepository)
 		return await userRepository.GetAsync(id);
 	}
 
-	public async Task<string> CreateAsync(UserCreate create)
+	public async Task<string> CreateAsync(UserCreateUpdate create)
 	{
 		var entity = UserMapper.ToEntity(create);
 		await userRepository.CreateAsync(entity);
@@ -53,7 +53,7 @@ public class UserService(IUserRepository userRepository)
 	/// <param name="update"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidIdException"></exception>
-	public async Task ReplaceAsync(string id, UserUpdate update)
+	public async Task ReplaceAsync(string id, UserCreateUpdate update)
 	{
 		var entity = await userRepository.GetAsync(id)
 			?? throw new InvalidIdException("UserId was not found.", [id]);

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+	x:Class="MAUIApp.Views.AuditReports.TotalBarView"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	x:Name="this">
+	<Grid
+		BackgroundColor="{StaticResource BackgroundPrimary}"
+		BindingContext="{x:Reference this}"
+		ColumnDefinitions="2*, 1*, 1*, 0.75*"
+		RowDefinitions="Auto, Auto"
+		RowSpacing="8">
+		<Grid.Resources>
+			<Style TargetType="{x:Type Label}">
+				<Setter Property="HorizontalOptions" Value="Center" />
+				<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+			</Style>
+		</Grid.Resources>
+
+		<Label
+			Grid.Row="0"
+			Grid.Column="0"
+			Margin="8,0,0,0"
+			HorizontalOptions="Start"
+			Text="Sản phẩm" />
+		<Label
+			Grid.Row="1"
+			Grid.Column="0"
+			Margin="8,0,0,0"
+			HorizontalOptions="Start"
+			Text="{Binding TotalProduct}" />
+
+		<Label
+			Grid.Row="0"
+			Grid.Column="1"
+			Text="Tồn kho" />
+		<Label
+			Grid.Row="1"
+			Grid.Column="1"
+			Text="{Binding TotalOriginal}" />
+
+		<Label
+			Grid.Row="0"
+			Grid.Column="2"
+			Text="Thực tế" />
+		<Label
+			Grid.Row="1"
+			Grid.Column="2"
+			Text="{Binding TotalAdjusted}"
+			TextColor="{StaticResource Blue}" />
+
+		<Label
+			Grid.Row="0"
+			Grid.Column="3"
+			Text="Lệch" />
+		<Label
+			Grid.Row="1"
+			Grid.Column="3"
+			Text="{Binding TotalDifference}"
+			TextColor="{Binding TotalDifference, Converter={StaticResource LongToIsPositiveNullableColorConverter}}" />
+	</Grid>
+</ContentView>

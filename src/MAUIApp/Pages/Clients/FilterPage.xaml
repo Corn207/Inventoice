@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MAUIApp.Pages.Clients.FilterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
+    xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Clients"
+    xmlns:views="clr-namespace:MAUIApp.Views"
+    x:DataType="{x:Type viewmodels:FilterViewModel}"
+    Background="{StaticResource BackgroundSecondary}"
+    Shell.NavBarIsVisible="False"
+    Shell.PresentationMode="ModalAnimated">
+
+    <Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+        <views:NavigationBar
+            Title="Lọc khách hàng"
+            BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}"
+            Style="{StaticResource CloseNavigationBar}">
+            <Button
+                Command="{Binding SearchCommand}"
+                Style="{StaticResource SaveButton}"
+                Text="Tìm kiếm" />
+        </views:NavigationBar>
+
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="16">
+                <views:Card HeaderTitle="Tìm kiếm">
+                    <Entry
+                        FontSize="Body"
+                        Placeholder="Tên hoặc số điện thoại"
+                        Text="{Binding Filter.NameOrPhonenumber}" />
+                </views:Card>
+                <views:FilterOrderBy
+                    AscendingTitle="A-Z"
+                    DescendingTitle="Z-A"
+                    OrderBy="{Binding Filter.OrderBy}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
