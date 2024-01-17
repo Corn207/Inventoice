@@ -1,6 +1,7 @@
 ﻿using Application.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Exceptions;
 
 namespace WebAPI.Middlewares;
 
@@ -26,8 +27,12 @@ public class ExceptionHandler : IExceptionHandler
 				details.Status = StatusCodes.Status400BadRequest;
 				details.Detail += "\nIds: " + string.Join(", ", ((OutOfStockException)exception).Ids);
 				break;
+			case InvalidClaimException:
 			case UnknownException:
 				details.Status = StatusCodes.Status500InternalServerError;
+				break;
+			case FormatException:
+				details.Status = StatusCodes.Status400BadRequest;
 				break;
 			default:
 				return false;
