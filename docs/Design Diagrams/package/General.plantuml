@@ -1,0 +1,41 @@
+@startuml Package
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+
+frame Client {
+    package "Ứng dụng\ndi động" as MobileApp {
+        package "Màn hình" as Views
+        package "Xử lí logic" as ViewModels
+        package "Mẫu API" as HttpServices
+    }
+}
+
+frame Server {
+    package "WebAPI" as WebAPI {
+        package "Presentation" as Presentation {
+            package "Các REST API" as Controllers
+        }
+        package "Application" as Application {
+            package "Xử lí logic" as Services
+            package "Interface\nTruy cập dữ liệu" as IRepositories
+        }
+        package "Infrastructure" as Infrastructure {
+            package "Truy cập dữ liệu" as Repositories
+        }
+        package "Domain" as Domain {
+            package "Thực thể" as Entities
+        }
+    }
+    database "Cơ sở dữ liệu\n(MongoDB)" as Database
+}
+
+Views ..> ViewModels
+ViewModels ..> HttpServices 
+HttpServices .l.> Controllers : "Gọi API"
+Controllers .down.> Services
+Services ..> IRepositories
+IRepositories ..> Entities
+IRepositories <|-down- Repositories
+Repositories .down.> Database : "Truy vấn"
+
+@enduml

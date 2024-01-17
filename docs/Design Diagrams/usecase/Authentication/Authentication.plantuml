@@ -1,0 +1,22 @@
+@startuml Authentication
+left to right direction
+
+actor Admin as "Quản trị viên"
+actor User as "Người dùng"
+actor Manager as "Quản lý"
+actor Employee as "Nhân viên"
+
+rectangle Authentication as "Xác thực" {
+    usecase Login as "Đăng nhập"
+    usecase Logout as "Đăng xuất"
+}
+
+Employee --|> User
+Manager --|> User
+
+Admin -- Login
+User -- Login
+
+Admin -- Logout
+User -- Logout
+@enduml

@@ -1,0 +1,22 @@
+@startuml ImportReportDELETESequence
+hide footbox
+
+actor "Frontend" as Client
+boundary "API Server" as Server
+control ImportReportsController
+participant ImportReportService
+participant ImportReportRepository
+database "Cơ sở dữ liệu" as Database
+
+Client -> Server ++ : DELETE api/ImportReports/{id}
+Server -> ImportReportsController ++ : Delete(string id)
+ImportReportsController --> ImportReportService ++ : Delete(string id)
+ImportReportService --> ImportReportRepository ++ : Delete(string id)
+ImportReportRepository --> Database ++ : Xóa dữ liệu
+Database --> ImportReportRepository -- : Trả về kết quả
+ImportReportRepository --> ImportReportService -- : return bool
+ImportReportService --> ImportReportsController -- : return bool
+ImportReportsController --> Server -- : return bool
+Server --> Client -- : 204 OK
+
+@enduml

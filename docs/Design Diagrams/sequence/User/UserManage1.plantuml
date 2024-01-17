@@ -1,0 +1,35 @@
+@startuml UserManage1
+hide footbox
+
+actor User as "Quản trị viên"
+boundary ListPage as "Trang danh sách"
+boundary DetailsPage as "Trang chi tiết"
+control API as "API\nNgười dùng"
+database Database as "CSDL\nNgười dùng"
+
+User -> ListPage ++ : Truy cập
+ListPage -> API ++ : Gửi yêu cầu tìm kiếm
+API -> Database ++ : Lấy danh sách
+Database --> API -- : Trả về danh sách
+API --> ListPage -- : Gửi phản hồi danh sách
+ListPage --> User -- : Hiện trang
+|||
+User -> ListPage ++ : Chọn người dùng
+ListPage -> DetailsPage --++ : Truy cập
+DetailsPage -> API ++ : Gửi yêu cầu\nlấy chi tiết
+API -> Database ++ : Lấy chi tiết
+Database --> API -- : Trả về chi tiết
+API --> DetailsPage -- : Gửi phản hồi\nchi tiết
+DetailsPage --> User -- : Hiện trang
+|||
+opt Reset mật khẩu
+    User -> DetailsPage ++ : Chọn nút\n'Reset mật khẩu'
+    DetailsPage -> API ++ : Gửi yêu cầu
+    API -> Database ++ : Cập nhật\nmật khẩu
+    Database --> API -- : Trả về kết quả
+    API --> DetailsPage -- : Gửi phản hồi
+    DetailsPage --> User -- : Thông báo mật khẩu mới
+    |||
+end
+
+@enduml

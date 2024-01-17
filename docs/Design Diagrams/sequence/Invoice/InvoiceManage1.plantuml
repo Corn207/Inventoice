@@ -1,0 +1,43 @@
+@startuml InvoiceManage1
+hide footbox
+
+actor User as "Nhân viên,\nQuản lý"
+boundary ListPage as "Trang danh sách"
+boundary DetailsPage as "Trang chi tiết"
+boundary CreatePage as "Trang tạo"
+participant ProductSearch as "UC: Tìm kiếm\nsản phẩm"
+participant ClientSearch as "UC: Tìm kiếm\nkhách hàng"
+boundary EditItemPage as "Form sửa\nđơn vị"
+control API as "API\nhóa đơn"
+database Database as "CSDL\nhóa đơn"
+
+group Tạo phiếu
+    User -> ListPage ++ : Chọn nút 'Tạo'
+    ListPage -> CreatePage --++ : Truy cập
+    CreatePage --> User -- : Hiện trang
+    |||
+    User -> ProductSearch ++ : Chọn nút 'Thêm sản phẩm'
+    ProductSearch --> CreatePage --++ : Thêm\nsản phẩm
+    CreatePage --> User -- : Cập nhật trang
+    |||
+    User -> ClientSearch ++ : Chọn nút 'Khách hàng'
+    ClientSearch --> CreatePage --++ : Thêm khách hàng
+    CreatePage --> User -- : Cập nhật trang
+    |||
+    User -> EditItemPage ++ : Chọn sản phẩm
+    EditItemPage --> User -- : Hiện form
+    User -> EditItemPage ++ : Chỉnh số liệu
+    EditItemPage --> CreatePage --++ : Cập nhật dữ liệu
+    CreatePage --> User -- : Cập nhật trang
+    |||
+    User -> CreatePage ++ : Điền thông tin và Chọn nút 'Lưu'
+    CreatePage -> API ++ : Gửi yêu cầu
+    API -> Database ++ : Tạo dữ liệu
+    Database --> API -- : Trả về kết quả
+    API --> CreatePage -- : Gửi phản hồi
+    CreatePage --> DetailsPage --++ : Truy cập
+    DetailsPage --> User -- : Hiện trang
+    |||
+end
+
+@enduml

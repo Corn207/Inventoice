@@ -1,0 +1,60 @@
+@startuml Views
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package Views {
+    package Products {
+        class ListPage
+        class FilterPage
+        class DetailsPage
+        class CreateUpdatePage
+        class SearchPage
+        class BarcodeScannerPage
+    }
+    package Clients {
+        class ListPage
+        class FilterPage
+        class DetailsPage
+        class CreateUpdatePage
+        class SearchPage
+    }
+    package AuditReports {
+        class ListPage
+        class FilterPage
+        class DetailsPage
+        class CreatePage
+        class EditItemPage
+    }
+    package ImportReports {
+        class ListPage
+        class FilterPage
+        class DetailsPage
+        class CreatePage
+        class EditItemPage
+    }
+    package ExportReports {
+        class ListPage
+        class FilterPage
+        class DetailsPage
+        class CreatePage
+        class EditItemPage
+    }
+    package Invoices {
+        class ListPage
+        class FilterPage
+        class DetailsPage
+        class CreatePage
+        class EditItemPage
+    }
+    package Users {
+        class ListPage
+        class DetailsPage
+        class CreatePage
+        class EditItemPage
+    }
+    class LoginPage
+    class HomePage
+    class MorePage
+}
+@enduml

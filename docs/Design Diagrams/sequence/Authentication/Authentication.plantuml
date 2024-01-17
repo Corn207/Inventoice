@@ -1,0 +1,41 @@
+@startuml Authentication
+hide footbox
+
+actor User as "Người dùng"
+boundary LoginPage as "Trang đăng nhập"
+boundary MainPage as "Màn hình chính"
+control API as "API\nXác thực"
+database Database as "CSDL\nNgười dùng"
+
+group Login
+    User -> LoginPage ++ : Truy cập
+    LoginPage --> User -- : Hiện trang
+    User -> LoginPage ++ : Điền thông tin đăng nhập\nBấm 'Đăng nhập'
+    LoginPage -> API ++ : Gửi yêu cầu xác thực
+    API -> Database ++ : Lấy thông tin\nngười dùng
+    Database --> API -- : Trả về thông tin
+    API -> API : Kiểm tra thông tin\nngười dùng
+    API --> LoginPage -- : Gửi phản hồi xác thực
+
+    alt Đăng nhập thành công
+        LoginPage --> MainPage ++ : Truy cập
+        MainPage --> User -- : Hiện trang
+        |||
+    else Đăng nhập thất bại
+        LoginPage --> User -- : Thông báo lỗi
+    end
+end
+
+group Đăng xuất
+    User -> MainPage ++ : Bấm 'Đăng xuất'
+    MainPage -> API ++ : Gửi yêu cầu\nthông báo
+    API -> Database ++ : Xóa token xác thực
+    Database --> API -- : Trả về kết quả
+    API --> MainPage -- : Gửi phản hồi
+    MainPage -> MainPage : Xóa token xác thực
+    MainPage --> LoginPage --++ : Truy cập
+    LoginPage --> User -- : Hiện trang
+    |||
+end
+
+@enduml

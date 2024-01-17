@@ -1,0 +1,15 @@
+@startuml HttpServices
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package HttpServices {
+    class ProductService
+    class ClientService
+    class AuditReportService
+    class ImportReportService
+    class ExportReportService
+    class IdentityService
+    class UserService
+}
+@enduml

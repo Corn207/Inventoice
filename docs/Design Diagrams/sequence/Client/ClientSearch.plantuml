@@ -1,0 +1,19 @@
+@startuml ClientSearch
+skinparam dpi 200
+hide footbox
+
+actor User as "Người dùng"
+boundary SearchPage as "Trang tìm kiếm"
+control API as "API\nKhách hàng"
+database Database as "CSDL\nKhách hàng"
+
+[-> SearchPage ++ : Truy cập
+SearchPage --> User -- : Hiện trang
+User -> SearchPage ++ : Nhập từ khóa
+SearchPage -> API ++ : Gửi yêu cầu\ntìm kiếm
+API -> Database ++ : Truy vấn
+Database --> API -- : Trả về kết quả
+API --> SearchPage -- : Gửi phản hồi
+[<-- SearchPage -- : Trả về kết quả
+
+@enduml

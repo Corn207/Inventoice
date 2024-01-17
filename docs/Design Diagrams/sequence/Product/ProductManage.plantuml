@@ -1,0 +1,49 @@
+@startuml ProductManage
+hide footbox
+
+actor User as "Quản lý"
+boundary ListPage as "Trang danh sách"
+boundary DetailsPage as "Trang chi tiết"
+boundary CreateUpdatePage as "Trang tạo/sửa"
+control API as "API\nSản phẩm"
+database Database as "CSDL\nSản phẩm"
+
+group Tạo/sửa
+    alt Sửa
+        User -> DetailsPage ++ : Truy cập
+        DetailsPage --> User -- : Hiện trang
+        User -> DetailsPage ++ : Chọn nút 'Sửa'
+        DetailsPage -> CreateUpdatePage --++ : Điền thông tin\ncó sẵn
+        CreateUpdatePage --> User -- : Hiện trang
+        |||
+    else Tạo
+        User -> ListPage ++ : Bấm 'Tạo'
+        ListPage -> CreateUpdatePage --++ : Tạo dữ liệu mới
+        CreateUpdatePage --> User -- : Hiện trang
+        |||
+    end
+
+    User -> CreateUpdatePage ++ : Điền thông tin và Chọn nút 'Lưu'
+    CreateUpdatePage -> API ++ : Gửi yêu cầu
+    API -> Database ++ : Tạo/sửa dữ liệu
+    Database --> API -- : Trả về kết quả
+    API --> CreateUpdatePage -- : Gửi phản hồi
+    CreateUpdatePage --> DetailsPage --++ : Truy cập
+    DetailsPage --> User -- : Hiện trang
+    |||
+end
+
+group Xóa
+    User -> DetailsPage ++ : Truy cập
+    DetailsPage --> User -- : Hiện trang
+    User -> DetailsPage ++ : Chọn nút 'Xóa'
+    DetailsPage -> API ++ : Gửi yêu cầu
+    API -> Database ++ : Xóa dữ liệu
+    Database --> API -- : Trả về kết quả
+    API --> DetailsPage -- : Gửi phản hồi
+    DetailsPage --> ListPage --++ : Truy cập
+    ListPage --> User -- : Hiện trang
+    |||
+end
+
+@enduml

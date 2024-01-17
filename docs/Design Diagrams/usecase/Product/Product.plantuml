@@ -1,0 +1,34 @@
+@startuml Product
+left to right direction
+
+actor User as "Người dùng"
+actor Manager as "Quản lý"
+actor Employee as "Nhân viên"
+
+rectangle Product as "Sản phẩm" {
+    usecase ProductSearch as "Tìm kiếm sản phẩm"
+    usecase ProductSearchByName as "Tìm bằng tên"
+    usecase ProductSearchByBarcode as "Tìm bằng quét mã hàng"
+
+    usecase ProductFilter as "Lọc và xem sản phẩm"
+
+    usecase ProductManage as "Quản lý sản phẩm"
+    usecase ProductCreate as "Thêm sản phẩm"
+    usecase ProductEdit as "Sửa sản phẩm"
+    usecase ProductDelete as "Xóa sản phẩm"
+}
+
+Employee -r-|> User
+Manager -l-|> User
+
+Manager -- ProductManage
+ProductManage <|-- ProductCreate
+ProductManage <|-- ProductEdit
+ProductManage <|-- ProductDelete
+
+User -- ProductFilter
+
+User -- ProductSearch
+ProductSearch <|-- ProductSearchByName
+ProductSearch <|-- ProductSearchByBarcode
+@enduml

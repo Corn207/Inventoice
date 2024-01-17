@@ -1,0 +1,27 @@
+@startuml Application
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package Application {
+    package Services {
+        class AuditReportService
+        class ClientService
+        class ExportReportService
+        class ImportReportService
+        class InvoiceService
+        class ProductService
+        class UserService
+    }
+
+    package IRepositories {
+        class IAuditReportRepositories
+        class IClientRepositories
+        class IExportReportRepositories
+        class IImportReportRepositories
+        class IInvoiceRepositories
+        class IProductRepositories
+        class IUserRepositories
+    }
+}
+@enduml

@@ -1,0 +1,22 @@
+@startuml ImportReportGETSequence
+hide footbox
+
+actor "Frontend" as Client
+boundary "API Server" as Server
+control ImportReportsController
+participant ImportReportService
+participant ImportReportRepository
+database "Cơ sở dữ liệu" as Database
+
+Client -> Server ++ : GET api/ImportReports/{id}
+Server -> ImportReportsController ++ : Get(string id)
+ImportReportsController --> ImportReportService ++ : Get(string id)
+ImportReportService --> ImportReportRepository ++ : Get(string id)
+ImportReportRepository --> Database ++ : Truy vấn lấy dữ liệu
+Database --> ImportReportRepository -- : Trả về dữ liệu
+ImportReportRepository --> ImportReportService -- : return ImportReport
+ImportReportService --> ImportReportsController -- : return ImportReport
+ImportReportsController --> Server -- : return ImportReport
+Server --> Client -- : 200 OK\n{\n"Id": "string",\n"BuyingPrice":uint\n...\n}
+
+@enduml

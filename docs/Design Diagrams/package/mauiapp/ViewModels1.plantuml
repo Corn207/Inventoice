@@ -1,0 +1,32 @@
+@startuml ViewModels1
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package ViewModels {
+    package Products {
+        class ListViewModel
+        class FilterViewModel
+        class DetailsViewModel
+        class CreateUpdateViewModel
+        class SearchViewModel
+        class BarcodeScannerViewModel
+    }
+    package Clients {
+        class ListViewModel
+        class FilterViewModel
+        class DetailsViewModel
+        class CreateUpdateViewModel
+        class SearchViewModel
+    }
+    package Users {
+        class ListViewModel
+        class DetailsViewModel
+        class CreateViewModel
+        class EditItemViewModel
+    }
+    class LoginViewModel
+    class HomeViewModel
+    class MoreViewModel
+}
+@enduml

@@ -1,0 +1,17 @@
+@startuml Domain
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package Domain {
+    package Entities {
+        class AuditReport
+        class Client
+        class ExportReport
+        class ImportReport
+        class Invoice
+        class Product
+        class User
+    }
+}
+@enduml

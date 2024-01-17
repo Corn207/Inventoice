@@ -1,0 +1,17 @@
+@startuml Infrastructure
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package Infrastructure {
+    package Repositories {
+        class AuditReportRepositories
+        class ClientRepositories
+        class ExportReportRepositories
+        class ImportReportRepositories
+        class InvoiceRepositories
+        class ProductRepositories
+        class UserRepositories
+    }
+}
+@enduml

@@ -1,0 +1,41 @@
+@startuml InvoiceManage2
+hide footbox
+
+actor User as "Nhân viên,\nQuản lý"
+boundary ListPage as "Trang danh sách"
+boundary DetailsPage as "Trang chi tiết"
+control API as "API\nhóa đơn"
+database Database as "CSDL\nhóa đơn"
+
+group Thanh toán / Hủy / Xóa phiếu
+    User -> DetailsPage ++ : Truy cập
+    DetailsPage --> User -- : Hiện trang
+
+    alt Thanh toán
+        User -> DetailsPage ++ : Chọn nút 'Thanh toán'
+        DetailsPage -> API ++ : Gửi yêu cầu
+        API -> Database ++ : Cập nhật\ndữ liệu
+        Database --> API -- : Trả về kết quả
+        API --> DetailsPage -- : Gửi phản hồi
+        DetailsPage --> User -- : Cập nhật trang
+        |||
+    else Hủy phiếu
+        User -> DetailsPage ++ : Chọn nút 'Hủy'
+        DetailsPage -> API ++ : Gửi yêu cầu
+        API -> Database ++ : Cập nhật\ndữ liệu
+        Database --> API -- : Trả về kết quả
+        API --> DetailsPage -- : Gửi phản hồi
+        DetailsPage --> User -- : Cập nhật trang
+        |||
+    else Xóa phiếu
+        User -> DetailsPage ++ : Chọn nút 'Xóa'
+        DetailsPage -> API ++ : Gửi yêu cầu
+        API -> Database ++ : Xóa dữ liệu
+        Database --> API -- : Trả về kết quả
+        API --> DetailsPage -- : Gửi phản hồi
+        DetailsPage --> ListPage --++ : Truy cập
+        ListPage --> User -- : Hiện trang
+    end
+end
+
+@enduml

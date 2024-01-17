@@ -1,0 +1,37 @@
+@startuml ProductFilter
+hide footbox
+
+actor User as "Người dùng"
+boundary FilterPage as "Form lọc"
+boundary ListPage as "Trang danh sách"
+boundary DetailsPage as "Trang chi tiết"
+control API as "API\nSản phẩm"
+database Database as "CSDL\nSản phẩm"
+
+opt Lọc
+    User -> FilterPage ++ : Truy cập
+    FilterPage --> User -- : Hiện trang
+    User -> FilterPage ++ : Điền thông tin lọc\nBấm 'Tìm kiếm'
+    FilterPage --> ListPage --++ : Tạo bộ lọc
+    |||
+end
+
+User -> ListPage ++ : Truy cập
+ListPage -> API ++ : Gửi yêu cầu tìm kiếm
+API -> Database ++ : Lấy danh sách
+Database --> API -- : Trả về danh sách
+API --> ListPage -- : Gửi phản hồi danh sách
+ListPage --> User -- : Hiện trang
+deactivate ListPage
+
+|||
+
+User -> ListPage ++ : Chọn sản phẩm
+ListPage -> DetailsPage --++ : Truy cập
+DetailsPage -> API ++ : Gửi yêu cầu\nlấy chi tiết
+API -> Database ++ : Lấy chi tiết
+Database --> API -- : Trả về chi tiết
+API --> DetailsPage -- : Gửi phản hồi\nchi tiết
+DetailsPage --> User -- : Hiện trang
+
+@enduml

@@ -1,0 +1,113 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+% Lưu ý: \textbf{Trước khi viết ĐATN, sinh viên cần đọc kỹ hướng dẫn và quy định chi tiết} về cách viết ĐATN trong Phụ lục A. Sinh viên tuân theo mẫu tài liệu này để viết báo cáo đồ án tốt nghiệp, vì tài liệu này đã được căn chỉnh, chỉnh sửa theo đúng chuẩn báo cáo kỹ thuật đồ án tốt nghiệp (ISO 7144:1986). Sinh viên viết trực tiếp vào file này, chỉ chỉnh sửa nội dung, và không viết trên file mới.
+
+% \textbf{Khi đóng quyển ĐATN}, sinh viên cần lưu ý tuân thủ hướng dẫn ở phụ lục A.9
+
+% \textbf{SV cần đặc biệt lưu ý cách hành văn}. Mỗi đoạn văn không được quá dài và cần có ý tứ rõ ràng, bao gồm duy nhất một ý chính và các ý phân tích bổ trợ để làm rõ hơn ý chính. Các câu văn trong đoạn phải đầy đủ chủ ngữ vị ngữ, cùng hướng đến chủ đề chung. Câu sau phải liên kết với câu trước, đoạn sau liên kết với đoạn trước. Trong văn phong khoa học, sinh viên không được dùng từ trong văn nói, không dùng các từ phóng đại, thái quá, các từ thiếu khách quan, thiên về cảm xúc, về quan điểm cá nhân như “tuyệt vời”, “cực hay”, “cực kỳ hữu ích”, v.v. Các câu văn cần được tối ưu hóa, đảm bảo rất khó để thể thêm hoặc bớt đi được dù chỉ một từ. Cách diễn đạt cần ngắn gọn, súc tích, không dài dòng.
+
+% Mẫu ĐATN này được thiết kế phù hợp nhất với đa số các đề tài xây dựng phần mềm ứng dụng. Với các dạng đề tài khác (giải pháp, nghiên cứu, phần mềm đặc thù, v.v.), sinh viên dựa trên cấu trúc và hướng dẫn của báo cáo này để đề xuất và trao đổi với giáo viên hướng dẫn để thiết kế khung báo cáo đồ án cho phù hợp. Sinh viên lưu ý \textbf{trong mọi trường hợp, SV luôn phải sử dụng định dạng báo cáo này, và phải đọc kỹ toàn bộ các hướng dẫn từ đầu tới cuối.} Các hướng dẫn không chỉ áp dụng riêng cho đề tài ứng dụng, mà còn phù hợp với các dạng đề tài khác. Ngoài ra, trong mẫu ĐATN này đã được tích hợp một số hướng dẫn dành riêng cho đề tài nghiên cứu.
+
+% Chương 1 có độ dài từ 3 đến 6 trang với các nội dung sau đây
+
+\section{Đặt vấn đề}
+\label{section:1.1}
+% Khi đặt vấn đề, sinh viên cần làm nổi bật mức độ cấp thiết, tầm quan trọng và/hoặc quy mô của bài toán của mình.
+
+% Gợi ý cách trình bày cho sinh viên: Xuất phát từ tình hình thực tế gì, dẫn đến vấn đề hoặc bài toán gì. Vấn đề hoặc bài toán đó, nếu được giải quyết, đem lại lợi ích gì, cho những ai, còn có thể được áp dụng vào các lĩnh vực khác nữa không. Sinh viên cần lưu ý phần này chỉ trình bày vấn đề, tuyệt đối không trình bày giải pháp.
+Kinh doanh có thể được coi là một trong những hoạt động quan trọng nhất của con người. Từ những năm đầu của thời kỳ công nghiệp, chúng đã trở thành một trong những ngành nghề phát triển mạnh nhất, và đóng góp rất lớn vào sự phát triển của xã hội. Với sự phát triển của khoa học công nghệ, kinh doanh cũng dần được cải tiến, đưa vào sử dụng các công nghệ mới để tối ưu hóa quy trình và tăng hiệu quả. Từ việc sử dụng các máy móc để thay thế lao động thủ công, đến việc sử dụng các phần mềm để quản lý và vận hành, công nghệ đã đóng một vai trò rất quan trọng trong việc phát triển kinh doanh.
+
+Quy mô hoạt động kinh doanh có thể được chia thành ba loại: lớn, vừa và nhỏ. Các doanh nghiệp lớn thường có quy mô hoạt động rộng lớn, với nhiều chi nhánh, nhiều nhân viên, và nhiều khách hàng. Các doanh nghiệp vừa và nhỏ thường có quy mô hoạt động nhỏ hơn, với ít nhân viên và ít khách hàng hơn. Tuy nhiên, các doanh nghiệp vừa và nhỏ lại chiếm phần lớn số lượng so với các doanh nghiệp lớn. Vì vậy, việc quản lý và vận hành các doanh nghiệp vừa và nhỏ là một vấn đề rất quan trọng, và cần được đầu tư nghiên cứu và phát triển.
+
+Bản thân tôi đang sống trong một hộ kinh doanh nhỏ trong lĩnh vực bán buôn bán lẻ. Tôi đã nhận thấy rằng, việc quản lý và vận hành một cửa hàng nhỏ là một vấn đề rất khó khăn. Với một cửa hàng nhỏ, việc quản lý hàng hóa, hóa đơn, và tồn kho là một việc rất quan trọng, nhưng lại có rất nhiều trở ngại.
+
+Không phải mặt hàng nào cũng được bán hết, biến động thị trường cũng tác động rất nhiều vào giá cả của chúng và độ ưa chuộng của khách hàng. Phải có giải pháp để người quản lý có thể theo dõi và cập nhật giá cả của hàng hóa một cách nhanh chóng và thuận tiện. Sự quyết định vào giá cả của hàng hóa không nên dựa trên cảm tính, mà phải dựa trên các con số thống kê và phân tích. Từ những hóa đơn bán hàng, người quản lý có thể phân tích được các mặt hàng bán chạy. Từ đó, họ có thể đưa ra các quyết định về việc nhập thêm hàng hóa, hay giảm giá các mặt hàng đó để tăng doanh số bán hàng.
+
+Và khi nhắc đến số lượng của hàng hóa, điều không tránh khỏi là việc chúng có thể bị hết hạn sử dụng, hay hỏng hóc trong quá trình bảo quản, lưu trữ khiến số lượng tồn kho không còn chính xác nữa. Việc theo dõi số lượng tồn kho của hàng hóa là một việc rất quan trọng, nhưng lại rất khó khăn. Người quản lý phải thường xuyên kiểm tra số lượng tồn kho của hàng hóa, và cập nhật chúng vào các giấy tờ chi chép. Điều này dẫn đến việc mất nhiều thời gian, và có thể dẫn đến sai sót. Ngoài ra, việc theo dõi số lượng tồn kho cũng là một thước đo để người quản lý nắm bắt được dòng tiền trong cửa hàng. Nếu số lượng tồn kho quá nhiều, người quản lý có thể đưa ra quyết định giảm giá để bán hết hàng hóa, và ngược lại.
+
+Giấy tờ, chúng là phương tiện ghi chép của con người lâu đời nhất. Từ khi con người bắt đầu sử dụng chúng, giấy tờ đã trở thành một phần không thể thiếu trong cuộc sống. Trong kinh doanh, từ việc ghi chép các hóa đơn bán hàng, đến việc ghi chép các thông tin cá nhân của khách hàng khiến chúng là một công cụ rất tất yếu. Song chúng lại có những hạn chế của nó. Giấy tờ có thể bị thất lạc, bị hư hỏng, và có thể bị mất bởi thời gian. Vì vậy, việc lưu trữ giấy tờ là một vấn đề rất quan trọng. Giấy tờ có thể rất nhiều, nếu không được lưu trữ một cách khoa học, việc không thể truy xuất được thông tin trong giấy tờ đó là không thể. Ngoài ra, việc lưu trữ chúng cũng là một việc tốn kém. Giấy tờ cần được lưu trữ trong một kho lưu trữ, và chỉ có thể truy cập tại một chỗ, kèm với cần sự quản lý và bảo quản nghiêm ngặt. Điều này dẫn đến việc tốn kém về chi phí, và không thể truy cập được thông tin bất cứ lúc nào.
+
+Từ những trở ngại trên, nếu hộ kinh doanh đó quyết định mở rộng quy mô, thì họ sẽ cần thêm nhân lực. Và khi đó, trở ngại lớn nhất với họ là việc nhân viên mới mất bao lâu để quen việc, ghi nhớ được vị trí của hàng hóa cũng như giá cả và số lượng của chúng. Điều này dẫn đến việc họ phải đầu tư thêm nhiều thời gian và công sức để đào tạo nhân viên mới, và có thể sẽ mất nhiều thời gian hơn để nhân viên mới có thể làm việc hiệu quả nếu không có một quy chuẩn trong quá trình hoạt động kinh doanh.
+
+Vì quy mô hoạt động nhỏ, việc sử dụng các phần mềm quản lý kinh doanh trong các đại lí lớn là không khả thi. Các phần mềm đó thường có quy trình phức tạp, và cần nhiều người để vận hành. Vì vậy, việc sử dụng các phần mềm đó sẽ làm tăng chi phí, và không đảm bảo hiệu quả. Đặc biệt là rào cản công nghệ cũng là một trong những trở ngại lớn nhất nếu hộ kinh doanh đó gồm những người lớn tuổi. Họ không thể sử dụng các thiết bị công nghệ mới một cách hiệu quả, và việc sử dụng các phần mềm quản lý kinh doanh sẽ làm cho họ cảm thấy khó khăn và không thích thú.
+
+
+\section{Mục tiêu và phạm vi đề tài}
+\label{section:1.2}
+% Sinh viên trước tiên cần trình bày tổng quan các kết quả của các nghiên cứu hiện nay cho bài toán giới thiệu ở phần \ref{section:1.1} (đối với đề tài nghiên cứu), hoặc về các sản phẩm hiện tại/về nhu cầu của người dùng (đối với đề tài ứng dụng). Tiếp đến, sinh viên tiến hành so sánh và đánh giá tổng quan các sản phẩm/nghiên cứu này.
+
+% Dựa trên các phân tích và đánh giá ở trên, sinh viên khái quát lại các hạn chế hiện tại đang gặp phải. Trên cơ sở đó, sinh viên sẽ hướng tới giải quyết vấn đề cụ thể gì, khắc phục hạn chế gì, phát triển phần mềm \textbf{có các chức năng chính gì}, tạo nên đột phá gì, v.v.
+
+% Trong phần này, sinh viên lưu ý chỉ trình bày tổng quan, không đi vào chi tiết của vấn đề hoặc giải pháp. Nội dung chi tiết sẽ được trình bày trong các chương tiếp theo, đặc biệt là trong Chương 5.
+Khi được hỏi về nhu cầu của người dùng, họ đều muốn giảm thiểu công việc quản lý thủ công bằng giấy tờ. Và khi sống trong thời đại công nghệ số 4.0 này, họ cũng mong muốn được sử dụng các thiết bị công nghệ hỗ trợ trong hoạt động kinh doanh. Dẫn tới, họ cũng đâu đó biết một hai chữ về phần mềm quản lí kinh doanh. Tuy nhiên, bởi vì quy mô của họ không lớn, kèm thêm nhiều người không được đào tạo chuyên sâu về công nghệ hay không trải qua các trường lớp khác nhau, họ khó có thể sử dụng các phần mềm quản lí kinh doanh hiện tại. Họ cũng không có nhiều thời gian để tìm hiểu và học cách sử dụng các phần mềm đó. Và vì vậy, họ vẫn tiếp tục sử dụng các phương pháp quản lý thủ công bằng giấy tờ.
+
+Để tìm giải pháp cho các trở ngại trên, họ đều mong muốn một phần mềm quản lý kinh doanh có các tính năng đơn giản, dễ sử dụng, dễ triển khai, tiết kiệm chi phí. Tốt hơn nữa, họ muốn dễ dàng sử dụng ngay trên các thiết bị công nghệ thông minh như điện thoại, máy tính bảng, v.v. Điều này sẽ giúp họ tiết kiệm được thời gian và công sức, và có thể tập trung vào các hoạt động kinh doanh chính. Đồng thời, họ có thể chia sẻ được thông tin hoạt động kinh doanh với các thành viên. Điều này giúp ích rất nhiều trong việc vận hàng cũng như giúp nhân viên mới có thể bắt kịp được nhịp độ của công việc. Khả năng truy cập từ mọi nơi mọi lúc cũng khiến họ mang được công việc theo bên mình, và có thể giải quyết các vấn đề nhanh chóng.
+
+Khi đi tìm hiểu về các phần mềm quản lý hóa đơn, tồn kho hiện có. Tôi nhận thấy được rằng, các phần mềm đó đều có quy trình phức tạp, phù hợp hơn cho các chuỗi đại lí lớn. Và đặc biệt, vì đối tượng khách hàng của các phần mềm đó là các tổ chức có lợi nhuận lớn có thể đầu tư cho chi phí vận hành cùng với đội ngũ nhân viên có chuyên môn cao, nên giá thành của các phần mềm đó cũng rất cao. Không những thế, các phần mềm đó được tích hợp quá nhiều chức năng nâng cao mà hộ kinh doanh vừa và nhỏ không cần thiết dùng tới. Với quy mô của các phần mềm này, chúng đòi hỏi khả năng xử lí của thiết bị chạy chúng cũng rất cao, khiến nền tảng của thiết bị hay giới hạn ở máy tính. Điều này chứng tỏ thị trường này còn thiếu sự đa dạng nhắm tới các kiểu hình kinh doanh khác nhau.
+
+Dựa trên các phân tích và đánh giá ở trên, một ý tưởng đã nảy sáng lên. Tại sao không phát triển một ứng dụng quản lí hóa đơn, tồn kho dành cho các hộ kinh doanh vừa và nhỏ? Ứng dụng này sẽ có các tính năng đơn giản dễ sử dụng, giao diện thân thiện với nhiều lứa tuổi. Đặc biệt, ứng dụng này có thể sử dụng được ngay trên điện thoại thông minh, thứ mà hầu như ai cũng có thể lôi từ trong túi ra sử dụng. Và chỉ cần có kết nối mạng, họ có thể truy cập vào ứng dụng bất cứ lúc nào, bất cứ nơi đâu. Với một hệ thống lưu trữ dữ liệu trên đám mây, họ không cần phải lo lắng về việc lưu trữ và bảo quản dữ liệu nữa. Ngoài ra, ứng dụng sẽ chỉ phân quyền hạn thành nhân viên và quản lí để họ có thể dễ dàng tin tưởng sử dụng mà không lo đến yếu tố bảo mật thông tin. Cuối cùng, ứng dụng này được phát triển dành riêng cho các hộ kinh doanh vừa và nhỏ, nên giá thành của nó sẽ rất thấp, phù hợp với túi tiền của họ.
+\vfill
+\break
+
+
+\section{Định hướng giải pháp}
+\label{section:1.3}
+% Từ việc xác định rõ nhiệm vụ cần giải quyết ở phần \ref{section:1.2}, sinh viên đề xuất định hướng giải pháp của mình theo trình tự sau: (i) Sinh viên trước tiên trình bày sẽ giải quyết vấn đề theo định hướng, phương pháp, thuật toán, kỹ thuật, hay công nghệ nào; Tiếp theo, (ii) sinh viên mô tả ngắn gọn giải pháp của mình là gì (khi đi theo định hướng/phương pháp nêu trên); và sau cùng, (iii) sinh viên trình bày đóng góp chính của đồ án là gì, kết quả đạt được là gì.
+
+% Sinh viên lưu ý không giải thích hoặc phân tích chi tiết công nghệ/thuật toán trong phần này. Sinh viên chỉ cần nêu tên định hướng công nghệ/thuật toán, mô tả ngắn gọn trong một đến hai câu và giải thích nhanh lý do lựa chọn.
+Khi thiết kế giải pháp cho các nhu cầu của các hộ kinh doanh vừa và nhỏ. Tôi để ý thấy nếu người dùng muốn hoàn toàn trọn vẹn điều hành hệ thống kèm với chi phí thấp thì mô hình Server-Client là một giải pháp tốt. Với mô hình này, người dùng sẽ có một máy chủ để lưu trữ dữ liệu, và các máy khách để truy cập vào dữ liệu đó. Họ có thể tận dụng các thiết bị cũ để làm máy chủ, và đối với máy khách, thì một ứng dụng di động là đủ. Điều này cũng giúp họ có thể dễ dàng mở rộng hệ thống khi cần thiết. Hơn nữa, dữ liệu của họ sẽ hoàn toàn họ kiểm soát và không lo lắng bên thứ ba nào cả.
+
+Suy nghĩ về hệ thống đang đề xuất, để quá trình phát triển được tốt và triển khai được nhanh chóng, việc lựa chọn các công nghệ phù hợp là rất quan trọng. Tiêu chí các công nghệ này sẽ quyết định chất lượng và tương lai của hệ thống, do đó cần phải lựa chọn một cách cẩn thận. Đầu tiên, cần lựa chọn một ngôn ngữ lập trình để phát triển ứng dụng và phát triển hệ thống dữ liệu. Ngôn ngữ lập trình sẽ quyết định cấu trúc của ứng dụng, và cũng quyết định được các công nghệ khác có thể được sử dụng hay không. Tiếp theo, tôi cần lựa chọn một hệ quản trị cơ sở dữ liệu để lưu trữ dữ liệu của ứng dụng. Sau đây là các tiêu chí mà tôi đã đặt ra để lựa chọn các công nghệ phù hợp:
+\begin{itemize}
+    \item \textbf{Đơn giản:} Các công nghệ được lựa chọn cần phải đơn giản, dễ sử dụng, và dễ triển khai. Điều này giúp quá trình phát triển và triển khai ứng dụng được trơn chu.
+    \item \textbf{Hiệu quả:} Các công nghệ được lựa chọn cần phải hiệu quả, và có thể đáp ứng được lưu lượng lớn dữ liệu. Điều đó sẽ giúp hệ thống hoạt động được tối ưu nhất với mức độ sử dụng tài nguyên thấp nhất. Dẫn tới chi phí vận hành hệ thống sẽ thấp nhất.
+    \item \textbf{Mở rộng:} Các công nghệ được lựa chọn cần phải có khả năng mở rộng. Dễ dàng đề xuất và cải tiến các tính năng mới, và có thể đáp ứng được nhu cầu của người dùng.
+    \item \textbf{Đa nền tảng:} Các công nghệ được lựa chọn cần phải có khả năng đa nền tảng. Nếu được, hệ thống dùng chung một công nghệ cho cả máy chủ và máy khách sẽ giảm thời gian phát triển đi rất nhiều. Mà độ tương thích giữa chúng cũng sẽ tốt hơn.
+    \item \textbf{Hệ sinh thái:} Các công nghệ được lựa chọn cần phải có một hệ sinh thái phát triển tốt. Điều này giúp tôi có thể phát triển một ứng dụng có thể dễ dàng mở rộng.
+    \item \textbf{Cộng đồng:} Các công nghệ được lựa chọn cần phải có một cộng đồng phát triển tốt. Một cộng đồng phát triển tốt sẽ giúp tôi có thể tìm kiếm được nhiều tài liệu hơn, và có thể nhận được sự giúp đỡ từ các thành viên trong cộng đồng.
+\end{itemize}
+
+Theo kinh nghiệm bản thân tôi tích lũy được, hệ sinh thái .NET (C\#) của Microsoft là một lựa chọn tốt. Hệ sinh thái này có framework là ASP.NET Core, một framework chuyên về phát triển ứng dụng web đã được chứng minh là hiệu quả và mở rộng. Ngoài ra, với hệ sinh thái này, tôi có thể phát triển một ứng dụng di động trên nền tảng Android và iOS, một ứng dụng máy tính trên nền tảng Windows, Linux, bằng framework .NET MAUI. Tính đa nền tảng, hiệu quả, và mở rộng của hệ sinh thái này đã được chứng minh qua nhiều năm phát triển. Ngoài ra, hệ sinh thái này cũng có một cộng đồng phát triển rất lớn, và có rất nhiều tài liệu hướng dẫn.
+
+Khi lựa chọn hệ cơ sở dữ liệu, thì khi làm việc với cấu trúc dữ liệu không ngừng thay đổi thì NoSQL là một lựa chọn tốt. Với NoSQL, tôi có thể lưu trữ dữ liệu dưới dạng tài liệu, và có thể thay đổi cấu trúc dữ liệu một cách dễ dàng. Điều này giúp tôi có thể phát triển ứng dụng một cách nhanh chóng, và có thể mở rộng ứng dụng một cách dễ dàng. Cụ thể, MongoDB là một hệ cơ sở dữ liệu NoSQL tôi đã lựa chọn. MongoDB có bộ tài liệu rất tường minh cùng với nhiều diễn đàn giải đáp. Ngoài ra, MongoDB cũng có một hệ quản trị cơ sở dữ liệu trực quan, giúp tôi có thể quản lý dữ liệu một cách dễ dàng.
+
+Cuối cùng, khi đóng gói sản phẩm lại cho người dùng sử dụng, việc hệ thống đề xuất này phải có khả năng hoạt động hầu hết trên mọi môi trường là rất quan trọng. Vì vậy, tôi đã lựa chọn Docker để đóng gói sản phẩm. Docker là một công nghệ ảo hóa, giúp tôi có thể đóng gói ứng dụng và triển khai dễ dàng, tiện lợi. Ngoài ra, Docker cũng có một hệ sinh thái phát triển tốt, và có một cộng đồng phát triển lớn, được tin cậy và được sử dụng rộng rãi.
+\vfill
+\break
+
+
+\section{Bố cục đồ án}
+\label{section:1.4}
+% Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau.
+
+% Chương 2 trình bày về v.v.
+
+% Trong Chương 3, em/tôi giới thiệu về v.v.
+
+% \textbf{Chú ý:} Sinh viên cần viết mô tả thành đoạn văn đầy đủ về nội dung chương. Tuyệt đối không viết ý hay gạch đầu dòng. Chương 1 không cần mô tả trong phần này.
+
+% Ví dụ tham khảo mô tả chương trong phần bố cục đồ án tốt nghiệp: Chương *** trình bày đóng góp chính của đồ án, đó là một nền tảng ABC cho phép khai phá và tích hợp nhiều nguồn dữ liệu, trong đó mỗi nguồn dữ liệu lại có định dạng đặc thù riêng. Nền tảng ABC được phát triển dựa trên khái niệm DEF, là các module ngữ nghĩa trợ giúp người dùng tìm kiếm, tích hợp và hiển thị trực quan dữ liệu theo mô hình cộng tác và mô hình phân tán.
+
+% \textbf{Chú ý:} Trong phần nội dung chính, mỗi chương của đồ án nên có phần Tổng quan và Kết chương. Hai phần này đều có định dạng văn bản “Normal”, sinh viên không cần tạo định dạng riêng, ví dụ như không in đậm/in nghiêng, không đóng khung, v.v.
+
+% Trong phần Tổng quan của chương N, sinh viên nên có sự liên kết với chương N-1 rồi trình bày sơ qua lý do có mặt của chương N và sự cần thiết của chương này trong đồ án. Sau đó giới thiệu những vấn đề sẽ trình bày trong chương này là gì, trong các đề mục lớn nào.
+
+% Ví dụ về phần Tổng quan: Chương 3 đã thảo luận về nguồn gốc ra đời, cơ sở lý thuyết và các nhiệm vụ chính của bài toán tích hợp dữ liệu. Chương 4 này sẽ trình bày chi tiết các công cụ tích hợp dữ liệu theo hướng tiếp cận “mashup”. Với mục đích và phạm vi của đề tài, sáu nhóm công cụ tích hợp dữ liệu chính được trình bày bao gồm: (i) nhóm công cụ ABC trong phần 4.1, (ii) nhóm công cụ DEF trong phần 4.2, nhóm công cụ GHK trong phần 4.3, v.v.
+
+% Trong phần Kết chương, sinh viên đưa ra một số kết luận quan trọng của chương. Những vấn đề mở ra trong Tổng quan cần được tóm tắt lại nội dung và cách giải quyết/thực hiện như thế nào. Sinh viên lưu ý không viết Kết chương giống hệt Tổng quan. Sau khi đọc phần Kết chương, người đọc sẽ nắm được sơ bộ nội dung và giải pháp cho các vấn đề đã trình bày trong chương. Trong Kết chương, Sinh viên nên có thêm câu liên kết tới chương tiếp theo.
+
+% Ví dụ về phần Kết chương: Chương này đã phân tích chi tiết sáu nhóm công cụ tích hợp dữ liệu. Nhóm công cụ ABC và DEF thích hợp với những bài toán tích hợp dữ liệu phạm vi nhỏ. Trong khi đó, nhóm công cụ GHK lại chứng tỏ thế mạnh của mình với những bài toán cần độ chính xác cao, v.v. Từ kết quả nghiên cứu và phân tích về sáu nhóm công cụ tích hợp dữ liệu này, tôi đã thực hiện phát triển phần mềm tự động bóc tách và tích hợp dữ liệu sử dụng nhóm công cụ GHK. Phần này được trình bày trong chương tiếp theo – Chương 5.
+Trong báo cáo đồ án tốt nghiệp này, bố cục sẽ được chia thành 6 chương:
+
+\textbf{Chương 2: Khảo sát và phân tích yêu cầu.} Chương này sẽ trình bày về các phương pháp khảo sát và phân tích yêu cầu của người dùng. Từ các kết quả thu được từ việc khảo sát kĩ lưỡng chức năng của hệ thống hiện có, tôi đã so sánh với yêu cầu người dùng và chỉ ra rõ những điểm mạnh và điểm yếu của hệ thống hiện có. Từ đó, tôi đưa ra được các yêu cầu cần thiết cho hệ thống mới.
+
+\textbf{Chương 3: Công nghệ sử dụng.} Chương này sẽ giới thiệu về các công nghệ được sử dụng và sự áp dụng của chúng trong thế giới nói chung và đồ án này nói riêng.
+
+\textbf{Chương 4: Thiết kế, triển khai và đánh giá hệ thống.} Chương này sẽ trình bày về sự quan trọng của việc lựa chọn kiến trúc hệ thống. Nó quyết định quy trình hệ thống tương tác các thành phần với nhau như thế nào cho hiệu quả. Sau đó, chương này sẽ chứa các thông tin về quá trình triển khai hệ thống, và đánh giá hiệu năng của hệ thống.
+
+\textbf{Chương 5: Các giải pháp và đóng góp nổi bật.} Chương này trình bày tất cả nội dung đóng góp mà tôi thấy tâm đắc nhất trong suốt thời gian thực hiện đồ án. Cũng như các giải pháp mà tôi đã đưa ra để giải quyết các vấn đề khó khăn trong quá trình phát triển ứng dụng.
+
+\textbf{Chương 6: Kết luận và hướng phát triển.} Chương này sẽ bao gồm các kết quả đạt được của sản phẩm so với các hệ thống hiện có. Cùng với đó là những cái tôi đã làm được hay chưa làm được và những bài học kinh nghiệm mà tôi đã rút ra được trong quá trình thực hiện đồ án. Cuối cùng, tôi sẽ đưa ra một số hướng phát triển cho sản phẩm trong tương lai.
+
+\end{document}

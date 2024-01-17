@@ -1,0 +1,18 @@
+@startuml Presentation
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package Presentation {
+    package Controllers {
+        class AuditReportsController
+        class ClientsController
+        class ExportReportsController
+        class IdentitiesController
+        class ImportReportsController
+        class InvoicesController
+        class ProductsController
+        class UsersController
+    }
+}
+@enduml

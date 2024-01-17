@@ -1,0 +1,23 @@
+@startuml ProductListPage
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+
+package Views {
+    package Products {
+        class ListPage
+    }
+}
+
+package ViewModels {
+    package Products {
+        class ListViewModel
+    }
+}
+
+package HttpServices {
+    class ProductService
+}
+
+ListPage --* ListViewModel
+ListViewModel -- ProductService
+@enduml

@@ -1,0 +1,35 @@
+@startuml User
+left to right direction
+
+actor Admin as "Quản trị viên"
+actor User as "Người dùng"
+actor Manager as "Quản lý"
+actor Employee as "Nhân viên"
+
+rectangle UserIdentity as "Thông tin người dùng" {
+    usecase IdentityManage as "Quản lý người dùng"
+    usecase IdentityView as "Xem thông tin\nngười dùng"
+    usecase IdentityCreate as "Thêm người dùng"
+    usecase IdentityEdit as "Sửa người dùng"
+    usecase IdentityResetPassword as "Khôi phục\nmật khẩu"
+    usecase IdentityDelete as "Xóa người dùng"
+
+    usecase UserManage as "Quản lý thông tin\ncá nhân"
+    usecase UserView as "Xem thông tin\ncá nhân"
+    usecase UserEdit as "Sửa thông tin\ncá nhân"
+}
+
+Employee -r-|> User
+Manager -l-|> User
+
+Admin -- IdentityManage
+IdentityManage <|-r- IdentityView
+IdentityManage <|-- IdentityCreate
+IdentityManage <|-- IdentityEdit
+IdentityManage <|-- IdentityResetPassword
+IdentityManage <|-l- IdentityDelete
+
+User -- UserManage
+UserManage <|-- UserView
+UserManage <|-- UserEdit
+@enduml

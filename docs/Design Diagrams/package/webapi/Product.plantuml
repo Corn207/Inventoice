@@ -1,0 +1,27 @@
+@startuml Product
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package Presentation {
+    class ProductController
+}
+
+package Application {
+    class ProductService
+    class IProductRepository
+}
+
+package Infrastructure {
+    class ProductRepository
+}
+
+package Domain {
+    class Product
+}
+
+ProductController -- ProductService
+ProductService -- IProductRepository
+ProductRepository --|> IProductRepository
+Product -r-o IProductRepository
+@enduml

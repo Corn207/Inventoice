@@ -1,0 +1,49 @@
+@startuml Invoice
+left to right direction
+
+actor User as "Người dùng"
+actor Manager as "Quản lý"
+actor Employee as "Nhân viên"
+
+rectangle Invoice as "Hóa đơn" {
+    usecase InvoiceFilter as "Lọc và xem hóa đơn"
+    usecase InvoiceFilterByProductName as "Lọc theo đơn chứa\ntên sản phẩm"
+    usecase InvoiceFilterByProductBarcode as "Lọc theo đơn chứa\nmã vạch sản phẩm"
+    usecase InvoiceFilterByClientNamePhonenumber as "Lọc theo số điện thoại,\ntên khách hàng"
+    usecase InvoiceFilterByEmployeeName as "Lọc theo tên người bán"
+    usecase InvoiceFilterByStatus as "Lọc theo trạng thái đơn"
+    usecase InvoiceFilterByDate as "Lọc từ ngày\nvà đến ngày"
+
+    usecase InvoiceManage as "Quản lý hóa đơn"
+    usecase InvoiceCreate as "Thêm hóa đơn"
+    usecase InvoiceDelete as "Xóa hóa đơn"
+    usecase InvoiceCancel as "Hủy hóa đơn\n(Khách trả hàng)"
+    usecase InvoicePay as "Đánh dấu hóa đơn\nđã thanh toán"
+    usecase ProductUpdateInStock as "Cập nhật tồn kho\nsản phẩm"
+    usecase ExportReportCreate as "Tạo báo cáo xuất hàng"
+    usecase ExportReportCancel as "Hủy báo cáo xuất hàng"
+}
+
+Employee -r-|> User
+Manager -l-|> User
+
+User -- InvoiceFilter
+InvoiceFilter <|-- InvoiceFilterByProductName
+InvoiceFilter <|-- InvoiceFilterByProductBarcode
+InvoiceFilter <|-- InvoiceFilterByClientNamePhonenumber
+InvoiceFilter <|-- InvoiceFilterByEmployeeName
+InvoiceFilter <|-- InvoiceFilterByStatus
+InvoiceFilter <|-- InvoiceFilterByDate
+
+User -- InvoiceManage
+InvoiceManage <|-- InvoiceCreate
+InvoiceManage <|-- InvoiceDelete
+InvoiceManage <|-- InvoiceCancel
+InvoiceManage <|-- InvoicePay
+
+InvoicePay .> InvoiceCreate : <<extend>
+InvoiceCancel ..> ExportReportCancel : <<include>>
+ExportReportCancel .l.> ProductUpdateInStock : <<include>>
+InvoiceCreate ..> ExportReportCreate : <<include>>
+ExportReportCreate .r.> ProductUpdateInStock : <<include>>
+@enduml

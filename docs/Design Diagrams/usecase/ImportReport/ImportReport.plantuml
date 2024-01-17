@@ -1,0 +1,34 @@
+@startuml ImportReport
+left to right direction
+
+actor Manager as "Quản lý"
+
+rectangle ImportReport as "Báo cáo nhập kho" {
+    usecase ImportReportFilter as "Lọc và xem báo cáo"
+    usecase ImportReportFilterByProductName as "Lọc theo đơn chứa\ntên sản phẩm"
+    usecase ImportReportFilterByProductBarcode as "Lọc theo đơn chứa\nmã vạch sản phẩm"
+    usecase ImportReportFilterByDate as "Lọc từ ngày\nvà đến ngày"
+    
+    usecase ImportReportManage as "Quản lý báo cáo"
+    usecase ImportReportCreate as "Thêm báo cáo"
+    usecase ImportReportDelete as "Xóa báo cáo"
+    usecase ImportReportCancel as "Hủy báo cáo\n(Trả hàng nhập)"
+    usecase ProductUpdateInStock as "Cập nhật tồn kho\nsản phẩm"
+    usecase ProductUpdateBuyingPrice as "Cập nhật giá nhập\nsản phẩm"
+}
+
+
+Manager -- ImportReportFilter
+ImportReportFilter <|-- ImportReportFilterByProductName
+ImportReportFilter <|-- ImportReportFilterByProductBarcode
+ImportReportFilter <|-- ImportReportFilterByDate
+
+Manager -- ImportReportManage
+ImportReportManage <|-- ImportReportCreate
+ImportReportManage <|-- ImportReportDelete
+ImportReportManage <|-- ImportReportCancel
+
+ImportReportCancel ..> ProductUpdateInStock : <<include>>
+ImportReportCreate ..> ProductUpdateInStock : <<include>>
+ImportReportCreate ..> ProductUpdateBuyingPrice : <<include>>
+@enduml

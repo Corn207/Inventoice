@@ -1,0 +1,22 @@
+@startuml EntityRelational
+entity Product
+entity Client
+entity User
+entity AuditReport
+entity ImportReport
+entity ExportReport
+entity Invoice
+
+AuditReport }o--|{ Product
+AuditReport }o-u-|| User
+
+ImportReport }o--|{ Product
+ImportReport }o-u-|| User
+
+ExportReport }o--|{ Product
+ExportReport }o-u-|| User
+
+Invoice }o--|{ Product
+Invoice }o-u-|| User
+Invoice }o--o| Client
+@enduml

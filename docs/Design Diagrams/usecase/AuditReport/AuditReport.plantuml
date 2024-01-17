@@ -1,0 +1,28 @@
+@startuml AuditReport
+left to right direction
+
+actor Manager as "Quản lý"
+
+rectangle AuditReport as "Báo cáo kiểm kho" {
+    usecase AuditReportFilter as "Lọc và xem báo cáo"
+    usecase AuditReportFilterByProductName as "Lọc theo đơn chứa\ntên sản phẩm"
+    usecase AuditReportFilterByProductBarcode as "Lọc theo đơn chứa\nmã vạch sản phẩm"
+    usecase AuditReportFilterByDate as "Lọc từ ngày\nvà đến ngày"
+
+    usecase AuditReportManage as "Quản lý báo cáo"
+    usecase AuditReportCreate as "Thêm báo cáo"
+    usecase AuditReportDelete as "Xóa báo cáo"
+    usecase ProductUpdateInStock as "Cập nhật tồn kho\nsản phẩm"
+}
+
+Manager -- AuditReportManage
+AuditReportManage <|-- AuditReportCreate
+AuditReportManage <|-- AuditReportDelete
+
+Manager -- AuditReportFilter
+AuditReportFilter <|-- AuditReportFilterByProductName
+AuditReportFilter <|-- AuditReportFilterByProductBarcode
+AuditReportFilter <|-- AuditReportFilterByDate
+
+AuditReportCreate ..> ProductUpdateInStock : <<include>>
+@enduml

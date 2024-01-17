@@ -1,0 +1,36 @@
+@startuml ViewModels2
+skinparam DefaultTextAlignment center
+skinparam Linetype polyline
+left to right direction
+
+package ViewModels {
+    package AuditReports {
+        class ListViewModel
+        class FilterViewModel
+        class DetailsViewModel
+        class CreateViewModel
+        class EditItemViewModel
+    }
+    package ImportReports {
+        class ListViewModel
+        class FilterViewModel
+        class DetailsViewModel
+        class CreateViewModel
+        class EditItemViewModel
+    }
+    package ExportReports {
+        class ListViewModel
+        class FilterViewModel
+        class DetailsViewModel
+        class CreateViewModel
+        class EditItemViewModel
+    }
+    package Invoices {
+        class ListViewModel
+        class FilterViewModel
+        class DetailsViewModel
+        class CreateViewModel
+        class EditItemViewModel
+    }
+}
+@enduml

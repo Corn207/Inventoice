@@ -1,0 +1,61 @@
+@startuml ImportReportManage
+hide footbox
+
+actor User as "Quản lý"
+boundary ListPage as "Trang danh sách"
+boundary DetailsPage as "Trang chi tiết"
+boundary CreatePage as "Trang tạo"
+participant ProductSearch as "UC: Tìm kiếm\nsản phẩm"
+boundary EditItemPage as "Form sửa\nđơn vị"
+control API as "API\nphiếu nhập kho"
+database Database as "CSDL\nphiếu nhập kho"
+
+group Tạo phiếu
+    User -> ListPage ++ : Chọn nút 'Tạo'
+    ListPage -> CreatePage --++ : Truy cập
+    CreatePage --> User -- : Hiện trang
+    |||
+    User -> ProductSearch ++ : Chọn nút 'Thêm sản phẩm'
+    ProductSearch --> CreatePage --++ : Thêm\nsản phẩm
+    CreatePage --> User -- : Cập nhật trang
+    |||
+    User -> EditItemPage ++ : Chọn sản phẩm
+    EditItemPage --> User -- : Hiện form
+    User -> EditItemPage ++ : Chỉnh số liệu
+    EditItemPage --> CreatePage --++ : Cập nhật dữ liệu
+    CreatePage --> User -- : Cập nhật trang
+    |||
+    User -> CreatePage ++ : Điền thông tin và Chọn nút 'Lưu'
+    CreatePage -> API ++ : Gửi yêu cầu
+    API -> Database ++ : Tạo dữ liệu
+    Database --> API -- : Trả về kết quả
+    API --> CreatePage -- : Gửi phản hồi
+    CreatePage --> DetailsPage --++ : Truy cập
+    DetailsPage --> User -- : Hiện trang
+    |||
+end
+
+group Hủy / Xóa phiếu
+    User -> DetailsPage ++ : Truy cập
+    DetailsPage --> User -- : Hiện trang
+
+    alt Hủy phiếu
+        User -> DetailsPage ++ : Chọn nút 'Hủy'
+        DetailsPage -> API ++ : Gửi yêu cầu
+        API -> Database ++ : Cập nhật\ndữ liệu
+        Database --> API -- : Trả về kết quả
+        API --> DetailsPage -- : Gửi phản hồi
+        DetailsPage --> User -- : Cập nhật trang
+        |||
+    else Xóa phiếu
+        User -> DetailsPage ++ : Chọn nút 'Xóa'
+        DetailsPage -> API ++ : Gửi yêu cầu
+        API -> Database ++ : Xóa dữ liệu
+        Database --> API -- : Trả về kết quả
+        API --> DetailsPage -- : Gửi phản hồi
+        DetailsPage --> ListPage --++ : Truy cập
+        ListPage --> User -- : Hiện trang
+    end
+end
+
+@enduml

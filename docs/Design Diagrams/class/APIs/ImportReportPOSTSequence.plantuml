@@ -1,0 +1,31 @@
+@startuml ImportReportPOSTSequence
+hide footbox
+
+actor "Frontend" as Client
+boundary "API Server" as Server
+control ImportReportsController
+participant ImportReportService
+participant ImportReportRepository
+participant ProductRepository
+database "Cơ sở dữ liệu" as Database
+
+Client -> Server ++ : POST api/ImportReports/\n{\n  "Id": "string",\n  "BuyingPrice": int\n  "Products": [\n    {\n      "Id": string,\n      "Quantity": int,\n      "BuyingPrice": int\n    },\n    ...\n  ]\n  ...\n}
+Server -> ImportReportsController ++ : Post(ImportReport entity)
+ImportReportsController --> ImportReportService ++ : Create(ImportReport entity)
+ImportReportService --> ProductRepository ++ : GetAll(string[] productIds)
+ProductRepository --> Database ++ : Truy vấn lấy\ncác sản phẩm\ncó id trong\nmảng ids
+Database --> ProductRepository -- : Trả về danh\nsách sản phẩm
+ProductRepository --> ImportReportService -- : return Product[]
+ImportReportService -> ImportReportService : Xử lí dữ liệu
+ImportReportService --> ProductRepository ++ : Update(Product[] products)
+ProductRepository --> Database ++ : Cập nhật\nthông tin\nsản phẩm
+Database --> ProductRepository -- : Trả về kết quả\nthực hiện
+ProductRepository --> ImportReportService -- : return bool
+ImportReportService --> ImportReportRepository ++ : Create(ImportReport entity)
+ImportReportRepository --> Database ++ : Thêm mới báo cáo nhập hàng
+Database --> ImportReportRepository -- : Trả về kết quả thực hiện
+ImportReportRepository --> ImportReportService -- : return bool
+ImportReportService --> ImportReportsController -- : return bool
+ImportReportsController --> Server -- : return bool
+Server --> Client -- : 201 OK
+@enduml
