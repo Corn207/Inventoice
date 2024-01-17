@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+	x:Class="MAUIApp.Views.EditProductItemHeaderView"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	x:Name="this"
+	Padding="16,8"
+	BackgroundColor="{StaticResource BackgroundSecondary}">
+	<VerticalStackLayout BindingContext="{Reference this}" Spacing="4">
+		<Label
+			FontAttributes="Bold"
+			FontSize="Body"
+			LineBreakMode="TailTruncation"
+			Text="{Binding Name}"
+			TextColor="{StaticResource TextPrimary}" />
+		<Label
+			FontSize="Caption"
+			Text="{Binding Barcode}"
+			TextColor="{StaticResource TextSecondary}" />
+	</VerticalStackLayout>
+</ContentView>

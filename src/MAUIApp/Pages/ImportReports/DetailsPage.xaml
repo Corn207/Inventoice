@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.ImportReports.DetailsPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:entities="clr-namespace:Domain.Entities;assembly=Domain"
+	xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.ImportReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:DetailsViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Chi tiết phiếu nhập" BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}">
+			<ImageButton
+				the49:ContextMenu.ShowMenuOnClick="True"
+				Source="more_vert.png"
+				Style="{StaticResource ContextTitlePageImageButton}">
+				<ImageButton.Behaviors>
+					<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+				</ImageButton.Behaviors>
+
+				<the49:ContextMenu.Menu>
+					<DataTemplate>
+						<the49:Menu>
+							<the49:Action
+								Title="Hủy đơn"
+								Command="{Binding CancelCommand}"
+								Icon="contract_delete.png"
+								IsVisible="{Binding CanExecuteCancel}" />
+							<the49:Action
+								Title="Xóa đơn"
+								Command="{Binding DeleteCommand}"
+								Icon="delete.png"
+								IsVisible="{Binding CanExecuteDelete}" />
+						</the49:Menu>
+					</DataTemplate>
+				</the49:ContextMenu.Menu>
+			</ImageButton>
+		</views:NavigationBar>
+
+
+		<RefreshView
+			Grid.Row="1"
+			Command="{Binding LoadDataCommand}"
+			IsRefreshing="{Binding IsRefreshing}">
+			<ScrollView>
+				<VerticalStackLayout Spacing="16">
+					<Border Style="{StaticResource ValueFieldCardBorder}">
+						<VerticalStackLayout>
+							<views:ValueField Title="Người nhập kho" Value="{Binding Model.Author.Name}" />
+							<views:Separator />
+							<views:ValueField Title="Ngày tạo" Value="{Binding Model.DateCreated, Converter={StaticResource DateTimeToDetailedStringConverter}}" />
+
+							<views:Separator IsVisible="{Binding Source={x:Reference cancelField}, Path=IsVisible}" />
+							<views:ValueField
+								x:Name="cancelField"
+								Title="Ngày hủy phiếu"
+								Value="{Binding Model.DateCancelled, Converter={StaticResource DateTimeToDetailedStringConverter}}">
+								<views:ValueField.Triggers>
+									<Trigger TargetType="views:ValueField" Property="Value" Value="{x:Null}">
+										<Setter Property="IsVisible" Value="False" />
+									</Trigger>
+								</views:ValueField.Triggers>
+							</views:ValueField>
+						</VerticalStackLayout>
+					</Border>
+
+					<Border Style="{StaticResource ValueFieldCardBorder}">
+						<VerticalStackLayout>
+							<views:ValueField Title="Tổng số hàng" Value="{Binding TotalItem}" />
+							<views:Separator />
+							<views:ValueField Title="Tổng sản phẩm" Value="{Binding TotalProduct}" />
+							<views:Separator />
+							<views:ValueField Title="Tổng tiền hàng" Value="{Binding TotalPrice, Converter={StaticResource ConvertObjectToCurrencyStringConverter}}" />
+						</VerticalStackLayout>
+					</Border>
+
+					<Border Style="{StaticResource TemplatedLayoutCardBorder}">
+						<ListView
+							HasUnevenRows="True"
+							ItemsSource="{Binding Model.ProductItems, Mode=OneWay}"
+							SelectionMode="None">
+							<ListView.ItemTemplate>
+								<DataTemplate x:DataType="{x:Type entities:ImportReportProductItem}">
+									<ViewCell>
+										<views:ProductItemView
+											Name="{Binding Name, Mode=OneTime}"
+											Barcode="{Binding Barcode, Mode=OneTime}"
+											ControlTemplate="{StaticResource ProductItemViewControlTemplate}"
+											Price="{Binding Price, Mode=OneTime}"
+											Quantity="{Binding Quantity, Mode=OneTime}">
+											<views:ProductItemView.GestureRecognizers>
+												<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToProductDetailsPageCommand}" CommandParameter="{Binding Id}" />
+											</views:ProductItemView.GestureRecognizers>
+										</views:ProductItemView>
+									</ViewCell>
+								</DataTemplate>
+							</ListView.ItemTemplate>
+						</ListView>
+					</Border>
+				</VerticalStackLayout>
+			</ScrollView>
+		</RefreshView>
+	</Grid>
+</ContentPage>

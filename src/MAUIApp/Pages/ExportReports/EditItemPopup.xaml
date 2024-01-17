@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+	x:Class="MAUIApp.Pages.ExportReports.EditItemPopup"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.ExportReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:EditItemViewModel}">
+
+	<VerticalStackLayout BackgroundColor="{StaticResource BackgroundPrimary}">
+		<VerticalStackLayout
+			Padding="16"
+			BackgroundColor="{StaticResource BackgroundSecondary}"
+			Spacing="4">
+			<Label
+				FontAttributes="Bold"
+				FontSize="Body"
+				Text="{Binding Item.Name}"
+				TextColor="{StaticResource TextPrimary}" />
+			<Label
+				FontSize="Caption"
+				Text="{Binding Item.Barcode}"
+				TextColor="{StaticResource TextSecondary}" />
+		</VerticalStackLayout>
+		<Grid Padding="24,8" ColumnDefinitions="Auto, 1*, Auto">
+			<Label
+				Grid.Column="0"
+				Margin="0,0,0,4"
+				Text="Số lượng"
+				VerticalOptions="Center" />
+			<Entry
+				Grid.Column="1"
+				Margin="16,0"
+				HorizontalTextAlignment="Center"
+				Keyboard="Numeric"
+				Text="{Binding Item.Quantity}">
+				<Entry.Behaviors>
+					<toolkit:EventToCommandBehavior Command="{Binding NotifyChangedCommand}" EventName="TextChanged" />
+				</Entry.Behaviors>
+			</Entry>
+			<Stepper
+				Grid.Column="2"
+				Increment="1"
+				Maximum="{Binding Item.InStock}"
+				Minimum="1"
+				Value="{Binding Item.Quantity}" />
+		</Grid>
+		<views:Separator Margin="16,0" />
+		<Button
+			Margin="8"
+			BackgroundColor="Transparent"
+			Clicked="OKButton_Clicked"
+			HorizontalOptions="End"
+			Text="OK"
+			TextColor="{StaticResource Blue}"
+			VerticalOptions="Center" />
+	</VerticalStackLayout>
+</toolkit:Popup>

@@ -1,11 +1,14 @@
-﻿namespace MAUIApp;
+﻿using MAUIApp.Pages;
+
+namespace MAUIApp;
 
 public partial class App : Application
 {
-	public App()
+	public App(AppShell appShell, LoginPage loginPage)
 	{
 		InitializeComponent();
 
-		MainPage = new AppShell();
+		UserAppTheme = AppTheme.Light;
+		MainPage = appShell;
 	}
 }

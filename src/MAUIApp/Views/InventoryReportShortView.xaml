@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+	x:Class="MAUIApp.Views.InventoryReportShortView"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:Name="this">
+	<Grid
+		Padding="16,8,16,0"
+		BindingContext="{x:Reference this}"
+		ColumnDefinitions="Auto, 1*, Auto"
+		RowDefinitions="Auto, Auto, Auto">
+		<Image
+			Grid.Row="0"
+			Grid.RowSpan="2"
+			Grid.Column="0"
+			Margin="0,2,16,0"
+			HeightRequest="24"
+			Source="assignment.png"
+			VerticalOptions="Start">
+			<Image.Behaviors>
+				<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+			</Image.Behaviors>
+		</Image>
+
+		<Label
+			Grid.Row="0"
+			Grid.Column="1"
+			FontSize="Body">
+			<Label.FormattedText>
+				<FormattedString>
+					<Span
+						FontAttributes="Bold"
+						Text="{Binding TotalProduct}"
+						TextColor="{StaticResource Blue}" />
+					<Span Text=" sản phẩm" TextColor="{StaticResource TextPrimary}" />
+				</FormattedString>
+			</Label.FormattedText>
+		</Label>
+
+		<Label
+			Grid.Row="0"
+			Grid.Column="2"
+			HorizontalOptions="End"
+			Text="{Binding DateCreated, Converter={StaticResource DateTimeToDetailedStringConverter}}"
+			TextColor="{StaticResource TextPrimary}" />
+
+		<Label
+			Grid.Row="1"
+			Grid.Column="1"
+			Text="{Binding AuthorName}"
+			TextColor="{StaticResource TextSecondary}"
+			VerticalOptions="End" />
+
+		<Label
+			Grid.Row="1"
+			Grid.Column="2"
+			FontSize="Body"
+			HorizontalOptions="End"
+			Text="{Binding TotalPrice, Converter={StaticResource ConvertObjectToCurrencyStringConverter}}"
+			TextColor="{StaticResource Blue}" />
+
+		<views:Separator
+			Grid.Row="2"
+			Grid.ColumnSpan="3"
+			Margin="0,8,0,0" />
+	</Grid>
+</ContentView>

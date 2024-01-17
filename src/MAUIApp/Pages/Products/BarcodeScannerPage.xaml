@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MAUIApp.Pages.Products.BarcodeScannerPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:scanner="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Products"
+    x:DataType="{x:Type viewmodels:BarcodeScannerViewModel}"
+    Shell.PresentationMode="ModalAnimated">
+
+    <Grid>
+        <scanner:CameraView
+            x:Name="scanner"
+            BarcodeSymbologies="Ean13"
+            CameraEnabled="{Binding CameraEnabled, Mode=OneWay}"
+            CaptureQuality="Low"
+            PauseScanning="{Binding PauseScanning, Mode=OneWay}"
+            TapToFocusEnabled="True"
+            VibrationOnDetected="True">
+            <scanner:CameraView.Behaviors>
+                <toolkit:EventToCommandBehavior
+                    x:TypeArguments="scanner:OnDetectionFinishedEventArg"
+                    Command="{Binding DetectedCommand}"
+                    EventName="OnDetectionFinished" />
+            </scanner:CameraView.Behaviors>
+        </scanner:CameraView>
+        <ImageButton
+            Margin="16,24,0,0"
+            Command="{Binding CloseCommand}"
+            HeightRequest="24"
+            HorizontalOptions="Start"
+            Source="close.png"
+            VerticalOptions="Start">
+            <ImageButton.Behaviors>
+                <toolkit:IconTintColorBehavior TintColor="White" />
+            </ImageButton.Behaviors>
+        </ImageButton>
+    </Grid>
+</ContentPage>

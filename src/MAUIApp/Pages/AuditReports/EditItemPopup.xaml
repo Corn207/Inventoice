@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+	x:Class="MAUIApp.Pages.AuditReports.EditItemPopup"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.AuditReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:EditItemViewModel}">
+
+	<VerticalStackLayout BackgroundColor="{StaticResource BackgroundPrimary}">
+		<VerticalStackLayout
+			Padding="16"
+			BackgroundColor="{StaticResource BackgroundSecondary}"
+			Spacing="4">
+			<Label
+				FontAttributes="Bold"
+				FontSize="Body"
+				Text="{Binding Item.Name}"
+				TextColor="{StaticResource TextPrimary}" />
+			<Label
+				FontSize="Caption"
+				Text="{Binding Item.Barcode}"
+				TextColor="{StaticResource TextSecondary}" />
+		</VerticalStackLayout>
+		<Grid
+			Padding="0,8"
+			ColumnDefinitions="1*, 1*, 1*"
+			RowDefinitions="Auto, Auto">
+			<Grid.Resources>
+				<Style TargetType="{x:Type Label}">
+					<Setter Property="HorizontalOptions" Value="Center" />
+					<Setter Property="VerticalOptions" Value="Center" />
+					<Setter Property="TextColor" Value="Black" />
+				</Style>
+			</Grid.Resources>
+
+			<Label
+				Grid.Row="0"
+				Grid.Column="0"
+				Text="Tồn kho" />
+			<Label
+				Grid.Row="1"
+				Grid.Column="0"
+				Text="{Binding Item.InStock}" />
+
+			<Label
+				Grid.Row="0"
+				Grid.Column="1"
+				Text="Thực tế" />
+			<Label
+				Grid.Row="1"
+				Grid.Column="1"
+				Text="{Binding Item.Quantity}"
+				TextColor="{StaticResource Blue}" />
+
+			<Label
+				Grid.Row="0"
+				Grid.Column="2"
+				Text="Chênh lệch" />
+			<Label
+				x:Name="discrepantLabel"
+				Grid.Row="1"
+				Grid.Column="2"
+				Text="{Binding Item.Difference}"
+				TextColor="{Binding Item.Difference, Converter={StaticResource LongToIsPositiveNullableColorConverter}}" />
+		</Grid>
+		<views:Separator Margin="16,0" />
+		<Grid Padding="24,8" ColumnDefinitions="Auto, 1*, Auto">
+			<Label Text="Số lượng" VerticalOptions="Center" />
+			<Entry
+				Grid.Column="1"
+				Margin="16,0"
+				HorizontalTextAlignment="Center"
+				Keyboard="Numeric"
+				Text="{Binding Item.Quantity}">
+				<Entry.Behaviors>
+					<toolkit:EventToCommandBehavior Command="{Binding NotifyChangedCommand}" EventName="TextChanged" />
+				</Entry.Behaviors>
+			</Entry>
+			<Stepper
+				Grid.Column="2"
+				Minimum="0"
+				Value="{Binding Item.Quantity}" />
+		</Grid>
+		<views:Separator Margin="16,0" />
+		<Button
+			Margin="8"
+			BackgroundColor="Transparent"
+			Clicked="OKButton_Clicked"
+			HorizontalOptions="End"
+			Text="OK"
+			TextColor="{StaticResource Blue}"
+			VerticalOptions="Center" />
+	</VerticalStackLayout>
+</toolkit:Popup>
