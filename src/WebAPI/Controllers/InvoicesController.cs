@@ -3,15 +3,20 @@ using Application.Services;
 using Domain.DTOs;
 using Domain.DTOs.Invoices;
 using Domain.Entities;
+using Identity.Domain.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = $"{nameof(Role.Manager)},{nameof(Role.Employee)}")]
 public class InvoicesController(InvoiceService service) : ControllerBase
 {
-	[HttpGet]
-	public async Task<IEnumerable<InvoiceShort>> Get(
+	[HttpGet("search")]
+	[ProducesResponseType<IEnumerable<InvoiceShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<InvoiceShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? clientNameOrPhonenumber = null,
 		[FromQuery] string? authorName = null,
@@ -24,60 +29,50 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 	{
 		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
 		var pagination = new Pagination(pageNumber, pageSize);
-
-		return await service.SearchAsync(
-			productNameOrBarcode ?? string.Empty,
-			clientNameOrPhonenumber ?? string.Empty,
-			authorName ?? string.Empty,
+		var result = await service.SearchAsync(
+			productNameOrBarcode,
+			clientNameOrPhonenumber,
+			authorName,
 			status,
 			timeRange,
 			orderBy,
 			pagination);
+
+		return result;
 	}
 
-
-	[HttpGet("count")]
-	public async Task<uint> Count(
-		[FromQuery] string? productNameOrBarcode = null,
-		[FromQuery] string? clientNameOrPhonenumber = null,
-		[FromQuery] string? authorName = null,
-		[FromQuery] InvoiceStatus status = InvoiceStatus.All,
-		[FromQuery] DateTime? dateStart = null,
-		[FromQuery] DateTime? dateEnd = null)
-	{
-		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
-
-		return await service.CountAsync(
-			productNameOrBarcode ?? string.Empty,
-			clientNameOrPhonenumber ?? string.Empty,
-			authorName ?? string.Empty,
-			status,
-			timeRange);
-	}
-
-	[HttpGet("count/all")]
-	public async Task<uint> CountAll()
+	[HttpGet("total")]
+	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]
+	[ProducesResponseType<AuditReport>(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<Invoice>> Get(string id)
 	{
 		var entity = await service.GetAsync(id)
-			?? throw new InvalidIdException("InvoiceId was not found.", id);
+			?? throw new NotFoundException("Invoice's Id was not found.", id);
 
 		return entity;
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Post([FromBody] InvoiceCreate body)
+	[ProducesResponseType(StatusCodes.Status201Created)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> Create([FromBody] InvoiceCreate body)
 	{
-		var newId = await service.CreateAsync(body);
+		var userId = this.GetUserId();
+		var newId = await service.CreateAsync(userId, body);
+
 		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
 	[HttpDelete("{id}")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete(string id)
 	{
 		await service.DeleteAsync(id);
@@ -86,6 +81,8 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 	}
 
 	[HttpPatch("{id}/cancel")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Cancel(string id)
 	{
 		await service.CancelAsync(id);
@@ -94,6 +91,8 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 	}
 
 	[HttpPatch("{id}/pay")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Pay(string id)
 	{
 		await service.PayAsync(id);

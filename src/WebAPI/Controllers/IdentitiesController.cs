@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Exceptions;
+using Application.Services;
 using Domain.DTOs.Users;
 using Identity.Application.Exceptions;
 using Identity.Application.Services;
@@ -19,13 +20,13 @@ public class IdentitiesController(
 {
 	#region Authentication
 	[HttpPost("login")]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType<TokenInfo>(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<ActionResult<TokenInfo>> Login([FromBody] Login body)
 	{
 		try
 		{
-			var tokenInfo = await tokenService.CreateTokenAsync(body.Username, body.Password);
+			var tokenInfo = await tokenService.CreateTokenAsync(body);
 			return Ok(tokenInfo);
 		}
 		catch (InvalidLoginException)
@@ -41,14 +42,38 @@ public class IdentitiesController(
 	public async Task<IActionResult> Logout()
 	{
 		var userId = this.GetUserId();
-		await tokenService.RevokeTokenByUserIdAsync(userId);
+		await tokenService.DeleteTokenByUserIdAsync(userId);
 
 		return NoContent();
 	}
 
-	[HttpPut("{id}/reset-password")]
+	[HttpPatch("change-password")]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> ChangePassword([FromBody] ChangePassword body)
+	{
+		var userId = this.GetUserId();
+		try
+		{
+			await identityService.ChangePasswordAsync(userId, body);
+		}
+		catch (EntityNotFoundException)
+		{
+			return StatusCode(StatusCodes.Status500InternalServerError, "UserId was not found.");
+		}
+		catch (InvalidPasswordException)
+		{
+			return BadRequest("Invalid password.");
+		}
+
+		return NoContent();
+	}
+
+	[HttpPatch("{id}/reset-password")]
 	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType<string>(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<string>> ResetPassword(string id)
 	{
@@ -96,16 +121,14 @@ public class IdentitiesController(
 			Phonenumber = body.Phonenumber,
 		};
 		var userId = await userService.CreateAsync(createUser);
-
-		try
+		var createIdentity = new CreateIdentity()
 		{
-			await identityService.CreateAdminIdentityAsync(userId, body);
-		}
-		catch (EntityExistedException)
-		{
-			await userService.DeleteAsync(userId);
-			return BadRequest($"Identity existed with userid, username: {body.Username}, {userId}");
-		}
+			Name = body.Name,
+			Phonenumber = body.Phonenumber,
+			Username = body.Username,
+			Roles = Role.Admin | Role.Manager | Role.Employee,
+		};
+		await identityService.CreateIdentityAsync(userId, createIdentity, body.Password);
 
 		return CreatedAtAction(nameof(Login), null);
 	}
@@ -136,7 +159,7 @@ public class IdentitiesController(
 
 	[HttpPost]
 	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType<string>(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> CreateIdentity([FromBody] CreateIdentity body)
 	{
@@ -152,9 +175,19 @@ public class IdentitiesController(
 			Phonenumber = body.Phonenumber,
 		};
 		var userId = await userService.CreateAsync(createUser);
-
 		var password = await identityService.CreateIdentityAsync(userId, body);
+
 		return CreatedAtAction(nameof(GetIdentity), new { Id = userId }, password);
+	}
+
+	[HttpPatch("{id}/role")]
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> UpdateRolesIdentity(string id, [FromBody] Role role)
+	{
+		await claimService.UpdateRolesAsync(id, role);
+		return NoContent();
 	}
 
 	[HttpDelete("{id}")]
@@ -165,13 +198,22 @@ public class IdentitiesController(
 	{
 		try
 		{
-			await identityService.DeleteIdentityAsync(id);
-			return NoContent();
+			await userService.DeleteAsync(id);
 		}
-		catch (EntityNotFoundException)
+		catch (NotFoundException)
 		{
 			return NotFound();
 		}
+
+		try
+		{
+			await identityService.DeleteIdentityAsync(id);
+		}
+		catch (EntityNotFoundException)
+		{
+		}
+
+		return NoContent();
 	}
 	#endregion
 }

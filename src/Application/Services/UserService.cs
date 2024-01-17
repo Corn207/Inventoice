@@ -9,21 +9,13 @@ namespace Application.Services;
 public class UserService(IUserRepository userRepository)
 {
 	public async Task<IEnumerable<UserShort>> SearchAsync(
-		string name,
+		string? name,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var entities = await userRepository.SearchAsync(name, orderBy, pagination);
 
 		return entities.Select(UserMapper.ToShort);
-	}
-
-	public async Task<uint> CountAsync(
-		string name)
-	{
-		var count = await userRepository.CountAsync(name);
-
-		return count;
 	}
 
 	public async Task<uint> CountAllAsync()
@@ -52,11 +44,11 @@ public class UserService(IUserRepository userRepository)
 	/// <param name="id"></param>
 	/// <param name="update"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task ReplaceAsync(string id, UserCreateUpdate update)
 	{
 		var entity = await userRepository.GetAsync(id)
-			?? throw new InvalidIdException("UserId was not found.", [id]);
+			?? throw new NotFoundException("User's Id was not found.", id);
 		UserMapper.ToEntity(update, entity);
 		await userRepository.ReplaceAsync(entity);
 	}
@@ -66,7 +58,7 @@ public class UserService(IUserRepository userRepository)
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task DeleteAsync(string id)
 	{
 		await userRepository.DeleteAsync(id);

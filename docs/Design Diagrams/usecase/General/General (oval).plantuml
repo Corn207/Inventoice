@@ -1,0 +1,34 @@
+@startuml General
+skinparam dpi 300
+left to right direction
+
+actor Admin as "Quản trị viên"
+actor User as "Người dùng"
+actor Manager as "Quản lý"
+actor Employee as "Nhân viên"
+
+usecase Product as "Sản phẩm"
+usecase Client as "Khách hàng"
+usecase AuditReport as "Kiểm kho"
+usecase ExportReport as "Xuất kho"
+usecase ImportReport as "Nhập kho"
+usecase Invoice as "Hóa đơn"
+usecase UserIdentity as "Thông tin\nngười dùng"
+usecase Authentication as "Đăng nhập\nĐăng xuất"
+
+
+Manager --|> User
+Employee --|> User
+
+Manager -- AuditReport
+Manager -- ExportReport
+Manager -- ImportReport
+User -- Client
+User -- Product
+User -- Invoice
+Admin --- UserIdentity
+User -- UserIdentity
+
+Admin -r- Authentication
+User -- Authentication
+@enduml

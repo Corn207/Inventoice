@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="MAUIApp.AppShell"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:MAUIApp"
-    Shell.FlyoutBehavior="Disabled">
+	x:Class="MAUIApp.AppShell"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:invoicepages="clr-namespace:MAUIApp.Pages.Invoices"
+	xmlns:local="clr-namespace:MAUIApp"
+	xmlns:pages="clr-namespace:MAUIApp.Pages"
+	xmlns:productpages="clr-namespace:MAUIApp.Pages.Products"
+	xmlns:services="clr-namespace:MAUIApp.Services"
+	Shell.FlyoutBehavior="Disabled">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+	<TabBar Route="{x:Static services:NavigationService.LoginStackRouteName}">
+		<Tab>
+			<ShellContent ContentTemplate="{DataTemplate pages:LoginPage}" />
+		</Tab>
+	</TabBar>
 
+	<TabBar Route="{x:Static services:NavigationService.MainStackRouteName}">
+		<Tab Title="Hoá đơn" Icon="assignment.svg">
+			<ShellContent ContentTemplate="{DataTemplate invoicepages:ListPage}" />
+		</Tab>
+		<Tab Title="Hàng hóa" Icon="inventory2.svg">
+			<ShellContent ContentTemplate="{DataTemplate productpages:ListPage}" />
+		</Tab>
+		<Tab Title="Nhiều hơn" Icon="menu.svg">
+			<ShellContent ContentTemplate="{DataTemplate pages:MorePage}" />
+		</Tab>
+	</TabBar>
 </Shell>

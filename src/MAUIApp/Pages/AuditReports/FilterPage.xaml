@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.AuditReports.FilterPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.AuditReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:FilterViewModel}"
+	Background="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="ModalAnimated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar
+			Title="Lọc phiếu kiểm kho"
+			BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}"
+			Style="{StaticResource CloseNavigationBar}">
+			<Button
+				Command="{Binding SearchCommand}"
+				Style="{StaticResource SaveButton}"
+				Text="Tìm kiếm" />
+		</views:NavigationBar>
+
+
+		<ScrollView Grid.Row="1">
+			<VerticalStackLayout Spacing="16">
+				<views:Card HeaderTitle="Tìm kiếm">
+					<views:BarcodeEntry ReturnId="{Static viewmodels:FilterViewModel.QueryProductNameOrBarcode}" Text="{Binding Filter.ProductNameOrBarcode}" />
+				</views:Card>
+				<views:FilterTime From="{Binding Filter.DateStart}" To="{Binding Filter.DateEnd}" />
+				<views:FilterOrderBy
+					AscendingTitle="Cũ nhất"
+					DescendingTitle="Mới nhất"
+					OrderBy="{Binding Filter.OrderBy}" />
+			</VerticalStackLayout>
+		</ScrollView>
+	</Grid>
+</ContentPage>

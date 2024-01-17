@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.Invoices.FilterPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
+	xmlns:dtos="clr-namespace:Domain.DTOs.Invoices;assembly=Domain"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Invoices"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:FilterViewModel}"
+	Background="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="ModalAnimated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar
+			Title="Lọc hóa đơn"
+			BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}"
+			Style="{StaticResource CloseNavigationBar}">
+			<Button
+				Command="{Binding SearchCommand}"
+				Style="{StaticResource SaveButton}"
+				Text="Tìm kiếm" />
+		</views:NavigationBar>
+
+
+		<ScrollView Grid.Row="1">
+			<VerticalStackLayout Spacing="16">
+				<views:Card HeaderTitle="Tìm kiếm">
+					<VerticalStackLayout>
+						<views:BarcodeEntry ReturnId="{Static viewmodels:FilterViewModel.QueryProductSearch}" Text="{Binding Filter.ProductNameOrBarcode}" />
+						<views:Separator />
+						<Entry
+							FontSize="Body"
+							Placeholder="Tên hoặc sđt khách hàng"
+							Text="{Binding Filter.ClientNameOrPhonenumber}" />
+						<views:Separator />
+						<Entry
+							FontSize="Body"
+							Placeholder="Tên người bán"
+							Text="{Binding Filter.AuthorName}" />
+					</VerticalStackLayout>
+				</views:Card>
+
+				<views:Card HeaderTitle="Trạng thái">
+					<FlexLayout
+						RadioButtonGroup.GroupName="Status"
+						RadioButtonGroup.SelectedValue="{Binding Filter.Status}"
+						Wrap="Wrap">
+						<RadioButton
+							Content="Tất cả"
+							GroupName="Status"
+							Value="{x:Static dtos:InvoiceStatus.All}" />
+						<RadioButton
+							Content="Chờ thanh toán"
+							GroupName="Status"
+							Value="{x:Static dtos:InvoiceStatus.Pending}" />
+						<RadioButton
+							BorderColor="{StaticResource TextSecondary}"
+							Content="Hoàn thành"
+							GroupName="Status"
+							Value="{x:Static dtos:InvoiceStatus.Paid}" />
+						<RadioButton
+							Content="Đã hủy"
+							GroupName="Status"
+							Value="{x:Static dtos:InvoiceStatus.Cancelled}" />
+					</FlexLayout>
+				</views:Card>
+
+				<views:FilterTime From="{Binding Filter.DateStart}" To="{Binding Filter.DateEnd}" />
+
+				<views:FilterOrderBy
+					AscendingTitle="Cũ nhất"
+					DescendingTitle="Mới nhất"
+					OrderBy="{Binding Filter.OrderBy}" />
+			</VerticalStackLayout>
+		</ScrollView>
+	</Grid>
+</ContentPage>

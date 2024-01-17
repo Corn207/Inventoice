@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:MAUIApp.Converters;assembly=MAUIApp"
+    xmlns:productmodels="clr-namespace:MAUIApp.Models.Products;assembly=MAUIApp"
+    xmlns:productviewmodels="clr-namespace:MAUIApp.ViewModels.Products;assembly=MAUIApp"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:views="clr-namespace:MAUIApp.Views;assembly=MAUIApp" />

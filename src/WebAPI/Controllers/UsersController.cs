@@ -3,8 +3,6 @@ using Application.Services;
 using Domain.DTOs;
 using Domain.DTOs.Users;
 using Domain.Entities;
-using Identity.Application.Exceptions;
-using Identity.Application.Services;
 using Identity.Domain.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +11,9 @@ using WebAPI.Extensions;
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController(
-	UserService service,
-	IdentityService identityService) : ControllerBase
+public class UsersController(UserService service) : ControllerBase
 {
-	[HttpGet]
+	[HttpGet("search")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType<IEnumerable<UserShort>>(StatusCodes.Status200OK)]
 	public async Task<IEnumerable<UserShort>> Search(
@@ -27,27 +23,18 @@ public class UsersController(
 		[FromQuery] ushort pageSize = 15)
 	{
 		var pagination = new Pagination(pageNumber, pageSize);
-
-		return await service.SearchAsync(
-			name ?? string.Empty,
+		var result = await service.SearchAsync(
+			name,
 			orderBy,
 			pagination);
+
+		return result;
 	}
 
-	[HttpGet("count")]
+	[HttpGet("total")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> Count(
-		[FromQuery] string? name = null)
-	{
-		return await service.CountAsync(
-			name ?? string.Empty);
-	}
-
-	[HttpGet("count/all")]
-	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
@@ -58,39 +45,10 @@ public class UsersController(
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<User>> Get(string id)
 	{
-		var entity = await service.GetAsync(id);
-		if (entity == null)
-		{
-			return NotFound();
-		};
+		var entity = await service.GetAsync(id)
+			?? throw new NotFoundException("User's Id was not found.", id);
 
 		return entity;
-	}
-
-	[HttpDelete("{id}")]
-	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Delete(string id)
-	{
-		try
-		{
-			await service.DeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			return NotFound();
-		}
-		try
-		{
-			await identityService.DeleteIdentityAsync(id);
-		}
-		catch (EntityNotFoundException)
-		{
-			return NotFound();
-		}
-
-		return NoContent();
 	}
 
 	#region Me
@@ -121,7 +79,7 @@ public class UsersController(
 		{
 			await service.ReplaceAsync(userId, body);
 		}
-		catch (InvalidIdException)
+		catch (NotFoundException)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError, "UserId was not found.");
 		}

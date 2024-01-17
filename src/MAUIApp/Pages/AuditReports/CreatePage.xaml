@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.AuditReports.CreatePage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:localviews="clr-namespace:MAUIApp.Views.AuditReports"
+	xmlns:productmodels="clr-namespace:MAUIApp.Models.Products"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.AuditReports"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:CreateViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="ModalAnimated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar
+			Title="Kiểm kho"
+			BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}"
+			Style="{StaticResource CloseNavigationBar}">
+			<Button Command="{Binding SaveCommand}" Style="{StaticResource SaveButton}" />
+		</views:NavigationBar>
+
+
+		<views:Card Grid.Row="1" Style="{StaticResource ListViewCard}">
+			<VerticalStackLayout>
+				<views:AddClearBar
+					AddCommand="{Static baseviewmodels:StaticViewModel.ToProductSearchPageCommand}"
+					AddCommandParameter="{Static viewmodels:CreateViewModel.QueryAddProduct}"
+					ClearCommand="{Binding ClearItemsCommand}" />
+				<views:Separator />
+				<localviews:TotalBarView
+					Padding="8"
+					TotalAdjusted="{Binding TotalAdjusted}"
+					TotalOriginal="{Binding TotalOriginal}"
+					TotalProduct="{Binding TotalProduct}" />
+				<views:Separator />
+				<ListView
+					HasUnevenRows="True"
+					ItemsSource="{Binding Items}"
+					SelectionMode="None">
+					<ListView.Behaviors>
+						<toolkit:EventToCommandBehavior
+							Command="{Binding OpenEditItemPopupCommand}"
+							EventArgsConverter="{StaticResource ItemTappedEventArgsConverter}"
+							EventName="ItemTapped" />
+					</ListView.Behaviors>
+					<ListView.ItemTemplate>
+						<DataTemplate x:DataType="{x:Type productmodels:ProductItem}">
+							<ViewCell>
+								<SwipeView Threshold="100">
+									<SwipeView.LeftItems>
+										<SwipeItems Mode="Execute">
+											<SwipeItem
+												BackgroundColor="{StaticResource Blue}"
+												Command="{Static baseviewmodels:StaticViewModel.ToProductDetailsPageCommand}"
+												CommandParameter="{Binding Id}"
+												IconImageSource="info.png"
+												Text="Info" />
+										</SwipeItems>
+									</SwipeView.LeftItems>
+									<SwipeView.RightItems>
+										<SwipeItems Mode="Execute">
+											<SwipeItem
+												BackgroundColor="{StaticResource Red}"
+												Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CreateViewModel}}, Path=RemoveItemCommand}"
+												CommandParameter="{Binding}"
+												IconImageSource="delete.png"
+												Text="Xóa" />
+										</SwipeItems>
+									</SwipeView.RightItems>
+
+									<localviews:ProductItemView
+										Name="{Binding Name}"
+										AdjustedQuantity="{Binding Quantity}"
+										Barcode="{Binding Barcode}"
+										OriginalQuantity="{Binding InStock}" />
+								</SwipeView>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+			</VerticalStackLayout>
+		</views:Card>
+
+		<!--<Border
+			Grid.Row="1"
+			Padding="0"
+			Style="{StaticResource CardBorder}">
+			<ListView
+				HasUnevenRows="True"
+				ItemsSource="{Binding Items, Mode=OneTime}"
+				SelectionMode="None">
+				<ListView.Header>
+					<VerticalStackLayout Padding="16,0">
+						<Grid ColumnDefinitions="Auto, 1*, Auto">
+							<Button Command="{Binding GoToSearchProductPageCommand}" Style="{StaticResource AddProductButton}" />
+							<Button
+								Grid.Column="2"
+								Command="{Binding ClearItemsCommand}"
+								Style="{StaticResource ClearProductButton}" />
+						</Grid>
+
+						<BoxView Style="{StaticResource Separator}" />
+
+						<Grid
+							Margin="0,8"
+							ColumnDefinitions="2*, 1*, 1*, 0.75*"
+							RowDefinitions="Auto, Auto">
+							<Grid.Resources>
+								<Style TargetType="Label">
+									<Setter Property="HorizontalOptions" Value="Center" />
+									<Setter Property="TextColor" Value="Black" />
+								</Style>
+							</Grid.Resources>
+
+							<Label
+								Grid.Row="0"
+								Grid.Column="0"
+								Margin="0,0,0,8"
+								HorizontalOptions="Start"
+								Text="Sản phẩm" />
+							<Label
+								Grid.Row="1"
+								Grid.Column="0"
+								FontSize="Body"
+								HorizontalOptions="Start"
+								Text="{Binding TotalProduct}" />
+
+							<Label
+								Grid.Row="0"
+								Grid.Column="1"
+								Text="Tồn kho" />
+							<Label
+								Grid.Row="1"
+								Grid.Column="1"
+								FontSize="Body"
+								Text="{Binding TotalInStock}" />
+
+							<Label
+								Grid.Row="0"
+								Grid.Column="2"
+								Text="Thực tế" />
+							<Label
+								Grid.Row="1"
+								Grid.Column="2"
+								FontSize="Body"
+								Text="{Binding TotalAuditedQuantity}"
+								TextColor="{StaticResource Blue}" />
+
+							<Label
+								Grid.Row="0"
+								Grid.Column="3"
+								Text="Lệch" />
+							<Label
+								Grid.Row="1"
+								Grid.Column="3"
+								FontSize="Body"
+								Text="{Binding TotalDiscrepantQuantity}">
+								<Label.Triggers>
+									<DataTrigger
+										Binding="{Binding TotalDiscrepantQuantity, Converter={StaticResource LongToIsPositiveBoolConverter}}"
+										TargetType="{x:Type Label}"
+										Value="True">
+										<Setter Property="TextColor" Value="{StaticResource Green}" />
+									</DataTrigger>
+									<DataTrigger
+										Binding="{Binding TotalDiscrepantQuantity, Converter={StaticResource LongToIsPositiveBoolConverter}}"
+										TargetType="{x:Type Label}"
+										Value="{x:Null}">
+										<Setter Property="TextColor" Value="Black" />
+									</DataTrigger>
+									<DataTrigger
+										Binding="{Binding TotalDiscrepantQuantity, Converter={StaticResource LongToIsPositiveBoolConverter}}"
+										TargetType="{x:Type Label}"
+										Value="False">
+										<Setter Property="TextColor" Value="{StaticResource Red}" />
+									</DataTrigger>
+								</Label.Triggers>
+							</Label>
+						</Grid>
+						<BoxView Style="{StaticResource Separator}" />
+					</VerticalStackLayout>
+				</ListView.Header>
+
+				<ListView.ItemTemplate>
+					<DataTemplate x:DataType="{x:Type productmodels:ProductItem}">
+						<ViewCell>
+							<SwipeView Threshold="100">
+								<SwipeView.RightItems>
+									<SwipeItems Mode="Execute">
+										<SwipeItem
+											BackgroundColor="#ff5e52"
+											Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CreateViewModel}}, Path=RemoveItemCommand}"
+											CommandParameter="{Binding .}"
+											IconImageSource="delete.png"
+											Text="Xóa" />
+									</SwipeItems>
+								</SwipeView.RightItems>
+
+								<Grid
+									Padding="16,8"
+									BackgroundColor="{StaticResource BackgroundPrimary}"
+									ColumnDefinitions="2*, 1*, 1*, 0.75*">
+									<Grid.GestureRecognizers>
+										<TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CreateViewModel}}, Path=OpenAdjustQuantityPopupCommand}" CommandParameter="{Binding .}" />
+									</Grid.GestureRecognizers>
+
+									<VerticalStackLayout Grid.Column="0">
+										<Label FontAttributes="Bold" Text="{Binding Name, Mode=OneTime}" />
+										<Label
+											FontSize="Caption"
+											Text="{Binding Barcode, Mode=OneTime}"
+											TextColor="{StaticResource Gray}" />
+									</VerticalStackLayout>
+
+									<Label
+										Grid.Column="1"
+										HorizontalOptions="Center"
+										Text="{Binding InStock, Mode=OneTime}" />
+									<Label
+										Grid.Column="2"
+										HorizontalOptions="Center"
+										Text="{Binding Quantity, Mode=OneWay}"
+										TextColor="{StaticResource Blue}" />
+									<Label
+										x:Name="discrepantLabel"
+										Grid.Column="3"
+										HorizontalOptions="Center">
+										<Label.Text>
+											<MultiBinding Converter="{StaticResource MultiMathExpressionConverter}" ConverterParameter="x0 - x1">
+												<Binding Mode="OneWay" Path="Quantity" />
+												<Binding Mode="OneWay" Path="InStock" />
+											</MultiBinding>
+										</Label.Text>
+
+										<Label.Triggers>
+											<DataTrigger
+												Binding="{Binding Source={x:Reference discrepantLabel}, Path=Text, Converter={StaticResource LongToIsPositiveBoolConverter}}"
+												TargetType="{x:Type Label}"
+												Value="True">
+												<Setter Property="TextColor" Value="{StaticResource Green}" />
+											</DataTrigger>
+											<DataTrigger
+												Binding="{Binding Source={x:Reference discrepantLabel}, Path=Text, Converter={StaticResource LongToIsPositiveBoolConverter}}"
+												TargetType="{x:Type Label}"
+												Value="{x:Null}">
+												<Setter Property="TextColor" Value="Black" />
+											</DataTrigger>
+											<DataTrigger
+												Binding="{Binding Source={x:Reference discrepantLabel}, Path=Text, Converter={StaticResource LongToIsPositiveBoolConverter}}"
+												TargetType="{x:Type Label}"
+												Value="False">
+												<Setter Property="TextColor" Value="{StaticResource Red}" />
+											</DataTrigger>
+										</Label.Triggers>
+									</Label>
+								</Grid>
+							</SwipeView>
+						</ViewCell>
+					</DataTemplate>
+				</ListView.ItemTemplate>
+			</ListView>
+		</Border>-->
+	</Grid>
+</ContentPage>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+	x:Class="MAUIApp.Views.Clients.ClientShortView"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	x:Name="this">
+	<Grid
+		Padding="16,8"
+		BindingContext="{Reference this}"
+		ColumnDefinitions="Auto, Auto"
+		RowDefinitions="Auto, Auto">
+		<Image
+			Grid.Row="0"
+			Grid.RowSpan="2"
+			Margin="0,0,8,0"
+			HeightRequest="34"
+			Source="account_circle.png">
+			<Image.Behaviors>
+				<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+			</Image.Behaviors>
+		</Image>
+		<Label
+			Grid.Row="0"
+			Grid.Column="1"
+			FontAttributes="Bold"
+			Text="{Binding Name}"
+			TextColor="{StaticResource TextPrimary}" />
+		<Label
+			Grid.Row="1"
+			Grid.Column="1"
+			FontSize="Caption"
+			Text="{Binding Phonenumber}"
+			TextColor="{StaticResource Blue}" />
+	</Grid>
+</ContentView>

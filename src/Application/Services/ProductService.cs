@@ -9,22 +9,13 @@ namespace Application.Services;
 public class ProductService(IProductRepository productRepository)
 {
 	public async Task<IEnumerable<ProductShort>> SearchAsync(
-		string nameOrBarcode,
+		string? nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var entities = await productRepository.SearchAsync(nameOrBarcode, orderBy, pagination);
 
 		return entities.Select(ProductMapper.ToShort);
-	}
-
-	public async Task<uint> CountAsync(
-		string nameOrBarcode)
-	{
-		var count = await productRepository.CountAsync(
-			nameOrBarcode);
-
-		return count;
 	}
 
 	public async Task<uint> CountAllAsync()
@@ -54,11 +45,11 @@ public class ProductService(IProductRepository productRepository)
 	/// <param name="id"></param>
 	/// <param name="update"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task ReplaceAsync(string id, ProductCreateUpdate update)
 	{
 		var entity = await productRepository.GetAsync(id)
-			?? throw new InvalidIdException("ProductId was not found.", [id]);
+			?? throw new NotFoundException("Product's Id was not found.", id);
 		ProductMapper.ToEntity(update, entity);
 		await productRepository.ReplaceAsync(entity);
 	}
@@ -68,7 +59,7 @@ public class ProductService(IProductRepository productRepository)
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task DeleteAsync(string id)
 	{
 		await productRepository.DeleteAsync(id);

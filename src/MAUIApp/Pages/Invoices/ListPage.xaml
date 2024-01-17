@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.Invoices.ListPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
+	xmlns:converters="clr-namespace:MAUIApp.Converters"
+	xmlns:dtos="clr-namespace:Domain.DTOs.Invoices;assembly=Domain"
+	xmlns:models="clr-namespace:MAUIApp.Models.Invoices"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Invoices"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:ListViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+	<ContentPage.Resources>
+		<converters:TotalProductToRemainingConverter x:Key="TotalProductToRemainingConverter" />
+	</ContentPage.Resources>
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Hóa đơn" IsBackButtonVisible="False">
+			<HorizontalStackLayout>
+				<ImageButton
+					Command="{Binding ToFilterPageCommand}"
+					Source="search.png"
+					Style="{StaticResource ContextTitlePageImageButton}">
+					<ImageButton.Behaviors>
+						<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+					</ImageButton.Behaviors>
+				</ImageButton>
+				<ImageButton
+					Command="{Binding ToCreatePageCommand}"
+					Source="add.png"
+					Style="{StaticResource ContextTitlePageImageButton}">
+					<ImageButton.Behaviors>
+						<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+					</ImageButton.Behaviors>
+				</ImageButton>
+			</HorizontalStackLayout>
+
+			<views:NavigationBar.Footer>
+				<views:TotalItemBar
+					TotalAll="{Binding TotalAllItems, TargetNullValue='N/A'}"
+					TotalSearch="{Binding TotalFoundItems, TargetNullValue='N/A'}"
+					UnitTitle="hóa đơn" />
+			</views:NavigationBar.Footer>
+		</views:NavigationBar>
+
+
+		<RefreshView
+			Grid.Row="1"
+			Command="{Binding LoadDataCommand}"
+			IsRefreshing="{Binding IsRefreshing}">
+			<CollectionView
+				EmptyView="Không có hóa đơn nào"
+				ItemsSource="{Binding Items}"
+				Style="{StaticResource ShortCollectionView}">
+				<CollectionView.ItemTemplate>
+					<DataTemplate x:DataType="{x:Type models:GroupShort}">
+						<views:Card HeaderTitle="{Binding Date, Converter={StaticResource DateOnlyToWeekDayStringConverter}, Mode=OneTime}" Style="{StaticResource ItemsTemplateCard}">
+							<VerticalStackLayout BindableLayout.ItemsSource="{Binding Shorts}">
+								<BindableLayout.ItemTemplate>
+									<DataTemplate x:DataType="{x:Type dtos:InvoiceShort}">
+										<Grid
+											Padding="16,8,16,0"
+											ColumnDefinitions="Auto, 1*, Auto"
+											RowDefinitions="Auto, Auto, Auto, Auto">
+											<Grid.GestureRecognizers>
+												<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToInvoiceDetailsPageCommand}" CommandParameter="{Binding Id}" />
+											</Grid.GestureRecognizers>
+
+											<Grid.Resources>
+												<Style TargetType="{x:Type Label}">
+													<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+												</Style>
+											</Grid.Resources>
+
+											<Image
+												Grid.Row="0"
+												Grid.RowSpan="3"
+												Grid.Column="0"
+												Margin="0,2,16,0"
+												HeightRequest="24"
+												Source="assignment.png"
+												VerticalOptions="Start">
+												<Image.Behaviors>
+													<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+												</Image.Behaviors>
+											</Image>
+
+											<Label
+												Grid.Row="0"
+												Grid.Column="1"
+												FontSize="Body"
+												Text="{Binding GrandTotal, Converter={StaticResource ConvertObjectToCurrencyStringConverter}, Mode=OneTime}"
+												TextColor="{StaticResource Blue}" />
+											<Label
+												Grid.Row="0"
+												Grid.Column="2"
+												HorizontalOptions="End"
+												Text="{Binding DateCreated, Converter={StaticResource DateTimeToDetailedStringConverter}, Mode=OneTime}" />
+
+											<Label
+												Grid.Row="1"
+												Grid.Column="1"
+												Text="{Binding ClientName, TargetNullValue='Khách hàng chung', Mode=OneTime}"
+												TextColor="{StaticResource TextSecondary}" />
+											<Label
+												Grid.Row="1"
+												Grid.Column="2"
+												HorizontalOptions="End">
+												<Label.Triggers>
+													<DataTrigger
+														Binding="{Binding Status, Mode=OneTime}"
+														TargetType="{x:Type Label}"
+														Value="{x:Static dtos:InvoiceStatus.Pending}">
+														<Setter Property="Text" Value="Chờ thanh toán" />
+														<Setter Property="TextColor" Value="Orange" />
+													</DataTrigger>
+													<DataTrigger
+														Binding="{Binding Status, Mode=OneTime}"
+														TargetType="{x:Type Label}"
+														Value="{x:Static dtos:InvoiceStatus.Paid}">
+														<Setter Property="Text" Value="Hoàn thành" />
+														<Setter Property="TextColor" Value="Green" />
+													</DataTrigger>
+													<DataTrigger
+														Binding="{Binding Status, Mode=OneTime}"
+														TargetType="{x:Type Label}"
+														Value="{x:Static dtos:InvoiceStatus.Cancelled}">
+														<Setter Property="Text" Value="Đã hủy" />
+														<Setter Property="TextColor" Value="Gray" />
+													</DataTrigger>
+												</Label.Triggers>
+											</Label>
+
+											<Grid
+												Grid.Row="2"
+												Grid.Column="1"
+												Grid.ColumnSpan="2"
+												Margin="0,4,0,0"
+												ColumnDefinitions="1*, Auto"
+												RowDefinitions="Auto, Auto">
+												<Label
+													Grid.Row="0"
+													Grid.Column="0"
+													Text="{Binding FirstProductName, Mode=OneTime}" />
+												<Label
+													Grid.Row="0"
+													Grid.Column="1"
+													Margin="32,0,0,0"
+													HorizontalOptions="End">
+													<Label.FormattedText>
+														<FormattedString>
+															<Span Text="x " />
+															<Span Text="{Binding FirstProductQuantity, Mode=OneTime}" TextColor="{StaticResource Blue}" />
+														</FormattedString>
+													</Label.FormattedText>
+												</Label>
+												<Label
+													Grid.Row="1"
+													Grid.ColumnSpan="2"
+													TextColor="{StaticResource TextSecondary}">
+													<Label.FormattedText>
+														<FormattedString>
+															<Span Text="và " />
+															<Span Text="{Binding TotalProduct, Converter={StaticResource TotalProductToRemainingConverter}, Mode=OneTime}" />
+															<Span Text=" sản phẩm khác" />
+														</FormattedString>
+													</Label.FormattedText>
+
+													<Label.Triggers>
+														<DataTrigger
+															Binding="{Binding TotalProduct, Mode=OneTime}"
+															TargetType="{x:Type Label}"
+															Value="1">
+															<Setter Property="IsVisible" Value="False" />
+														</DataTrigger>
+													</Label.Triggers>
+												</Label>
+											</Grid>
+
+											<views:Separator
+												Grid.Row="3"
+												Grid.ColumnSpan="3"
+												Margin="0,8,0,0" />
+										</Grid>
+									</DataTemplate>
+								</BindableLayout.ItemTemplate>
+							</VerticalStackLayout>
+						</views:Card>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</RefreshView>
+	</Grid>
+</ContentPage>

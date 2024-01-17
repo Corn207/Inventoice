@@ -6,9 +6,7 @@ namespace Application.Interfaces.Repositories;
 public interface IUserRepository : IRepository<User>
 {
 	Task<List<User>> SearchAsync(
-		string name,
+		string? name,
 		OrderBy orderBy,
 		Pagination pagination);
-	Task<uint> CountAsync(
-		string name);
 }

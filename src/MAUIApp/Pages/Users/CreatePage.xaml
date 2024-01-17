@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.Users.CreatePage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Users"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:CreateViewModel}"
+	Background="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="ModalAnimated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar
+			Title="Tạo người dùng"
+			BackCommand="{Static baseviewmodels:StaticViewModel.ClosePageCommand}"
+			Style="{StaticResource CloseNavigationBar}">
+			<Button Command="{Binding SaveCommand}" Style="{StaticResource SaveButton}" />
+		</views:NavigationBar>
+
+
+		<ScrollView Grid.Row="1">
+			<VerticalStackLayout Spacing="16">
+				<views:Card HeaderTitle="Thông tin cơ bản">
+					<Grid ColumnDefinitions="3*, 5*" RowDefinitions="Auto, Auto, Auto">
+						<Grid.Resources>
+							<Style TargetType="{x:Type Label}">
+								<Setter Property="Grid.Column" Value="0" />
+								<Setter Property="VerticalOptions" Value="Center" />
+								<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+							</Style>
+							<Style TargetType="{x:Type Entry}">
+								<Setter Property="Grid.Column" Value="1" />
+								<Setter Property="IsReadOnly" Value="False" />
+								<Setter Property="FontSize" Value="Body" />
+								<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+							</Style>
+							<Style TargetType="{x:Type views:Separator}">
+								<Setter Property="Grid.Column" Value="1" />
+								<Setter Property="VerticalOptions" Value="End" />
+							</Style>
+						</Grid.Resources>
+
+						<Label Grid.Row="0" Text="Tên" />
+						<Entry Grid.Row="0" Text="{Binding Name}" />
+						<views:Separator Grid.Row="0" />
+
+						<Label Grid.Row="1" Text="Điện thoại" />
+						<Entry Grid.Row="1" Text="{Binding Phonenumber}" />
+						<views:Separator Grid.Row="1" />
+
+						<Label Grid.Row="2" Text="Tên đăng nhập" />
+						<Entry Grid.Row="2" Text="{Binding Username}" />
+						<views:Separator Grid.Row="2" />
+					</Grid>
+				</views:Card>
+
+				<views:Card HeaderTitle="Quyền hạn">
+					<VerticalStackLayout Spacing="8">
+						<HorizontalStackLayout Spacing="8">
+							<CheckBox IsChecked="{Binding HasAdminRole}" />
+							<Label Text="Quản trị viên" VerticalOptions="Center" />
+						</HorizontalStackLayout>
+						<HorizontalStackLayout Spacing="8">
+							<CheckBox IsChecked="{Binding HasManagerRole}" />
+							<Label Text="Quản lý" VerticalOptions="Center" />
+						</HorizontalStackLayout>
+						<HorizontalStackLayout Spacing="8">
+							<CheckBox IsChecked="{Binding HasEmployeeRole}" />
+							<Label Text="Nhân viên" VerticalOptions="Center" />
+						</HorizontalStackLayout>
+					</VerticalStackLayout>
+				</views:Card>
+			</VerticalStackLayout>
+		</ScrollView>
+	</Grid>
+</ContentPage>

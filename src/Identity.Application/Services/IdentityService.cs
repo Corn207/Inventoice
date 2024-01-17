@@ -12,8 +12,8 @@ public class IdentityService(IdentityDatabase database)
 	private static string GenerateRandomPassword()
 	{
 		var random = new Random();
-		var chars = new char[6];
-		for (var i = 0; i < 6; i++)
+		var chars = new char[5];
+		for (var i = 0; i < 5; i++)
 		{
 			var index = random.Next(0, _randomPasswordChars.Length);
 			var c = _randomPasswordChars[index];
@@ -62,59 +62,55 @@ public class IdentityService(IdentityDatabase database)
 	/// <param name="userId"></param>
 	/// <param name="create"></param>
 	/// <returns></returns>
+	/// <exception cref="ArgumentException"></exception>
 	/// <exception cref="EntityExistedException"></exception>
-	public async Task<string> CreateIdentityAsync(string userId, CreateIdentity create)
+	public async Task<string> CreateIdentityAsync(string userId, CreateIdentity create, string? password = null)
 	{
+		if (create.Roles == 0)
+		{
+			throw new ArgumentException("Roles must be not empty");
+		}
+
 		var isExists = await database.UserLogins
 			.Find(x => x.UserId == userId || x.Username == create.Username)
 			.AnyAsync();
 		if (isExists) throw new EntityExistedException();
 
-		var password = GenerateRandomPassword();
+		var userPassword = password ?? GenerateRandomPassword();
 		var userLogin = new UserLogin()
 		{
 			UserId = userId,
 			Username = create.Username,
-			Password = password,
+			Password = userPassword,
 		};
 		var userClaim = new UserClaim()
 		{
 			UserId = userId,
-			Roles = create.Roles.Length > 0 ? create.Roles : [Role.Employee],
+			Roles = create.Roles,
 		};
 		await database.UserLogins.InsertOneAsync(userLogin);
 		await database.UserClaims.InsertOneAsync(userClaim);
 
-		return password;
+		return userPassword;
 	}
 
 	/// <summary>
 	/// 
 	/// </summary>
 	/// <param name="userId"></param>
-	/// <param name="create"></param>
 	/// <returns></returns>
-	/// <exception cref="EntityExistedException"></exception>
-	public async Task CreateAdminIdentityAsync(string userId, Onboarding create)
+	/// <exception cref="EntityNotFoundException"></exception>
+	/// <exception cref="InvalidPasswordException"></exception>
+	public async Task ChangePasswordAsync(string userId, ChangePassword body)
 	{
-		var isExists = await database.UserLogins
-			.Find(x => x.UserId == userId || x.Username == create.Username)
-			.AnyAsync();
-		if (isExists) throw new EntityExistedException();
+		var entity = await database.UserLogins
+			.Find(x => x.UserId == userId)
+			.FirstOrDefaultAsync() ?? throw new EntityNotFoundException();
+		if (entity.Password != body.OldPassword)
+			throw new InvalidPasswordException();
 
-		var userLogin = new UserLogin()
-		{
-			UserId = userId,
-			Username = create.Username,
-			Password = create.Password,
-		};
-		var userClaim = new UserClaim()
-		{
-			UserId = userId,
-			Roles = [Role.Admin, Role.Manager, Role.Employee],
-		};
-		await database.UserLogins.InsertOneAsync(userLogin);
-		await database.UserClaims.InsertOneAsync(userClaim);
+		var updateDefinition = Builders<UserLogin>.Update.Set(x => x.Password, body.NewPassword);
+		await database.UserLogins.UpdateOneAsync(x => x.UserId == userId, updateDefinition);
 	}
 
 	/// <summary>

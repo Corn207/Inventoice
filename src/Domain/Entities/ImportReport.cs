@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Domain.Entities;
-public class ImportReport : IEntity, ISoftDeletableEntity, ICancellableEntity
+public class ImportReport : IEntity, ICancellableEntity
 {
 	[BsonId]
 	[BsonRepresentation(BsonType.ObjectId)]
@@ -12,7 +12,6 @@ public class ImportReport : IEntity, ISoftDeletableEntity, ICancellableEntity
 	public required List<ImportReportProductItem> ProductItems { get; set; }
 	public required DateTime DateCreated { get; set; }
 	public DateTime? DateCancelled { get; set; }
-	public DateTime? DateDeleted { get; set; }
 }
 
 public class ImportReportProductItem

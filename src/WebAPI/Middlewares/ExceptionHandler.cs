@@ -19,16 +19,15 @@ public class ExceptionHandler : IExceptionHandler
 		};
 		switch (exception)
 		{
-			case InvalidIdException:
+			case NotFoundException:
 				details.Status = StatusCodes.Status404NotFound;
-				details.Detail += "\nIds: " + string.Join(", ", ((InvalidIdException)exception).Ids);
+				details.Detail += "\nIds: " + string.Join(", ", ((NotFoundException)exception).Ids);
 				break;
 			case OutOfStockException:
 				details.Status = StatusCodes.Status400BadRequest;
-				details.Detail += "\nIds: " + string.Join(", ", ((OutOfStockException)exception).Ids);
+				details.Detail = "Products are out of stock.\nIds: " + string.Join(", ", ((OutOfStockException)exception).Ids);
 				break;
 			case InvalidClaimException:
-			case UnknownException:
 				details.Status = StatusCodes.Status500InternalServerError;
 				break;
 			case FormatException:

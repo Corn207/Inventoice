@@ -12,8 +12,8 @@ public class AuditReportService(
 	IUserRepository userRepository)
 {
 	public async Task<IEnumerable<AuditReportShort>> SearchAsync(
-		string productNameOrBarcode,
-		string authorName,
+		string? productNameOrBarcode,
+		string? authorName,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
@@ -26,18 +26,6 @@ public class AuditReportService(
 			pagination);
 
 		return entities.Select(AuditReportMapper.ToShort);
-	}
-
-	public async Task<uint> CountAsync(string productNameOrBarcode,
-		string authorName,
-		TimeRange timeRange)
-	{
-		var count = await auditReportRepository.CountAsync(
-			productNameOrBarcode,
-			authorName,
-			timeRange);
-
-		return count;
 	}
 
 	public async Task<uint> CountAllAsync()
@@ -55,13 +43,14 @@ public class AuditReportService(
 	/// <summary>
 	/// 
 	/// </summary>
+	/// <param name="authorUserId"></param>
 	/// <param name="create"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
-	/// <exception cref="UnknownException"></exception>
-	public async Task<string> CreateAsync(AuditReportCreate create)
+	/// <exception cref="NotFoundException"></exception>
+	public async Task<string> CreateAsync(string authorUserId, AuditReportCreate create)
 	{
-		var user = await userRepository.GetAsync(create.AuthorUserId) ?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
+		var user = await userRepository.GetAsync(authorUserId)
+			?? throw new NotFoundException("AuditReport.Author's UserId was not found.", authorUserId);
 		var products = await productRepository.GetByIdsAsync(create.ProductItems.Select(x => x.Id));
 
 		#region Creating entity
@@ -89,7 +78,7 @@ public class AuditReportService(
 		#endregion
 
 		var tasks = create.ProductItems
-			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.Quantity))
+			.Select(x => productRepository.UpdateAsync(x.Id, (x => x.InStock, x.Quantity)))
 			.Append(auditReportRepository.CreateAsync(entity));
 		await Task.WhenAll(tasks);
 
@@ -99,11 +88,11 @@ public class AuditReportService(
 	/// <summary>
 	/// 
 	/// </summary>
-	/// <exception cref="InvalidIdException"></exception>
-	/// <exception cref="UnknownException"></exception>
+	/// <param name="id"></param>
 	/// <returns></returns>
+	/// <exception cref="NotFoundException"></exception>"
 	public async Task DeleteAsync(string id)
 	{
-		await auditReportRepository.SoftDeleteAsync(id);
+		await auditReportRepository.DeleteAsync(id);
 	}
 }

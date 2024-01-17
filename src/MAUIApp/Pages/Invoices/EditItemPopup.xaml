@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+	x:Class="MAUIApp.Pages.Invoices.EditItemPopup"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Invoices"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:EditItemViewModel}">
+	<toolkit:Popup.Resources>
+		<Style x:Key="Title" TargetType="{x:Type Label}">
+			<Setter Property="HorizontalOptions" Value="Center" />
+			<Setter Property="VerticalOptions" Value="Center" />
+			<Setter Property="Padding" Value="16" />
+		</Style>
+		<Style x:Key="Value" TargetType="{x:Type Label}">
+			<Setter Property="HorizontalOptions" Value="Center" />
+			<Setter Property="VerticalOptions" Value="Center" />
+			<Setter Property="Padding" Value="16" />
+			<Setter Property="FontAttributes" Value="Bold" />
+		</Style>
+		<Style TargetType="{x:Type views:Separator}">
+			<Setter Property="Grid.Column" Value="0" />
+			<Setter Property="Grid.ColumnSpan" Value="2" />
+			<Setter Property="Margin" Value="16,0" />
+			<Setter Property="VerticalOptions" Value="End" />
+		</Style>
+	</toolkit:Popup.Resources>
+
+	<Grid
+		BackgroundColor="{StaticResource BackgroundPrimary}"
+		ColumnDefinitions="Auto, 1*"
+		RowDefinitions="Auto, 1*, Auto, 1*, Auto">
+		<views:EditProductItemHeaderView
+			Name="{Binding Item.Name}"
+			Grid.Row="0"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			Barcode="{Binding Item.Barcode}" />
+
+		<Label
+			Grid.Row="1"
+			Grid.Column="0"
+			Style="{StaticResource Title}"
+			Text="Đơn giá" />
+		<Label
+			Grid.Row="1"
+			Grid.Column="1"
+			Style="{StaticResource Value}"
+			Text="{Binding Item.Price, Converter={StaticResource ConvertObjectToCurrencyStringConverter}}" />
+		<views:Separator Grid.Row="1" />
+
+		<Label
+			Grid.Row="2"
+			Grid.Column="0"
+			Style="{StaticResource Title}"
+			Text="Số lượng" />
+		<Grid
+			Grid.Row="2"
+			Grid.Column="1"
+			Padding="16,0"
+			ColumnDefinitions="1*, Auto"
+			ColumnSpacing="16">
+			<Entry
+				Grid.Column="0"
+				HorizontalTextAlignment="Center"
+				Keyboard="Numeric"
+				Text="{Binding Item.Quantity}">
+				<Entry.Behaviors>
+					<toolkit:EventToCommandBehavior Command="{Binding NotifyChangedCommand}" EventName="TextChanged" />
+				</Entry.Behaviors>
+			</Entry>
+			<Stepper
+				Grid.Column="1"
+				Increment="1"
+				Maximum="{Binding Item.InStock}"
+				Minimum="1"
+				Value="{Binding Item.Quantity}" />
+		</Grid>
+		<views:Separator Grid.Row="2" />
+
+		<Label
+			Grid.Row="3"
+			Grid.Column="0"
+			Style="{StaticResource Title}"
+			Text="Tổng tiền" />
+		<Label
+			Grid.Row="3"
+			Grid.Column="1"
+			Style="{StaticResource Value}">
+			<Label.Text>
+				<MultiBinding Converter="{StaticResource TotalPriceToCurrencyStringConverter}">
+					<Binding Mode="OneWay" Path="Item.Price" />
+					<Binding Mode="OneWay" Path="Item.Quantity" />
+				</MultiBinding>
+			</Label.Text>
+		</Label>
+		<views:Separator Grid.Row="3" />
+
+		<Button
+			Grid.Row="4"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			Margin="16,0"
+			BackgroundColor="Transparent"
+			Clicked="OKButton_Clicked"
+			HorizontalOptions="End"
+			Text="OK"
+			TextColor="{StaticResource Blue}"
+			VerticalOptions="Center" />
+	</Grid>
+</toolkit:Popup>

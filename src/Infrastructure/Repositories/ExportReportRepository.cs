@@ -2,53 +2,36 @@
 using Domain.DTOs;
 using Domain.Entities;
 using Infrastructure.Repositories.Bases;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
 public class ExportReportRepository(Database database)
-	: SoftDeletableRepository<ExportReport>(database), IExportReportRepository
+	: Repository<ExportReport>(database), IExportReportRepository
 {
-	// TODO Whether if allow cancel auto created
 	public async Task<List<ExportReport>> SearchAsync(
-		string productNameOrBarcode,
-		string authorName,
+		string? productNameOrBarcode,
+		string? authorName,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var query = Database.Collection<ExportReport>();
-		var pipelineBuilder = new PipelineBuilder<ExportReport>()
-			.Match(Builders<ExportReport>.Filter.Eq(nameof(ExportReport.DateDeleted), BsonNull.Value))
-			.MatchOr<ExportReportProductItem>(
-				nameof(ExportReport.ProductItems),
-				(nameof(ExportReportProductItem.Name), productNameOrBarcode),
-				(nameof(ExportReportProductItem.Barcode), productNameOrBarcode))
-			.MatchOr((nameof(ExportReport.Author.Name), authorName))
-			.Match(nameof(ExportReport.DateCreated), timeRange)
-			.Sort(nameof(ExportReport.DateCreated), orderBy)
-			.Paging(pagination);
-		var pipeline = pipelineBuilder.Build();
-		var result = await query.Aggregate(pipeline).ToListAsync();
+		PipelineDefinition<ExportReport, ExportReport> pipeline = new EmptyPipelineDefinition<ExportReport>();
+
+		var filters = new List<FilterDefinition<ExportReport>>();
+		filters.AddTextSearchCaseInsentitive(
+			x => x.ProductItems,
+			(x => x.Name, productNameOrBarcode),
+			(x => x.Barcode, productNameOrBarcode));
+		filters.AddTextSearchCaseInsentitive((x => x.Author.Name, authorName));
+		filters.AddFilterTimeRange(x => x.DateCreated, timeRange);
+
+		var result = await Database.Collection<ExportReport>()
+			.And(filters)
+			.Sort(x => x.DateCreated, orderBy)
+			.Paginate(pagination)
+			.ToListAsync();
 
 		return result;
-	}
-
-	public async Task<uint> CountAsync(
-		string productNameOrBarcode,
-		string authorName,
-		TimeRange timeRange)
-	{
-		var query = Database.Collection<ExportReport>();
-		var pipelineBuilder = new PipelineBuilder<ExportReport>()
-			.Match(Builders<ExportReport>.Filter.Eq(nameof(ExportReport.DateDeleted), BsonNull.Value))
-			.MatchOr<ExportReportProductItem>(
-				nameof(ExportReport.ProductItems),
-				(nameof(ExportReportProductItem.Name), productNameOrBarcode),
-				(nameof(ExportReportProductItem.Barcode), productNameOrBarcode))
-			.MatchOr((nameof(ExportReport.Author.Name), authorName))
-			.Match(nameof(ExportReport.DateCreated), timeRange);
-		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

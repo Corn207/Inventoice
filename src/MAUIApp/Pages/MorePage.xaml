@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.MorePage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels"
+	x:DataType="{x:Type viewmodels:MoreViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}">
+	<ContentPage.Behaviors>
+		<toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
+	</ContentPage.Behaviors>
+
+	<ScrollView>
+		<VerticalStackLayout Spacing="16">
+			<VerticalStackLayout.Resources>
+				<Style TargetType="{x:Type Button}">
+					<Setter Property="Margin" Value="16,0,16,0" />
+					<Setter Property="BackgroundColor" Value="White" />
+					<Setter Property="TextColor" Value="Black" />
+				</Style>
+			</VerticalStackLayout.Resources>
+
+			<Border
+				Padding="16"
+				BackgroundColor="White"
+				StrokeShape="RoundRectangle 0,0,8,8"
+				StrokeThickness="0">
+				<Grid ColumnDefinitions="Auto, 1*, Auto">
+					<ImageButton Margin="0,0,16,0" Source="account_circle.png">
+						<ImageButton.Behaviors>
+							<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+						</ImageButton.Behaviors>
+					</ImageButton>
+
+					<VerticalStackLayout Grid.Column="1">
+						<VerticalStackLayout.GestureRecognizers>
+							<TapGestureRecognizer Command="{Binding ToUserDetailsUserPageCommand}" />
+						</VerticalStackLayout.GestureRecognizers>
+
+						<Label
+							FontSize="Medium"
+							Text="{Binding NameOfUser}"
+							TextColor="{StaticResource TextPrimary}"
+							VerticalOptions="Center" />
+						<Label Text="{Binding RoleOfUser}" TextColor="{StaticResource TextSecondary}" />
+					</VerticalStackLayout>
+
+					<ImageButton
+						Grid.Column="2"
+						Command="{Binding LogoutCommand}"
+						HeightRequest="24"
+						Source="logout.png"
+						VerticalOptions="Center">
+						<ImageButton.Behaviors>
+							<toolkit:IconTintColorBehavior TintColor="{StaticResource Red}" />
+						</ImageButton.Behaviors>
+					</ImageButton>
+				</Grid>
+			</Border>
+
+			<VerticalStackLayout Margin="16,0,16,0" Spacing="16">
+				<VerticalStackLayout.Resources>
+					<Style TargetType="{x:Type Border}">
+						<Setter Property="BackgroundColor" Value="White" />
+						<Setter Property="StrokeThickness" Value="0" />
+						<Setter Property="StrokeShape" Value="RoundRectangle 8" />
+					</Style>
+					<Style TargetType="{x:Type Label}">
+						<Setter Property="TextColor" Value="Black" />
+						<Setter Property="FontSize" Value="Body" />
+						<Setter Property="VerticalOptions" Value="Center" />
+					</Style>
+					<Style TargetType="{x:Type Image}">
+						<Setter Property="Margin" Value="16" />
+					</Style>
+				</VerticalStackLayout.Resources>
+
+				<Border IsVisible="{Binding IsManager}">
+					<Border.GestureRecognizers>
+						<TapGestureRecognizer Command="{Binding GoToImportReportsPageCommand}" />
+					</Border.GestureRecognizers>
+
+					<HorizontalStackLayout>
+						<Image Source="download.png">
+							<Image.Behaviors>
+								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+							</Image.Behaviors>
+						</Image>
+						<Label Text="Nhập kho" />
+					</HorizontalStackLayout>
+				</Border>
+
+				<Border IsVisible="{Binding IsManager}">
+					<Border.GestureRecognizers>
+						<TapGestureRecognizer Command="{Binding GoToExportReportsPageCommand}" />
+					</Border.GestureRecognizers>
+
+					<HorizontalStackLayout>
+						<Image Source="upload.png">
+							<Image.Behaviors>
+								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+							</Image.Behaviors>
+						</Image>
+						<Label Text="Xuất kho" />
+					</HorizontalStackLayout>
+				</Border>
+
+				<Border IsVisible="{Binding IsManager}">
+					<Border.GestureRecognizers>
+						<TapGestureRecognizer Command="{Binding GoToAuditReportsPageCommand}" />
+					</Border.GestureRecognizers>
+
+					<HorizontalStackLayout>
+						<Image Source="inventory.png">
+							<Image.Behaviors>
+								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+							</Image.Behaviors>
+						</Image>
+						<Label Text="Kiểm kho" />
+					</HorizontalStackLayout>
+				</Border>
+
+				<Border>
+					<Border.GestureRecognizers>
+						<TapGestureRecognizer Command="{Binding GoToClientsPageCommand}" />
+					</Border.GestureRecognizers>
+
+					<HorizontalStackLayout>
+						<Image Source="group.png">
+							<Image.Behaviors>
+								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+							</Image.Behaviors>
+						</Image>
+						<Label Text="Khách hàng" />
+					</HorizontalStackLayout>
+				</Border>
+
+				<Border IsVisible="{Binding IsAdmin}">
+					<Border.GestureRecognizers>
+						<TapGestureRecognizer Command="{Binding GoToUserListPageCommand}" />
+					</Border.GestureRecognizers>
+
+					<HorizontalStackLayout>
+						<Image Source="person_fill.png">
+							<Image.Behaviors>
+								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+							</Image.Behaviors>
+						</Image>
+						<Label Text="Người dùng" />
+					</HorizontalStackLayout>
+				</Border>
+			</VerticalStackLayout>
+		</VerticalStackLayout>
+	</ScrollView>
+</ContentPage>

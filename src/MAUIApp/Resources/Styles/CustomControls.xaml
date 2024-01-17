@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:converters="clr-namespace:MAUIApp.Converters;assembly=MAUIApp"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:views="clr-namespace:MAUIApp.Views;assembly=MAUIApp">
+
+	<!--#region NavigationBar-->
+	<ControlTemplate x:Key="NavigationBarControlTemplate">
+		<Border
+			BackgroundColor="{StaticResource BackgroundPrimary}"
+			StrokeShape="RoundRectangle 0,0,16,16"
+			StrokeThickness="0">
+			<VerticalStackLayout>
+				<Grid Padding="{TemplateBinding BodyPadding}" ColumnDefinitions="Auto, Auto, 1*">
+					<ImageButton
+						Grid.Column="0"
+						Margin="{TemplateBinding BackMargin}"
+						Command="{TemplateBinding BackCommand}"
+						HeightRequest="{TemplateBinding BackHeightRequest}"
+						IsVisible="{TemplateBinding IsBackButtonVisible}"
+						Source="{TemplateBinding BackSource}"
+						VerticalOptions="Center">
+						<ImageButton.Behaviors>
+							<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+						</ImageButton.Behaviors>
+					</ImageButton>
+
+					<Label
+						Grid.Column="1"
+						FontAttributes="Bold"
+						FontSize="Medium"
+						Text="{TemplateBinding Title}"
+						TextColor="{StaticResource Black}"
+						VerticalOptions="Center" />
+
+					<ContentPresenter Grid.Column="2" HorizontalOptions="{TemplateBinding ContentHorizontalOptions}" />
+				</Grid>
+				<BoxView
+					HeightRequest="0.5"
+					IsVisible="{Binding Source={x:Reference footer}, Path=IsVisible, Mode=OneWay}"
+					Color="LightGray" />
+				<ContentView
+					x:Name="footer"
+					Padding="{TemplateBinding FooterPadding}"
+					BindingContext="{TemplateBinding BindingContext}"
+					Content="{TemplateBinding Footer}">
+					<ContentView.Triggers>
+						<Trigger TargetType="{x:Type ContentView}" Property="Content" Value="{x:Null}">
+							<Setter Property="IsVisible" Value="False" />
+						</Trigger>
+					</ContentView.Triggers>
+				</ContentView>
+			</VerticalStackLayout>
+		</Border>
+	</ControlTemplate>
+	<Style TargetType="{x:Type views:NavigationBar}">
+		<Setter Property="ControlTemplate" Value="{StaticResource NavigationBarControlTemplate}" />
+	</Style>
+	<Style x:Key="CloseNavigationBar" TargetType="{x:Type views:NavigationBar}">
+		<Setter Property="BackHeightRequest" Value="24" />
+		<Setter Property="BackSource" Value="close.png" />
+	</Style>
+	<Style x:Key="SearchNavigationBar" TargetType="{x:Type views:NavigationBar}">
+		<Setter Property="BodyPadding" Value="8,8,16,8" />
+		<Setter Property="BackMargin" Value="0,0,8,0" />
+	</Style>
+	<!--#endregion-->
+
+	<!--#region Card-->
+	<Style x:Key="CardHeaderLabel" TargetType="{x:Type Label}">
+		<Setter Property="Margin" Value="16,0,16,8" />
+		<Setter Property="FontAttributes" Value="Bold" />
+		<Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+	</Style>
+	<ControlTemplate x:Key="CardControlTemplate">
+		<Grid RowDefinitions="Auto, 1*">
+			<Label Style="{StaticResource CardHeaderLabel}" Text="{TemplateBinding HeaderTitle}">
+				<Label.Triggers>
+					<Trigger TargetType="{x:Type Label}" Property="Text" Value="{x:Null}">
+						<Setter Property="IsVisible" Value="False" />
+					</Trigger>
+				</Label.Triggers>
+			</Label>
+			<Border
+				Grid.Row="1"
+				Padding="{TemplateBinding BodyPadding}"
+				BackgroundColor="{StaticResource BackgroundPrimary}"
+				StrokeShape="{TemplateBinding StrokeShape}"
+				StrokeThickness="0">
+				<ContentPresenter />
+			</Border>
+		</Grid>
+	</ControlTemplate>
+	<Style TargetType="{x:Type views:Card}">
+		<Setter Property="ControlTemplate" Value="{StaticResource CardControlTemplate}" />
+	</Style>
+	<Style x:Key="FieldCard" TargetType="{x:Type views:Card}">
+		<Setter Property="BodyPadding" Value="8,0" />
+	</Style>
+	<Style x:Key="ItemsTemplateCard" TargetType="{x:Type views:Card}">
+		<Setter Property="BodyPadding" Value="0,0,0,-2" />
+	</Style>
+	<Style x:Key="ListViewCard" TargetType="{x:Type views:Card}">
+		<Setter Property="StrokeShape" Value="RoundRectangle 16,16,0,0" />
+		<Setter Property="BodyPadding" Value="0" />
+	</Style>
+	<!--#endregion-->
+
+	<!--#region ProductItemView-->
+	<ControlTemplate x:Key="ProductItemViewQuantityInStockControlTemplate">
+		<Grid
+			Padding="16,8"
+			BackgroundColor="{StaticResource BackgroundPrimary}"
+			ColumnDefinitions="1*, Auto"
+			RowDefinitions="Auto, Auto">
+			<Label
+				Grid.Row="0"
+				Grid.Column="0"
+				LineBreakMode="TailTruncation"
+				Text="{TemplateBinding Name}"
+				TextColor="{StaticResource TextPrimary}" />
+
+			<Label
+				Grid.Row="1"
+				Grid.Column="0"
+				FontSize="Caption"
+				Text="{TemplateBinding Barcode}"
+				TextColor="{StaticResource TextSecondary}" />
+
+			<Label
+				Grid.Row="0"
+				Grid.Column="1"
+				HorizontalOptions="End">
+				<Label.FormattedText>
+					<FormattedString>
+						<Span Text="Tồn: " TextColor="{StaticResource TextSecondary}" />
+						<Span Text="{TemplateBinding InStock}" TextColor="{StaticResource TextPrimary}" />
+					</FormattedString>
+				</Label.FormattedText>
+			</Label>
+
+			<Label
+				Grid.Row="1"
+				Grid.Column="1"
+				FontSize="Medium"
+				HorizontalOptions="End"
+				Text="{TemplateBinding Quantity}"
+				TextColor="{StaticResource Blue}"
+				VerticalOptions="End" />
+		</Grid>
+	</ControlTemplate>
+	<ControlTemplate x:Key="ProductItemViewQuantityControlTemplate">
+		<Grid
+			Padding="16,8"
+			BackgroundColor="{StaticResource BackgroundPrimary}"
+			ColumnDefinitions="1*, Auto"
+			RowDefinitions="Auto, Auto">
+			<Label
+				Grid.Row="0"
+				Grid.Column="0"
+				Grid.ColumnSpan="2"
+				LineBreakMode="TailTruncation"
+				Text="{TemplateBinding Name}"
+				TextColor="{StaticResource TextPrimary}" />
+
+			<Label
+				Grid.Row="1"
+				Grid.Column="0"
+				FontSize="Caption"
+				Text="{TemplateBinding Barcode}"
+				TextColor="{StaticResource TextSecondary}" />
+
+			<Label
+				Grid.Row="1"
+				Grid.Column="1"
+				FontSize="Medium"
+				HorizontalOptions="End"
+				Text="{TemplateBinding Quantity}"
+				TextColor="{StaticResource Blue}"
+				VerticalOptions="End" />
+		</Grid>
+	</ControlTemplate>
+	<ControlTemplate x:Key="ProductItemViewInStockControlTemplate">
+		<Grid
+			Padding="16,8"
+			BackgroundColor="{StaticResource BackgroundPrimary}"
+			ColumnDefinitions="1*, Auto"
+			RowDefinitions="Auto, Auto, Auto">
+			<Label
+				Grid.Row="0"
+				Grid.Column="0"
+				LineBreakMode="TailTruncation"
+				Text="{TemplateBinding Name}"
+				TextColor="{StaticResource TextPrimary}" />
+
+			<Label
+				Grid.Row="0"
+				Grid.Column="1"
+				HorizontalOptions="End">
+				<Label.FormattedText>
+					<FormattedString>
+						<Span Text="Tồn: " TextColor="{StaticResource TextSecondary}" />
+						<Span Text="{TemplateBinding InStock}" TextColor="{StaticResource TextPrimary}" />
+					</FormattedString>
+				</Label.FormattedText>
+			</Label>
+
+			<Label
+				Grid.Row="1"
+				Grid.Column="0"
+				FontSize="Caption"
+				Text="{TemplateBinding Barcode}"
+				TextColor="{StaticResource TextSecondary}" />
+
+			<Label
+				Grid.Row="2"
+				Grid.Column="0"
+				TextColor="{StaticResource Blue}">
+				<Label.FormattedText>
+					<FormattedString>
+						<Span Text="{TemplateBinding Price, Converter={StaticResource UIntToCurrencyStringConverter}}" TextColor="{StaticResource TextPrimary}" />
+						<Span Text="  x " />
+						<Span Text="{TemplateBinding Quantity}" />
+					</FormattedString>
+				</Label.FormattedText>
+			</Label>
+
+			<Label
+				Grid.Row="1"
+				Grid.RowSpan="2"
+				Grid.Column="1"
+				FontSize="Medium"
+				HorizontalOptions="End"
+				Text="{TemplateBinding TotalPrice,
+									   Converter={StaticResource UIntToCurrencyStringConverter}}"
+				TextColor="{StaticResource Blue}"
+				VerticalOptions="End" />
+		</Grid>
+	</ControlTemplate>
+	<ControlTemplate x:Key="ProductItemViewControlTemplate">
+		<Grid
+			Padding="16,8"
+			BackgroundColor="{StaticResource BackgroundPrimary}"
+			ColumnDefinitions="1*, Auto"
+			RowDefinitions="Auto, Auto, Auto">
+			<Label
+				Grid.Row="0"
+				Grid.Column="0"
+				LineBreakMode="TailTruncation"
+				Text="{TemplateBinding Name}"
+				TextColor="{StaticResource TextPrimary}" />
+
+			<Label
+				Grid.Row="1"
+				Grid.Column="0"
+				FontSize="Caption"
+				Text="{TemplateBinding Barcode}"
+				TextColor="{StaticResource TextSecondary}" />
+
+			<Label
+				Grid.Row="2"
+				Grid.Column="0"
+				TextColor="{StaticResource Blue}">
+				<Label.FormattedText>
+					<FormattedString>
+						<Span Text="{TemplateBinding Price, Converter={StaticResource UIntToCurrencyStringConverter}}" TextColor="{StaticResource TextPrimary}" />
+						<Span Text="  x " />
+						<Span Text="{TemplateBinding Quantity}" />
+					</FormattedString>
+				</Label.FormattedText>
+			</Label>
+
+			<Label
+				Grid.Row="1"
+				Grid.RowSpan="2"
+				Grid.Column="1"
+				FontSize="Medium"
+				HorizontalOptions="End"
+				Text="{TemplateBinding TotalPrice,
+									   Converter={StaticResource UIntToCurrencyStringConverter}}"
+				TextColor="{StaticResource Blue}"
+				VerticalOptions="End" />
+		</Grid>
+	</ControlTemplate>
+	<Style TargetType="{x:Type views:ProductItemView}">
+		<Setter Property="ControlTemplate" Value="{StaticResource ProductItemViewControlTemplate}" />
+	</Style>
+	<!--#endregion-->
+</ResourceDictionary>

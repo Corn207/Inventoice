@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:Card
+    x:Class="MAUIApp.Views.FilterOrderBy"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dtos="clr-namespace:Domain.DTOs;assembly=Domain"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:views="clr-namespace:MAUIApp.Views"
+    x:Name="this"
+    ControlTemplate="{StaticResource CardControlTemplate}"
+    HeaderTitle="Sắp xếp">
+    <toolkit:UniformItemsLayout
+        BindingContext="{x:Reference this}"
+        RadioButtonGroup.GroupName="OrderBy"
+        RadioButtonGroup.SelectedValue="{Binding OrderBy}">
+        <RadioButton
+            Content="{Binding AscendingTitle}"
+            GroupName="OrderBy"
+            Value="{x:Static dtos:OrderBy.Ascending}" />
+        <RadioButton
+            Content="{Binding DescendingTitle}"
+            GroupName="OrderBy"
+            Value="{x:Static dtos:OrderBy.Descending}" />
+    </toolkit:UniformItemsLayout>
+</views:Card>

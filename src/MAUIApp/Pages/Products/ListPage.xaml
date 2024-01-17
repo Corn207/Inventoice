@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.Products.ListPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
+	xmlns:dtos="clr-namespace:Domain.DTOs.Products;assembly=Domain"
+	xmlns:localviews="clr-namespace:MAUIApp.Views.Products"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Products"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:ListViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Sản phẩm" IsBackButtonVisible="False">
+			<HorizontalStackLayout>
+				<ImageButton
+					Command="{Binding ToFilterPageCommand}"
+					Source="search.png"
+					Style="{StaticResource ContextTitlePageImageButton}">
+					<ImageButton.Behaviors>
+						<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+					</ImageButton.Behaviors>
+				</ImageButton>
+				<ImageButton
+					Command="{Binding ToCreatePageCommand}"
+					Source="add.png"
+					Style="{StaticResource ContextTitlePageImageButton}">
+					<ImageButton.Behaviors>
+						<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+					</ImageButton.Behaviors>
+				</ImageButton>
+			</HorizontalStackLayout>
+
+			<views:NavigationBar.Footer>
+				<views:TotalItemBar
+					TotalAll="{Binding TotalAllItems, TargetNullValue='N/A'}"
+					TotalSearch="{Binding TotalFoundItems, TargetNullValue='N/A'}"
+					UnitTitle="sản phẩm" />
+			</views:NavigationBar.Footer>
+		</views:NavigationBar>
+
+
+		<views:Card Grid.Row="1" Style="{StaticResource ListViewCard}">
+			<RefreshView Command="{Binding LoadDataCommand}" IsRefreshing="{Binding IsRefreshing}">
+				<ListView
+					HasUnevenRows="True"
+					ItemsSource="{Binding Items}"
+					SelectionMode="None">
+					<ListView.ItemTemplate>
+						<DataTemplate x:DataType="{x:Type dtos:ProductShort}">
+							<ViewCell>
+								<localviews:ProductShortView
+									Name="{Binding Name}"
+									Barcode="{Binding Barcode}"
+									InStock="{Binding InStock}"
+									Price="{Binding Price}">
+									<localviews:ProductShortView.GestureRecognizers>
+										<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToProductDetailsPageCommand}" CommandParameter="{Binding Id}" />
+									</localviews:ProductShortView.GestureRecognizers>
+								</localviews:ProductShortView>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+			</RefreshView>
+		</views:Card>
+	</Grid>
+</ContentPage>
