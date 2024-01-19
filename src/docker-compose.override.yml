@@ -5,7 +5,10 @@ services:
   webapi:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - MongoConnection__ConnectionString=mongodb://database:27017
+      - MainMongoDB__ConnectionString=mongodb://database:27017
+      - MainMongoDB__DatabaseName=inventoice-dev
+      - IdentityMongoDB__ConnectionString=mongodb://database:27017
+      - IdentityMongoDB__DatabaseName=inventoiceidentity-dev
       - TZ=Asia/Ho_Chi_Minh
     ports:
       - "21080:8080"
