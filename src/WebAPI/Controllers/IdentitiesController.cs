@@ -20,13 +20,13 @@ public class IdentitiesController(
 {
 	#region Authentication
 	[HttpPost("login")]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType<TokenInfo>(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<ActionResult<TokenInfo>> Login([FromBody] Login body)
 	{
 		try
 		{
-			var tokenInfo = await tokenService.CreateTokenAsync(body.Username, body.Password);
+			var tokenInfo = await tokenService.CreateTokenAsync(body);
 			return Ok(tokenInfo);
 		}
 		catch (InvalidLoginException)
@@ -42,7 +42,7 @@ public class IdentitiesController(
 	public async Task<IActionResult> Logout()
 	{
 		var userId = this.GetUserId();
-		await tokenService.RevokeTokenByUserIdAsync(userId);
+		await tokenService.DeleteTokenByUserIdAsync(userId);
 
 		return NoContent();
 	}
@@ -52,7 +52,7 @@ public class IdentitiesController(
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	public async Task<ActionResult<string>> ChangePassword([FromBody] ChangePassword body)
+	public async Task<IActionResult> ChangePassword([FromBody] ChangePassword body)
 	{
 		var userId = this.GetUserId();
 		try
@@ -73,7 +73,7 @@ public class IdentitiesController(
 
 	[HttpPatch("{id}/reset-password")]
 	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType<string>(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<string>> ResetPassword(string id)
 	{
@@ -121,7 +121,14 @@ public class IdentitiesController(
 			Phonenumber = body.Phonenumber,
 		};
 		var userId = await userService.CreateAsync(createUser);
-		await identityService.CreateAdminIdentityAsync(userId, body);
+		var createIdentity = new CreateIdentity()
+		{
+			Name = body.Name,
+			Phonenumber = body.Phonenumber,
+			Username = body.Username,
+			Roles = Role.Admin | Role.Manager | Role.Employee,
+		};
+		await identityService.CreateIdentityAsync(userId, createIdentity, body.Password);
 
 		return CreatedAtAction(nameof(Login), null);
 	}
@@ -168,8 +175,8 @@ public class IdentitiesController(
 			Phonenumber = body.Phonenumber,
 		};
 		var userId = await userService.CreateAsync(createUser);
-
 		var password = await identityService.CreateIdentityAsync(userId, body);
+
 		return CreatedAtAction(nameof(GetIdentity), new { Id = userId }, password);
 	}
 

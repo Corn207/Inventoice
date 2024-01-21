@@ -12,7 +12,8 @@ public class TokenService(IdentityDatabase database)
 	/// </summary>
 	/// <param name="token"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidTokenException"></exception>
+	/// <exception cref="EntityNotFoundException"></exception>
+	/// <exception cref="DatabaseOperationErrorException"></exception>
 	public async Task<List<Claim>> GetClaimsAsync(string token)
 	{
 		var userToken = await database.UserTokens
@@ -23,7 +24,7 @@ public class TokenService(IdentityDatabase database)
 		var userClaim = await database.UserClaims
 			.Find(x => x.UserId == userToken.UserId)
 			.FirstOrDefaultAsync()
-				?? throw new EntityNotFoundException();
+				?? throw new DatabaseOperationErrorException();
 
 		var claims = new List<Claim>
 		{
@@ -31,9 +32,12 @@ public class TokenService(IdentityDatabase database)
 			new(CustomClaimTypes.DateCreated, userToken.DateCreated.ToString("s")),
 			new(CustomClaimTypes.DateExpired, userToken.DateExpired.ToString("s")),
 		};
-		foreach (var role in userClaim.Roles)
+		foreach (var role in Enum.GetValues<Role>())
 		{
-			claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+			if (userClaim.Roles.HasFlag(role))
+			{
+				claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+			}
 		}
 
 		return claims;
@@ -42,14 +46,14 @@ public class TokenService(IdentityDatabase database)
 	/// <summary>
 	/// 
 	/// </summary>
-	/// <param name="username"></param>
-	/// <param name="password"></param>
+	/// <param name="login"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidLoginException"></exception>
-	public async Task<TokenInfo> CreateTokenAsync(string username, string password)
+	/// <exception cref="DatabaseOperationErrorException"></exception>
+	public async Task<TokenInfo> CreateTokenAsync(Login login)
 	{
 		var userLogin = await database.UserLogins
-			.Find(x => x.Username == username && x.Password == password)
+			.Find(x => x.Username == login.Username && x.Password == login.Password)
 			.FirstOrDefaultAsync()
 				?? throw new InvalidLoginException();
 
@@ -64,15 +68,20 @@ public class TokenService(IdentityDatabase database)
 		await database.UserTokens.DeleteManyAsync(x => x.UserId == userLogin.UserId);
 		await database.UserTokens.InsertOneAsync(token);
 
-		return new TokenInfo(token.Id!, userLogin.UserId, now, expiration);
+		var userRoles = await database.UserClaims
+			.Find(x => x.UserId == userLogin.UserId)
+			.FirstOrDefaultAsync()
+				?? throw new DatabaseOperationErrorException();
+
+		return new TokenInfo(token.Id!, userLogin.UserId, userRoles.Roles, now, expiration);
 	}
 
-	public async Task RevokeTokenAsync(string token)
+	public async Task DeleteTokenAsync(string token)
 	{
 		await database.UserTokens.DeleteOneAsync(x => x.Id == token);
 	}
 
-	public async Task RevokeTokenByUserIdAsync(string userId)
+	public async Task DeleteTokenByUserIdAsync(string userId)
 	{
 		await database.UserTokens.DeleteManyAsync(x => x.UserId == userId);
 	}

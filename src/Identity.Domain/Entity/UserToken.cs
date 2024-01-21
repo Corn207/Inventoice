@@ -1,9 +1,8 @@
-﻿using Identity.Domain.Entity.Interfaces;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Identity.Domain.Entity;
-public class UserToken : IEntity
+public class UserToken
 {
 	[BsonId]
 	[BsonRepresentation(BsonType.ObjectId)]

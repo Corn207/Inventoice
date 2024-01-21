@@ -45,7 +45,7 @@ public class ServerAuthenticationHandler(
 		var dateExpired = DateTime.Parse(dateExpiredString, CultureInfo.InvariantCulture);
 		if (DateTime.UtcNow >= dateExpired)
 		{
-			await tokenService.RevokeTokenAsync(token);
+			await tokenService.DeleteTokenAsync(token);
 			return AuthenticateResult.Fail("Token expired.");
 		}
 

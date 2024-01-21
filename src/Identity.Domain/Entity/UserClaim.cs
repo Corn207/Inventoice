@@ -1,19 +1,17 @@
-﻿using Identity.Domain.Entity.Interfaces;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
 namespace Identity.Domain.Entity;
-public class UserClaim : IEntity
+public class UserClaim
 {
 	[BsonId]
-	[BsonRepresentation(BsonType.ObjectId)]
 	public required string UserId { get; set; }
-	public required Role[] Roles { get; set; }
+	public required Role Roles { get; set; }
 }
 
-public enum Role
+[Flags]
+public enum Role : byte
 {
-	Admin,
-	Manager,
-	Employee
+	Admin = 1,
+	Manager = 2,
+	Employee = 4,
 }
