@@ -5,16 +5,20 @@ services:
   webapi:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - MainMongoDB__ConnectionString=mongodb://database:27017
+      - MainMongoDB__ConnectionString=mongodb://inventoice-dev:Str0ngPa55w0rd@database:27017
       - MainMongoDB__DatabaseName=inventoice-dev
-      - IdentityMongoDB__ConnectionString=mongodb://database:27017
+      - IdentityMongoDB__ConnectionString=mongodb://inventoice-dev:Str0ngPa55w0rd@database:27017
       - IdentityMongoDB__DatabaseName=inventoiceidentity-dev
       - TZ=Asia/Ho_Chi_Minh
     ports:
       - "21080:8080"
+
   database:
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=inventoice-dev
+      - MONGO_INITDB_ROOT_PASSWORD=Str0ngPa55w0rd
     ports:
-      - "27017:27017"
+      - "21081:27017"
     volumes:
       - inventoice-dev:/data/db
 
