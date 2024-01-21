@@ -1,12 +1,55 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MAUIApp.Pages.LoginPage"
-             Title="LoginPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+<ContentPage
+	x:Class="MAUIApp.Pages.LoginPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels"
+	x:DataType="{x:Type viewmodels:LoginViewModel}"
+	BackgroundColor="{StaticResource BackgroundPrimary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+
+	<Grid RowDefinitions="1*, Auto">
+		<VerticalStackLayout
+			Grid.Row="0"
+			Padding="16,0"
+			Spacing="8"
+			VerticalOptions="Center">
+			<Label
+				FontAttributes="Bold"
+				FontSize="Large"
+				Text="Đăng nhập" />
+
+			<Label Text="Tên đăng nhập" TextColor="{StaticResource TextPrimary}" />
+			<Border
+				Padding="8,0"
+				Stroke="{StaticResource Gray}"
+				StrokeShape="RoundRectangle 8">
+				<Entry Text="{Binding Username, Mode=OneWayToSource}" />
+			</Border>
+
+			<Label Text="Mật khẩu" TextColor="{StaticResource TextPrimary}" />
+			<Border
+				Padding="8,0"
+				Stroke="{StaticResource Gray}"
+				StrokeShape="RoundRectangle 8">
+				<Entry IsPassword="True" Text="{Binding Password, Mode=OneWayToSource}" />
+			</Border>
+
+			<Button Command="{Binding LoginCommand}" Text="Đăng nhập" />
+		</VerticalStackLayout>
+
+		<ImageButton
+			Grid.Row="1"
+			Margin="16"
+			Command="{Binding ToSettingsPageCommand}"
+			HeightRequest="36"
+			HorizontalOptions="End"
+			Source="settings_fill.png">
+			<ImageButton.Behaviors>
+				<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+			</ImageButton.Behaviors>
+		</ImageButton>
+	</Grid>
 </ContentPage>

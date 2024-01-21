@@ -13,11 +13,9 @@ using WebAPI.Extensions;
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController(
-	UserService service,
-	IdentityService identityService) : ControllerBase
+public class UsersController(UserService service) : ControllerBase
 {
-	[HttpGet]
+	[HttpGet("search")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType<IEnumerable<UserShort>>(StatusCodes.Status200OK)]
 	public async Task<IEnumerable<UserShort>> Search(
@@ -44,14 +42,6 @@ public class UsersController(
 			name ?? string.Empty);
 	}
 
-	[HttpGet("count/all")]
-	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
-	{
-		return await service.CountAllAsync();
-	}
-
 	[HttpGet("{id}")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType<User>(StatusCodes.Status200OK)]
@@ -65,32 +55,6 @@ public class UsersController(
 		};
 
 		return entity;
-	}
-
-	[HttpDelete("{id}")]
-	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Delete(string id)
-	{
-		try
-		{
-			await service.DeleteAsync(id);
-		}
-		catch (InvalidIdException)
-		{
-			return NotFound();
-		}
-		try
-		{
-			await identityService.DeleteIdentityAsync(id);
-		}
-		catch (EntityNotFoundException)
-		{
-			return NotFound();
-		}
-
-		return NoContent();
 	}
 
 	#region Me

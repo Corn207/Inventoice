@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Exceptions;
+using Application.Services;
 using Domain.DTOs.Users;
 using Identity.Application.Exceptions;
 using Identity.Application.Services;
@@ -46,7 +47,31 @@ public class IdentitiesController(
 		return NoContent();
 	}
 
-	[HttpPut("{id}/reset-password")]
+	[HttpPatch("change-password")]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<ActionResult<string>> ChangePassword([FromBody] ChangePassword body)
+	{
+		var userId = this.GetUserId();
+		try
+		{
+			await identityService.ChangePasswordAsync(userId, body);
+		}
+		catch (EntityNotFoundException)
+		{
+			return StatusCode(StatusCodes.Status500InternalServerError, "UserId was not found.");
+		}
+		catch (InvalidPasswordException)
+		{
+			return BadRequest("Invalid password.");
+		}
+
+		return NoContent();
+	}
+
+	[HttpPatch("{id}/reset-password")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -96,16 +121,7 @@ public class IdentitiesController(
 			Phonenumber = body.Phonenumber,
 		};
 		var userId = await userService.CreateAsync(createUser);
-
-		try
-		{
-			await identityService.CreateAdminIdentityAsync(userId, body);
-		}
-		catch (EntityExistedException)
-		{
-			await userService.DeleteAsync(userId);
-			return BadRequest($"Identity existed with userid, username: {body.Username}, {userId}");
-		}
+		await identityService.CreateAdminIdentityAsync(userId, body);
 
 		return CreatedAtAction(nameof(Login), null);
 	}
@@ -136,7 +152,7 @@ public class IdentitiesController(
 
 	[HttpPost]
 	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType<string>(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> CreateIdentity([FromBody] CreateIdentity body)
 	{
@@ -165,13 +181,22 @@ public class IdentitiesController(
 	{
 		try
 		{
-			await identityService.DeleteIdentityAsync(id);
-			return NoContent();
+			await userService.DeleteAsync(id);
 		}
-		catch (EntityNotFoundException)
+		catch (InvalidIdException)
 		{
 			return NotFound();
 		}
+
+		try
+		{
+			await identityService.DeleteIdentityAsync(id);
+		}
+		catch (EntityNotFoundException)
+		{
+		}
+
+		return NoContent();
 	}
 	#endregion
 }

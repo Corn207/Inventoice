@@ -113,6 +113,9 @@
 	  <Compile Update="Pages\Clients\SearchPage.xaml.cs">
 	    <DependentUpon>SearchPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Pages\SettingsPage.xaml.cs">
+	    <DependentUpon>SettingsPage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\ExportReports\CreatePage.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
@@ -179,6 +182,9 @@
 	  <Compile Update="Pages\AuditReports\EditItemPopup.xaml.cs">
 	    <DependentUpon>EditItemPopup.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Pages\Users\ListPage.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\AuditReports\ProductItemView.xaml.cs">
 	    <DependentUpon>ProductItemView.xaml</DependentUpon>
 	  </Compile>
@@ -215,7 +221,7 @@
 	  <MauiXaml Update="Pages\Clients\ListPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\DebugPage.xaml">
+	  <MauiXaml Update="Pages\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\ExportReports\CreatePage.xaml">
@@ -288,6 +294,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\Users\DetailsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\Users\ListPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Resources\Styles\DataTemplates.xaml">

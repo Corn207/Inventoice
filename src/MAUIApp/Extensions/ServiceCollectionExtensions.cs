@@ -20,6 +20,7 @@ internal static class ServiceCollectionExtensions
 		services.AddTransient<IInvoiceService, InvoiceService>();
 		services.AddTransient<IProductService, ProductService>();
 		services.AddTransient<ICredentialService, CredentialService>();
+		services.AddTransient<IIdentityService, IdentityService>();
 
 		return services;
 	}
@@ -27,7 +28,9 @@ internal static class ServiceCollectionExtensions
 	public static IServiceCollection AddViewsAndViewModels(this IServiceCollection services)
 	{
 		services.AddSingleton<AppShell>();
-		services.AddTransientWithShellRoute<LoginPage, LoginViewModel>("login");
+		services.AddTransientWithShellRoute<LoginPage, LoginViewModel>(LoginViewModel.RouteName);
+		services.AddTransientWithShellRoute<SettingsPage, SettingsViewModel>(SettingsViewModel.RouteName);
+		services.AddTransientWithShellRoute<MorePage, MoreViewModel>(MoreViewModel.RouteName);
 
 		services.AddTransientWithShellRoute<Pages.Invoices.ListPage, ViewModels.Invoices.ListViewModel>(ViewModels.Invoices.ListViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Invoices.FilterPage, ViewModels.Invoices.FilterViewModel>(ViewModels.Invoices.FilterViewModel.RouteName);
@@ -65,9 +68,6 @@ internal static class ServiceCollectionExtensions
 		services.AddTransientWithShellRoute<Pages.Clients.DetailsPage, ViewModels.Clients.DetailsViewModel>(ViewModels.Clients.DetailsViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Clients.CreateUpdatePage, ViewModels.Clients.CreateUpdateViewModel>(ViewModels.Clients.CreateUpdateViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Clients.SearchPage, ViewModels.Clients.SearchViewModel>(ViewModels.Clients.SearchViewModel.RouteName);
-
-		services.AddTransientWithShellRoute<Pages.DebugPage, ViewModels.DebugViewModel>(ViewModels.DebugViewModel.RouteName);
-		services.AddTransientWithShellRoute<Pages.MorePage, ViewModels.MoreViewModel>(ViewModels.MoreViewModel.RouteName);
 
 		return services;
 	}

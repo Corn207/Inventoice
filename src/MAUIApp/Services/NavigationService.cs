@@ -85,5 +85,25 @@ public sealed class NavigationService(IPopupService popupService)
 	{
 		await Shell.Current.DisplayAlert("Hết hàng", "Sản phẩm hết hàng trong kho.", "OK");
 	}
+
+	public static async Task DisplayAlert(string title, string message, string cancel)
+	{
+		await Shell.Current.DisplayAlert(title, message, cancel);
+	}
+	#endregion
+
+	#region Shell related
+	public const string LoginStackRouteName = "loginStack";
+	public const string MainStackRouteName = "mainStack";
+
+	public static async Task ToLoginStackAsync()
+	{
+		await Shell.Current.GoToAsync($"//{LoginStackRouteName}");
+	}
+
+	public static async Task ToMainStackAsync()
+	{
+		await Shell.Current.GoToAsync($"//{MainStackRouteName}");
+	}
 	#endregion
 }

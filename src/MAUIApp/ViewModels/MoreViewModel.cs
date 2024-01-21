@@ -1,12 +1,21 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MAUIApp.Services;
+using MAUIApp.Services.HttpServices.Interfaces;
 
 namespace MAUIApp.ViewModels;
 
-public partial class MoreViewModel : ObservableObject
+public partial class MoreViewModel(IIdentityService identityService) : ObservableObject
 {
 	public const string RouteName = "More";
+
+
+	[RelayCommand]
+	private async Task LogoutAsync()
+	{
+		await identityService.LogoutAsync();
+		await Shell.Current.GoToAsync("//loginStack");
+	}
 
 	[RelayCommand]
 	private static async Task GoToImportReportsPageAsync()
@@ -35,6 +44,6 @@ public partial class MoreViewModel : ObservableObject
 	[RelayCommand]
 	private static async Task GoToDebugPageAsync()
 	{
-		await NavigationService.ToAsync(DebugViewModel.RouteName);
+		await NavigationService.ToAsync(SettingsViewModel.RouteName);
 	}
 }

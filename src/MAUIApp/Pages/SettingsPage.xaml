@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	x:Class="MAUIApp.Pages.SettingsPage"
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:views="clr-namespace:MAUIApp.Views"
+	x:DataType="{x:Type viewmodels:SettingsViewModel}"
+	BackgroundColor="{StaticResource BackgroundSecondary}"
+	Shell.NavBarIsVisible="False"
+	Shell.PresentationMode="Animated">
+
+	<Grid RowDefinitions="Auto, 1*" RowSpacing="16">
+		<views:NavigationBar Title="Cài đặt" BackCommand="{Static viewmodels:StaticViewModel.ClosePageCommand}">
+			<Button
+				Command="{Binding SaveCommand}"
+				Style="{StaticResource SaveButton}"
+				Text="Lưu" />
+		</views:NavigationBar>
+
+
+		<ScrollView Grid.Row="1">
+			<VerticalStackLayout Spacing="16">
+				<views:Card HeaderTitle="Url API Hệ thống">
+					<Entry
+						FontSize="Body"
+						Placeholder="BaseUri"
+						Text="{Binding BaseUri}" />
+				</views:Card>
+				<views:Card HeaderTitle="Url Tài khoản API Hệ thống">
+					<Entry
+						FontSize="Body"
+						Placeholder="IdentityBaseUri"
+						Text="{Binding IdentityBaseUri}" />
+				</views:Card>
+			</VerticalStackLayout>
+		</ScrollView>
+	</Grid>
+</ContentPage>

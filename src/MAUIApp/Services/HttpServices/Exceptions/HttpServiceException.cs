@@ -1,4 +1,4 @@
 ﻿namespace MAUIApp.Services.HttpServices.Exceptions;
-public class HttpServiceException : Exception
+public class HttpServiceException(string? message = null) : Exception(message)
 {
 }

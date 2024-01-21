@@ -25,3 +25,7 @@ public class ExportReportListRefreshMessage() : ValueChangedMessage<object?>(nul
 public class AuditReportListRefreshMessage() : ValueChangedMessage<object?>(null)
 {
 }
+
+public class UserListRefreshMessage() : ValueChangedMessage<object?>(null)
+{
+}

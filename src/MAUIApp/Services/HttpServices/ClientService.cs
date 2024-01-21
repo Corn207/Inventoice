@@ -11,7 +11,7 @@ public class ClientService(HttpService httpService) : BaseService<Client>, IClie
 
 	public async Task<ClientShort[]> SearchAsync(
 		string? nameOrPhonenumber = null,
-		OrderBy orderBy = OrderBy.Descending,
+		OrderBy orderBy = OrderBy.Ascending,
 		ushort pageNumber = 1,
 		ushort pageSize = 15,
 		CancellationToken cancellationToken = default)
@@ -44,13 +44,6 @@ public class ClientService(HttpService httpService) : BaseService<Client>, IClie
 		CancellationToken cancellationToken = default)
 	{
 		await httpService.PostNoContentAsync(Path, body, cancellationToken);
-	}
-
-	public async Task UpdateAsync(
-		string id,
-		ClientCreateUpdate body)
-	{
-		await UpdateAsync(id, body, CancellationToken.None);
 	}
 
 	public async Task UpdateAsync(

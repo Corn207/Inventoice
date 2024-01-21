@@ -123,6 +123,25 @@ public class IdentityService(IdentityDatabase database)
 	/// <param name="userId"></param>
 	/// <returns></returns>
 	/// <exception cref="EntityNotFoundException"></exception>
+	/// <exception cref="InvalidPasswordException"></exception>
+	public async Task ChangePasswordAsync(string userId, ChangePassword body)
+	{
+		var entity = await database.UserLogins
+			.Find(x => x.UserId == userId)
+			.FirstOrDefaultAsync() ?? throw new EntityNotFoundException();
+		if (entity.Password != body.OldPassword)
+			throw new InvalidPasswordException();
+
+		var updateDefinition = Builders<UserLogin>.Update.Set(x => x.Password, body.NewPassword);
+		var result = await database.UserLogins.UpdateOneAsync(x => x.UserId == userId, updateDefinition);
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="userId"></param>
+	/// <returns></returns>
+	/// <exception cref="EntityNotFoundException"></exception>
 	public async Task<string> ResetPasswordAsync(string userId)
 	{
 		var newPassword = GenerateRandomPassword();
