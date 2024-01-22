@@ -46,4 +46,10 @@ public partial class MoreViewModel(IIdentityService identityService) : Observabl
 	{
 		await NavigationService.ToAsync(SettingsViewModel.RouteName);
 	}
+
+	[RelayCommand]
+	private static async Task GoToUserListPageAsync()
+	{
+		await NavigationService.ToAsync(Users.ListViewModel.RouteName);
+	}
 }

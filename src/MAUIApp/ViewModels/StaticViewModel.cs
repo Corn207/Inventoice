@@ -82,4 +82,12 @@ public static class StaticViewModel
 		if (returnId is null) return;
 		await NavigationService.ToAsync(Clients.SearchViewModel.RouteName, Clients.SearchViewModel.QueryReturnId, returnId);
 	}
+
+	private static AsyncRelayCommand<string>? _toUserDetailsAdminPageCommand;
+	public static IAsyncRelayCommand<string> ToUserDetailsAdminPageCommand => _toUserDetailsAdminPageCommand ??= new AsyncRelayCommand<string>(ToUserDetailsAdminPageAsync);
+	private static async Task ToUserDetailsAdminPageAsync(string? id)
+	{
+		if (id is null) return;
+		await NavigationService.ToAsync(Users.DetailsAdminViewModel.RouteName, Users.DetailsAdminViewModel.QueryId, id);
+	}
 }

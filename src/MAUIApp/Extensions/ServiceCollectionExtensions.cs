@@ -21,6 +21,7 @@ internal static class ServiceCollectionExtensions
 		services.AddTransient<IProductService, ProductService>();
 		services.AddTransient<ICredentialService, CredentialService>();
 		services.AddTransient<IIdentityService, IdentityService>();
+		services.AddTransient<IUserService, UserService>();
 
 		return services;
 	}
@@ -68,6 +69,11 @@ internal static class ServiceCollectionExtensions
 		services.AddTransientWithShellRoute<Pages.Clients.DetailsPage, ViewModels.Clients.DetailsViewModel>(ViewModels.Clients.DetailsViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Clients.CreateUpdatePage, ViewModels.Clients.CreateUpdateViewModel>(ViewModels.Clients.CreateUpdateViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Clients.SearchPage, ViewModels.Clients.SearchViewModel>(ViewModels.Clients.SearchViewModel.RouteName);
+
+		services.AddTransientWithShellRoute<Pages.Users.ListPage, ViewModels.Users.ListViewModel>(ViewModels.Users.ListViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.FilterPage, ViewModels.Users.FilterViewModel>(ViewModels.Users.FilterViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.DetailsAdminPage, ViewModels.Users.DetailsAdminViewModel>(ViewModels.Users.DetailsAdminViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.CreatePage, ViewModels.Users.CreateViewModel>(ViewModels.Users.CreateViewModel.RouteName);
 
 		return services;
 	}

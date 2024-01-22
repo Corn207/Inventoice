@@ -138,6 +138,21 @@
 						<Label Text="Debug" />
 					</HorizontalStackLayout>
 				</Border>
+
+				<Border>
+					<Border.GestureRecognizers>
+						<TapGestureRecognizer Command="{Binding GoToUserListPageCommand}" />
+					</Border.GestureRecognizers>
+
+					<HorizontalStackLayout>
+						<Image Source="person_fill.png">
+							<Image.Behaviors>
+								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
+							</Image.Behaviors>
+						</Image>
+						<Label Text="Người dùng" />
+					</HorizontalStackLayout>
+				</Border>
 			</VerticalStackLayout>
 		</VerticalStackLayout>
 	</ScrollView>

@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Domain.DTOs.Products;
-using MAUIApp.Models.Products;
+using Domain.DTOs.Users;
+using MAUIApp.Models.Users;
 using MAUIApp.Services;
 using MAUIApp.Services.HttpServices.Exceptions;
 using MAUIApp.Services.HttpServices.Interfaces;
@@ -12,20 +12,20 @@ namespace MAUIApp.ViewModels.Users;
 
 public partial class ListViewModel : ObservableRecipient, IRecipient<UserListRefreshMessage>, IQueryAttributable
 {
-	public ListViewModel(IProductService productService)
+	public ListViewModel(IUserService service)
 	{
 		IsActive = true;
-		_productService = productService;
+		_service = service;
 	}
 
-	public const string RouteName = "ProductList";
+	public const string RouteName = "UserList";
 	public const string QueryRefresh = "refresh";
-	private readonly IProductService _productService;
+	private readonly IUserService _service;
 
 	public Filter Filter { get; private set; } = new Filter();
 
 	[ObservableProperty]
-	private ProductShort[] _items = [];
+	private UserShort[] _items = [];
 
 	[ObservableProperty]
 	private bool _isRefreshing = true;
@@ -50,7 +50,7 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<UserListRef
 	[RelayCommand]
 	private static async Task ToCreatePageAsync()
 	{
-		await NavigationService.ToAsync(CreateUpdateViewModel.RouteName);
+		await NavigationService.ToAsync(CreateViewModel.RouteName);
 	}
 
 	[RelayCommand]
@@ -58,9 +58,9 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<UserListRef
 	{
 		try
 		{
-			Items = await _productService.SearchAsync(Filter.ProductNameOrBarcode, Filter.OrderBy);
-			TotalAllItems = await _productService.CountAllAsync();
-			TotalFoundItems = await _productService.CountAsync(Filter.ProductNameOrBarcode);
+			Items = await _service.SearchAsync(Filter.Name, Filter.OrderBy);
+			TotalFoundItems = await _service.CountAsync(Filter.Name);
+			TotalAllItems = await _service.CountAsync();
 		}
 		catch (HttpServiceException)
 		{

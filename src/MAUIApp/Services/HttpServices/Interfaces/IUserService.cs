@@ -1,11 +1,6 @@
 ﻿using Domain.DTOs;
 using Domain.DTOs.Users;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MAUIApp.Services.HttpServices.Interfaces;
 public interface IUserService
@@ -19,10 +14,12 @@ public interface IUserService
 	Task<uint> CountAsync(
 		string? name = null,
 		CancellationToken cancellationToken = default);
-	Task<uint> CountAllAsync(
-		CancellationToken cancellationToken = default);
 	Task<User> GetAsync(
 		string id,
 		CancellationToken cancellationToken = default);
-
+	Task<User> GetMeAsync(
+		CancellationToken cancellationToken = default);
+	Task EditMeAsync(
+		UserCreateUpdate update,
+		CancellationToken cancellationToken = default);
 }

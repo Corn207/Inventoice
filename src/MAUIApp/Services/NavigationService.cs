@@ -86,7 +86,7 @@ public sealed class NavigationService(IPopupService popupService)
 		await Shell.Current.DisplayAlert("Hết hàng", "Sản phẩm hết hàng trong kho.", "OK");
 	}
 
-	public static async Task DisplayAlert(string title, string message, string cancel)
+	public static async Task DisplayAlertAsync(string title, string message, string cancel)
 	{
 		await Shell.Current.DisplayAlert(title, message, cancel);
 	}

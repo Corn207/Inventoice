@@ -28,12 +28,12 @@ public partial class LoginViewModel(IIdentityService service) : ObservableObject
 		}
 		catch (InvalidLoginException)
 		{
-			await NavigationService.DisplayAlert("Đăng nhập không thành công", "Sai tên đăng nhập hoặc mật khẩu", "OK");
+			await NavigationService.DisplayAlertAsync("Đăng nhập không thành công", "Sai tên đăng nhập hoặc mật khẩu", "OK");
 			return;
 		}
 		catch (ActionFailedException ex)
 		{
-			await NavigationService.DisplayAlert("Lỗi mạng", ex.Message, "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", ex.Message, "OK");
 			return;
 		}
 

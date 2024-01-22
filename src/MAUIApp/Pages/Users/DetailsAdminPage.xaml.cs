@@ -1,9 +1,10 @@
 using MAUIApp.ViewModels.Users;
 
 namespace MAUIApp.Pages.Users;
-public partial class DetailsPage : ContentPage
+
+public partial class DetailsAdminPage : ContentPage
 {
-	public DetailsPage(DetailsViewModel viewModel)
+	public DetailsAdminPage(DetailsAdminViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;

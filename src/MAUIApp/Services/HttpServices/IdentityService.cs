@@ -84,7 +84,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 
 		if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 		{
-			await NavigationService.DisplayAlert("Sai mật khẩu", "Mật khẩu cũ không đúng", "OK");
+			await NavigationService.DisplayAlertAsync("Sai mật khẩu", "Mật khẩu cũ không đúng", "OK");
 			throw new InvalidPasswordException();
 		}
 		else
@@ -102,7 +102,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 	/// <exception cref="ConnectionException"></exception>
 	/// <exception cref="NotFoundException"></exception>
 	/// <exception cref="ActionFailedException"></exception>
-	public async Task ResetPasswordAsync(
+	public async Task<string> ResetPasswordAsync(
 		string id,
 		CancellationToken cancellationToken = default)
 	{
@@ -113,13 +113,16 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 
 		if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
 		{
-			await NavigationService.DisplayAlert("Lỗi thao tác", "Không tìm thấy người dùng", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Không tìm thấy người dùng", "OK");
 			throw new NotFoundException();
 		}
 		else
 		{
 			await HttpService.ThrowIfNotSuccessStatusCode(response);
 		}
+
+		var password = await HttpService.ReadContent<string>(response, cancellationToken);
+		return password;
 	}
 
 	/// <summary>
@@ -142,7 +145,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		}
 		catch (HttpRequestException ex)
 		{
-			await NavigationService.DisplayAlert("Lỗi mạng", ex.Message, "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", ex.Message, "OK");
 			throw new ConnectionException();
 		}
 
@@ -171,12 +174,12 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 
 		if (response.StatusCode == System.Net.HttpStatusCode.Gone)
 		{
-			await NavigationService.DisplayAlert("Lỗi thao tác", "Onboarding không khả dụng", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Onboarding không khả dụng", "OK");
 			throw new ActionFailedException();
 		}
 		else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 		{
-			await NavigationService.DisplayAlert("Lỗi thao tác", "Đã tồn tại tên người dùng", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Đã tồn tại tên người dùng", "OK");
 			throw new ActionFailedException();
 		}
 		else
@@ -207,11 +210,20 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		}
 		catch (HttpRequestException ex)
 		{
-			await NavigationService.DisplayAlert("Lỗi mạng", ex.Message, "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", ex.Message, "OK");
 			throw new ConnectionException();
 		}
 
-		await HttpService.ThrowIfNotSuccessStatusCode(response);
+		if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+		{
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Không tìm thấy người dùng", "OK");
+			throw new NotFoundException();
+		}
+		else
+		{
+			await HttpService.ThrowIfNotSuccessStatusCode(response);
+		}
+
 		var details = await HttpService.ReadContent<IdentityDetails>(response, cancellationToken);
 		return details;
 	}
@@ -224,7 +236,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 	/// <returns></returns>
 	/// <exception cref="ConnectionException"></exception>
 	/// <exception cref="ActionFailedException"></exception>
-	public async Task CreateAsync(
+	public async Task<string> CreateAsync(
 		CreateIdentity body,
 		CancellationToken cancellationToken = default)
 	{
@@ -238,11 +250,22 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		}
 		catch (HttpRequestException ex)
 		{
-			await NavigationService.DisplayAlert("Lỗi mạng", ex.Message, "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", ex.Message, "OK");
 			throw new ConnectionException();
 		}
 
-		await HttpService.ThrowIfNotSuccessStatusCode(response);
+		if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+		{
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Đã tồn tại tên người dùng", "OK");
+			throw new ActionFailedException();
+		}
+		else
+		{
+			await HttpService.ThrowIfNotSuccessStatusCode(response);
+		}
+
+		var password = await HttpService.ReadContent<string>(response, cancellationToken);
+		return password;
 	}
 
 	/// <summary>
@@ -252,6 +275,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 	/// <param name="cancellationToken"></param>
 	/// <returns></returns>
 	/// <exception cref="ConnectionException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	/// <exception cref="ActionFailedException"></exception>
 	public async Task DeleteAsync(
 		string id,
@@ -267,10 +291,18 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		}
 		catch (HttpRequestException ex)
 		{
-			await NavigationService.DisplayAlert("Lỗi mạng", ex.Message, "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", ex.Message, "OK");
 			throw new ConnectionException();
 		}
 
-		await HttpService.ThrowIfNotSuccessStatusCode(response);
+		if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+		{
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Không tìm thấy người dùng", "OK");
+			throw new NotFoundException();
+		}
+		else
+		{
+			await HttpService.ThrowIfNotSuccessStatusCode(response);
+		}
 	}
 }

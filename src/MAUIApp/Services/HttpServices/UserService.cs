@@ -1,9 +1,10 @@
 ﻿using Domain.DTOs;
 using Domain.DTOs.Users;
 using Domain.Entities;
+using MAUIApp.Services.HttpServices.Interfaces;
 
 namespace MAUIApp.Services.HttpServices;
-public class UserService(HttpService httpService)
+public class UserService(HttpService httpService) : IUserService
 {
 	private const string _path = "Users";
 

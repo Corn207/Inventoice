@@ -1,4 +1,5 @@
-﻿using MAUIApp.Services.HttpServices.Exceptions;
+﻿using Identity.Domain.Entity;
+using MAUIApp.Services.HttpServices.Exceptions;
 using MAUIApp.Utilities;
 using System.Net;
 using System.Net.Http.Json;
@@ -72,7 +73,22 @@ public sealed class HttpService
 		}
 	}
 
-	public HttpClient HttpClient { get; } = new();
+	private const string _identityRolesKey = "IdentityRoles";
+	private Role _identityRoles = (Role)Preferences.Get(_identityRolesKey, 0);
+	public Role IdentityRoles
+	{
+		get => _identityRoles;
+		set
+		{
+			_identityRoles = value;
+			Preferences.Set(_identityRolesKey, (int)value);
+		}
+	}
+
+	public HttpClient HttpClient { get; } = new()
+	{
+		Timeout = TimeSpan.FromSeconds(10),
+	};
 	#endregion
 
 
@@ -92,7 +108,7 @@ public sealed class HttpService
 	{
 		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
 		{
-			await NavigationService.DisplayAlert("Lỗi mạng", "Không có kết nối mạng.", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", "Không có kết nối mạng.", "OK");
 			throw new ConnectionException();
 		}
 	}
@@ -107,13 +123,13 @@ public sealed class HttpService
 	{
 		if (response.StatusCode == HttpStatusCode.Unauthorized)
 		{
-			await NavigationService.DisplayAlert("Lỗi thao tác", "Hết hạn quyền truy cập.", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Hết hạn quyền truy cập.", "OK");
 			await NavigationService.ToLoginStackAsync();
 			throw new ActionFailedException();
 		}
 		else if (response.StatusCode == HttpStatusCode.Forbidden)
 		{
-			await NavigationService.DisplayAlert("Lỗi thao tác", "Không có quyền thực hiện thao tác này.", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi thao tác", "Không có quyền thực hiện thao tác này.", "OK");
 			throw new ActionFailedException();
 		}
 		else if (!response.IsSuccessStatusCode)
@@ -123,7 +139,7 @@ public sealed class HttpService
 				{response.RequestMessage!.Method.Method} {response.StatusCode} {response.RequestMessage!.RequestUri!.PathAndQuery}
 				{await response.Content.ReadAsStringAsync()}
 				""";
-			await NavigationService.DisplayAlert("Lỗi mạng", message, "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi mạng", message, "OK");
 			throw new ActionFailedException();
 		}
 	}
@@ -143,7 +159,7 @@ public sealed class HttpService
 		var result = await response.Content.ReadFromJsonAsync<T>(cancellationToken);
 		if (result is null)
 		{
-			await NavigationService.DisplayAlert("Lỗi dữ liệu", "Dữ liệu không khớp.", "OK");
+			await NavigationService.DisplayAlertAsync("Lỗi dữ liệu", "Dữ liệu không khớp.", "OK");
 			throw new DeserializeException();
 		}
 		return result;
