@@ -7,6 +7,7 @@ using Domain.Mappers;
 
 namespace Application.Services;
 public class ExportReportService(
+	IInvoiceRepository invoiceRepository,
 	IExportReportRepository exportReportRepository,
 	IProductRepository productRepository,
 	IUserRepository userRepository)
@@ -132,15 +133,22 @@ public class ExportReportService(
 	{
 		var report = await exportReportRepository.GetAsync(id, x => x.DateCancelled == null)
 			?? throw new NotFoundException("ExportReport was not found or cancelled.", id);
+
 		var products = await productRepository.GetByIdsAsync(report.ProductItems.Select(x => x.Id));
 
+		var timeCancelled = DateTime.UtcNow;
 		var tasks = products
 			.Join(
 				report.ProductItems,
 				product => product.Id,
-				report => report.Id,
-				(product, report) => productRepository.UpdateAsync(report.Id, (x => x.InStock, product.InStock + report.Quantity)))
-			.Append(exportReportRepository.UpdateAsync(id, (x => x.DateCancelled, DateTime.UtcNow)));
+				reportProductItem => reportProductItem.Id,
+				(product, reportProductItem) => productRepository.UpdateAsync(reportProductItem.Id, (x => x.InStock, product.InStock + reportProductItem.Quantity)))
+			.Append(exportReportRepository.UpdateAsync(id, (x => x.DateCancelled, timeCancelled)));
+
+		if (report.InvoiceId != null)
+		{
+			tasks = tasks.Append(invoiceRepository.UpdateAsync(report.InvoiceId, (x => x.DateCancelled, timeCancelled)));
+		}
 
 		await Task.WhenAll(tasks);
 	}
