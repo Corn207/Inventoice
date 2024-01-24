@@ -8,32 +8,30 @@ namespace Infrastructure.Repositories;
 public class ProductRepository(Database database)
 	: Repository<Product>(database), IProductRepository
 {
-	public async Task<List<Product>> SearchAsync(
-		string nameOrBarcode,
+	public async Task<PartialEnumerable<Product>> SearchAsync(
+		string? nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var query = Database.Collection<Product>();
-		var pipelineBuilder = new PipelineBuilder<Product>()
-			.MatchOr(
-				(nameof(Product.Name), nameOrBarcode),
-				(nameof(Product.Barcode), nameOrBarcode))
-			.Sort(nameof(Product.Name), orderBy)
-			.Paging(pagination);
-		var pipeline = pipelineBuilder.Build();
-		var result = await query.Aggregate(pipeline).ToListAsync();
+		PipelineDefinition<Product, Product> pipeline = new EmptyPipelineDefinition<Product>();
+
+		if (!string.IsNullOrWhiteSpace(nameOrBarcode))
+		{
+			var filter = Builders<Product>.Filter.Or(
+				Utility.TextSearchCaseInsentitive<Product>(x => x.Name, nameOrBarcode),
+				Utility.TextSearchCaseInsentitive<Product>(x => x.Barcode, nameOrBarcode));
+			pipeline = pipeline.Match(filter);
+		}
+
+		var sortStage = Utility.BuildStageSort<Product>(x => x.Name, orderBy);
+		pipeline = pipeline.AppendStage(sortStage);
+
+		var groupStage = Utility.BuildStageGroupAndPage<Product>(pagination);
+		var finalPipeline = pipeline.AppendStage(groupStage);
+
+		var result = await query.Aggregate(finalPipeline).FirstAsync();
 
 		return result;
-	}
-
-	public async Task<uint> CountAsync(
-		string nameOrBarcode)
-	{
-		var query = Database.Collection<Product>();
-		var pipelineBuilder = new PipelineBuilder<Product>()
-			.MatchOr(
-				(nameof(Product.Name), nameOrBarcode),
-				(nameof(Product.Barcode), nameOrBarcode));
-		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

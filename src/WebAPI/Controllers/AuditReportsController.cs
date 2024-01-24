@@ -3,15 +3,20 @@ using Application.Services;
 using Domain.DTOs;
 using Domain.DTOs.AuditReports;
 using Domain.Entities;
+using Identity.Domain.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = nameof(Role.Manager))]
 public class AuditReportsController(AuditReportService service) : ControllerBase
 {
-	[HttpGet]
-	public async Task<IEnumerable<AuditReportShort>> Get(
+	[HttpGet("search")]
+	[ProducesResponseType<PartialArray<AuditReportShort>>(StatusCodes.Status200OK)]
+	public async Task<PartialArray<AuditReportShort>> Get(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,
@@ -22,54 +27,48 @@ public class AuditReportsController(AuditReportService service) : ControllerBase
 	{
 		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
 		var pagination = new Pagination(pageNumber, pageSize);
-
-		return await service.SearchAsync(
-			productNameOrBarcode ?? string.Empty,
-			authorName ?? string.Empty,
+		var result = await service.SearchAsync(
+			productNameOrBarcode,
+			authorName,
 			timeRange,
 			orderBy,
 			pagination);
+
+		return result;
 	}
 
-	[HttpGet("count")]
-	public async Task<uint> Count(
-		[FromQuery] string? productNameOrBarcode = null,
-		[FromQuery] string? authorName = null,
-		[FromQuery] DateTime? dateStart = null,
-		[FromQuery] DateTime? dateEnd = null)
-	{
-		var timeRange = new TimeRange(dateStart ?? DateTime.MinValue, dateEnd ?? DateTime.MaxValue);
-
-		return await service.CountAsync(
-			productNameOrBarcode ?? string.Empty,
-			authorName ?? string.Empty,
-			timeRange);
-	}
-
-	[HttpGet("count/all")]
+	[HttpGet("total")]
+	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
 	public async Task<uint> CountAll()
 	{
 		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]
+	[ProducesResponseType<AuditReport>(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<AuditReport>> Get(string id)
 	{
 		var entity = await service.GetAsync(id)
-			?? throw new InvalidIdException("AuditReportId was not found.", id);
+			?? throw new NotFoundException("AuditReport's Id was not found.", id);
 
 		return entity;
 	}
 
 	[HttpPost]
+	[ProducesResponseType(StatusCodes.Status201Created)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Post([FromBody] AuditReportCreate body)
 	{
-		var newId = await service.CreateAsync(body);
+		var userId = this.GetUserId();
+		var newId = await service.CreateAsync(userId, body);
 
 		return CreatedAtAction(nameof(Get), new { id = newId }, null);
 	}
 
 	[HttpDelete("{id}")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete(string id)
 	{
 		await service.DeleteAsync(id);

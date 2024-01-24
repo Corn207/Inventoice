@@ -1,6 +1,4 @@
-﻿using Domain.DTOs.Interfaces;
-
-namespace Domain.DTOs.Invoices;
+﻿namespace Domain.DTOs.Invoices;
 public readonly record struct InvoiceShort(
 	string Id,
 	InvoiceStatus Status,
@@ -9,4 +7,4 @@ public readonly record struct InvoiceShort(
 	uint GrandTotal,
 	uint TotalProduct,
 	string FirstProductName,
-	uint FirstProductQuantity) : IDto;
+	uint FirstProductQuantity);

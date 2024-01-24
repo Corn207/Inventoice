@@ -11,9 +11,9 @@ public class ImportReportService(
 	IProductRepository productRepository,
 	IUserRepository userRepository)
 {
-	public async Task<IEnumerable<ImportReportShort>> SearchAsync(
-		string productNameOrBarcode,
-		string authorName,
+	public async Task<PartialArray<ImportReportShort>> SearchAsync(
+		string? productNameOrBarcode,
+		string? authorName,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
@@ -25,20 +25,7 @@ public class ImportReportService(
 			orderBy,
 			pagination);
 
-		return entities.Select(ImportReportMapper.ToShort);
-	}
-
-	public async Task<uint> CountAsync(
-		string productNameOrBarcode,
-		string authorName,
-		TimeRange timeRange)
-	{
-		var count = await importReportRepository.CountAsync(
-			productNameOrBarcode,
-			authorName,
-			timeRange);
-
-		return count;
+		return entities.ToPartialArray(ImportReportMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()
@@ -56,20 +43,20 @@ public class ImportReportService(
 	/// <summary>
 	/// 
 	/// </summary>
+	/// <param name="authorUserId"></param>
 	/// <param name="create"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
-	/// <exception cref="UnknownException"></exception>
-	public async Task<string> CreateAsync(ImportReportCreate create)
+	/// <exception cref="NotFoundException"></exception>
+	public async Task<string> CreateAsync(string authorUserId, ImportReportCreate create)
 	{
-		var user = await userRepository.GetAsync(create.AuthorUserId)
-			?? throw new InvalidIdException("UserId was not found.", [create.AuthorUserId]);
+		var user = await userRepository.GetAsync(authorUserId)
+			?? throw new NotFoundException("ImportReport.Author's UserId was not found.", authorUserId);
 		var createIds = create.ProductItems.Select(x => x.Id).ToArray();
 		var products = await productRepository.GetByIdsAsync(createIds);
 		if (products.Count != create.ProductItems.Length)
 		{
 			var nonExistingIds = createIds.Except(products.Select(x => x.Id!));
-			throw new InvalidIdException("ProductIds were not found.", nonExistingIds.ToArray());
+			throw new NotFoundException("ImportReport.ProductItems' Ids were not found.", nonExistingIds.ToArray());
 		}
 
 		var changes = products
@@ -79,12 +66,12 @@ public class ImportReportService(
 				create => create.Id,
 				(product, create) => new
 				{
-					Id = create.Id,
-					Name = product.Name,
-					Barcode = product.Barcode,
-					InStock = product.InStock,
-					Quantity = create.Quantity,
-					Price = create.Price
+					create.Id,
+					product.Name,
+					product.Barcode,
+					product.InStock,
+					create.Quantity,
+					create.Price
 				})
 			.ToArray();
 
@@ -109,7 +96,7 @@ public class ImportReportService(
 		#endregion
 
 		var tasks = changes
-			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.InStock + x.Quantity, x => x.BuyingPrice, x.Price))
+			.Select(x => productRepository.UpdateAsync(x.Id, (x => x.InStock, x.InStock + x.Quantity), (x => x.BuyingPrice, x.Price)))
 			.Append(importReportRepository.CreateAsync(entity));
 		await Task.WhenAll(tasks);
 
@@ -121,11 +108,10 @@ public class ImportReportService(
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
-	/// <exception cref="UnknownException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task DeleteAsync(string id)
 	{
-		await importReportRepository.SoftDeleteAsync(id);
+		await importReportRepository.DeleteAsync(id);
 	}
 
 	/// <summary>
@@ -133,13 +119,12 @@ public class ImportReportService(
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	/// <exception cref="OutOfStockException"></exception>
-	/// <exception cref="UnknownException"></exception>
 	public async Task CancelAsync(string id)
 	{
 		var report = await importReportRepository.GetAsync(id, x => x.DateCancelled == null)
-			?? throw new InvalidIdException("Id was not found or cancelled or deleted.", [id]);
+			?? throw new NotFoundException("ImportReport was not found or cancelled.", id);
 		var products = await productRepository.GetByIdsAsync(report.ProductItems.Select(x => x.Id));
 
 		var changes = products
@@ -149,9 +134,9 @@ public class ImportReportService(
 				reportProduct => reportProduct.Id,
 				(product, reportProduct) => new
 				{
-					Id = reportProduct.Id,
-					InStock = product.InStock,
-					Quantity = reportProduct.Quantity
+					reportProduct.Id,
+					product.InStock,
+					reportProduct.Quantity
 				})
 			.ToArray();
 
@@ -165,8 +150,8 @@ public class ImportReportService(
 		}
 
 		var tasks = changes
-			.Select(x => productRepository.UpdateAsync(x.Id, x => x.InStock, x.InStock - x.Quantity))
-			.Append(importReportRepository.UpdateAsync(id, x => x.DateCancelled, DateTime.UtcNow));
+			.Select(x => productRepository.UpdateAsync(x.Id, (x => x.InStock, x.InStock - x.Quantity)))
+			.Append(importReportRepository.UpdateAsync(id, (x => x.DateCancelled, DateTime.UtcNow)));
 
 		await Task.WhenAll(tasks);
 	}

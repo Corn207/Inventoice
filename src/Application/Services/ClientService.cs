@@ -8,8 +8,8 @@ using Domain.Mappers;
 namespace Application.Services;
 public class ClientService(IClientRepository clientRepository)
 {
-	public async Task<IEnumerable<ClientShort>> SearchAsync(
-		string nameOrPhonenumber,
+	public async Task<PartialArray<ClientShort>> SearchAsync(
+		string? nameOrPhonenumber,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
@@ -18,15 +18,7 @@ public class ClientService(IClientRepository clientRepository)
 			orderBy,
 			pagination);
 
-		return entities.Select(ClientMapper.ToShort);
-	}
-
-	public async Task<uint> CountAsync(
-		string nameOrPhonenumber)
-	{
-		var count = await clientRepository.CountAsync(nameOrPhonenumber);
-
-		return count;
+		return entities.ToPartialArray(ClientMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()
@@ -44,7 +36,6 @@ public class ClientService(IClientRepository clientRepository)
 	public async Task<string> CreateAsync(ClientCreateUpdate create)
 	{
 		var entity = ClientMapper.ToEntity(create);
-		entity.DateCreated = DateTime.UtcNow;
 		await clientRepository.CreateAsync(entity);
 
 		return entity.Id!;
@@ -56,11 +47,11 @@ public class ClientService(IClientRepository clientRepository)
 	/// <param name="id"></param>
 	/// <param name="update"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
-	/// <exception cref="UnknownException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task ReplaceAsync(string id, ClientCreateUpdate update)
 	{
-		var entity = await clientRepository.GetAsync(id) ?? throw new InvalidIdException("CliendId was not found.", [id]);
+		var entity = await clientRepository.GetAsync(id)
+			?? throw new NotFoundException("Client's Id was not found.", id);
 		ClientMapper.ToEntity(update, entity);
 		await clientRepository.ReplaceAsync(entity);
 	}
@@ -70,7 +61,7 @@ public class ClientService(IClientRepository clientRepository)
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	/// <exception cref="InvalidIdException"></exception>
+	/// <exception cref="NotFoundException"></exception>
 	public async Task DeleteAsync(string id)
 	{
 		await clientRepository.DeleteAsync(id);

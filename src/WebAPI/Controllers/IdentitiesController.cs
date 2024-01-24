@@ -190,7 +190,7 @@ public class IdentitiesController(
 		{
 			await userService.DeleteAsync(id);
 		}
-		catch (InvalidIdException)
+		catch (NotFoundException)
 		{
 			return NotFound();
 		}

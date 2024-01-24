@@ -10,7 +10,7 @@ public static partial class ExportReportMapper
 	{
 		var target = new ExportReportShort()
 		{
-			Id = source.Id ?? throw new NullReferenceException("Id is null."),
+			Id = source.Id ?? throw new NullReferenceException("ExportReport's Id is null."),
 			Author = UserMapper.ToShort(source.Author),
 			TotalProduct = Convert.ToUInt32(source.ProductItems.Count),
 			DateCreated = source.DateCreated

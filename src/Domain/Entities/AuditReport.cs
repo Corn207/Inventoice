@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Domain.Entities;
-public class AuditReport : IEntity, ISoftDeletableEntity
+public class AuditReport : IEntity
 {
 	[BsonId]
 	[BsonRepresentation(BsonType.ObjectId)]
@@ -11,7 +11,6 @@ public class AuditReport : IEntity, ISoftDeletableEntity
 	public required UserInfo Author { get; set; }
 	public required List<AuditReportProductItem> ProductItems { get; set; }
 	public required DateTime DateCreated { get; set; }
-	public DateTime? DateDeleted { get; set; }
 }
 
 public class AuditReportProductItem

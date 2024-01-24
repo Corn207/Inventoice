@@ -10,7 +10,7 @@ public static partial class AuditReportMapper
 	{
 		var target = new AuditReportShort()
 		{
-			Id = source.Id ?? throw new NullReferenceException("Id is null."),
+			Id = source.Id ?? throw new NullReferenceException("AuditReport's Id is null."),
 			Author = UserMapper.ToShort(source.Author),
 			TotalProduct = Convert.ToUInt32(source.ProductItems.Count),
 			DateCreated = source.DateCreated,

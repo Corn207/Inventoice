@@ -1,9 +1,8 @@
-﻿using Domain.DTOs.Interfaces;
-using Domain.DTOs.Users;
+﻿using Domain.DTOs.Users;
 
 namespace Domain.DTOs.ExportReports;
 public readonly record struct ExportReportShort(
 	string Id,
 	UserShort Author,
 	uint TotalProduct,
-	DateTime DateCreated) : IDto;
+	DateTime DateCreated);

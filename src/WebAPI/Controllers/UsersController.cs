@@ -3,8 +3,6 @@ using Application.Services;
 using Domain.DTOs;
 using Domain.DTOs.Users;
 using Domain.Entities;
-using Identity.Application.Exceptions;
-using Identity.Application.Services;
 using Identity.Domain.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,29 +15,28 @@ public class UsersController(UserService service) : ControllerBase
 {
 	[HttpGet("search")]
 	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType<IEnumerable<UserShort>>(StatusCodes.Status200OK)]
-	public async Task<IEnumerable<UserShort>> Search(
+	[ProducesResponseType<PartialArray<UserShort>>(StatusCodes.Status200OK)]
+	public async Task<PartialArray<UserShort>> Search(
 		[FromQuery] string? name = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,
 		[FromQuery] ushort pageSize = 15)
 	{
 		var pagination = new Pagination(pageNumber, pageSize);
-
-		return await service.SearchAsync(
-			name ?? string.Empty,
+		var result = await service.SearchAsync(
+			name,
 			orderBy,
 			pagination);
+
+		return result;
 	}
 
-	[HttpGet("count")]
+	[HttpGet("total")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> Count(
-		[FromQuery] string? name = null)
+	public async Task<uint> CountAll()
 	{
-		return await service.CountAsync(
-			name ?? string.Empty);
+		return await service.CountAllAsync();
 	}
 
 	[HttpGet("{id}")]
@@ -48,11 +45,8 @@ public class UsersController(UserService service) : ControllerBase
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<User>> Get(string id)
 	{
-		var entity = await service.GetAsync(id);
-		if (entity == null)
-		{
-			return NotFound();
-		};
+		var entity = await service.GetAsync(id)
+			?? throw new NotFoundException("User's Id was not found.", id);
 
 		return entity;
 	}
@@ -85,7 +79,7 @@ public class UsersController(UserService service) : ControllerBase
 		{
 			await service.ReplaceAsync(userId, body);
 		}
-		catch (InvalidIdException)
+		catch (NotFoundException)
 		{
 			return StatusCode(StatusCodes.Status500InternalServerError, "UserId was not found.");
 		}

@@ -9,28 +9,28 @@ namespace Infrastructure.Repositories;
 public class UserRepository(Database database)
 	: Repository<User>(database), IUserRepository
 {
-	public async Task<List<User>> SearchAsync(
-		string name,
+	public async Task<PartialEnumerable<User>> SearchAsync(
+		string? name,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var query = Database.Collection<User>();
-		var pipelineBuilder = new PipelineBuilder<User>()
-			.MatchOr((nameof(User.Name), name))
-			.Sort(nameof(User.Name), orderBy)
-			.Paging(pagination);
-		var pipeline = pipelineBuilder.Build();
-		var result = await query.Aggregate(pipeline).ToListAsync();
+		PipelineDefinition<User, User> pipeline = new EmptyPipelineDefinition<User>();
+
+		if (!string.IsNullOrWhiteSpace(name))
+		{
+			var filter = Builders<User>.Filter.Eq(x => x.Name, name);
+			pipeline = pipeline.Match(filter);
+		}
+
+		var sortStage = Utility.BuildStageSort<User>(x => x.Name, orderBy);
+		pipeline = pipeline.AppendStage(sortStage);
+
+		var groupStage = Utility.BuildStageGroupAndPage<User>(pagination);
+		var finalPipeline = pipeline.AppendStage(groupStage);
+
+		var result = await query.Aggregate(finalPipeline).FirstAsync();
 
 		return result;
-	}
-
-	public async Task<uint> CountAsync(
-		string name)
-	{
-		var query = Database.Collection<User>();
-		var pipelineBuilder = new PipelineBuilder<User>()
-			.MatchOr((nameof(User.Name), name));
-		return await pipelineBuilder.BuildAndCount(query);
 	}
 }

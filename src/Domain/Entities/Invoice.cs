@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Domain.Entities;
-public class Invoice : IEntity, ISoftDeletableEntity, ICancellableEntity
+public class Invoice : IEntity, ICancellableEntity
 {
 	[BsonId]
 	[BsonRepresentation(BsonType.ObjectId)]
@@ -16,7 +16,6 @@ public class Invoice : IEntity, ISoftDeletableEntity, ICancellableEntity
 	public ClientInfo? Client { get; set; }
 	public DateTime? DatePaid { get; set; }
 	public DateTime? DateCancelled { get; set; }
-	public DateTime? DateDeleted { get; set; }
 }
 
 public class InvoiceProductItem

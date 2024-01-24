@@ -8,6 +8,11 @@ public static partial class InvoiceMapper
 {
 	public static InvoiceShort ToShort(Invoice source)
 	{
+		if (source.ProductItems.Count == 0)
+		{
+			throw new InvalidOperationException("Invoice has no product items.");
+		}
+
 		var status = InvoiceStatus.Pending;
 		if (source.DateCancelled.HasValue)
 		{
@@ -17,10 +22,10 @@ public static partial class InvoiceMapper
 		{
 			status = InvoiceStatus.Paid;
 		}
-
+		
 		var target = new InvoiceShort()
 		{
-			Id = source.Id ?? throw new NullReferenceException("Id is null."),
+			Id = source.Id ?? throw new NullReferenceException("Invoice's Id is null."),
 			Status = status,
 			ClientName = source.Client?.Name,
 			DateCreated = source.DateCreated,

@@ -10,7 +10,7 @@ public static partial class ImportReportMapper
 	{
 		var target = new ImportReportShort()
 		{
-			Id = source.Id ?? throw new NullReferenceException("ID is null."),
+			Id = source.Id ?? throw new NullReferenceException("ImportReport's ID is null."),
 			Author = UserMapper.ToShort(source.Author),
 			TotalProduct = Convert.ToUInt32(source.ProductItems.Count),
 			TotalPrice = Convert.ToUInt32(source.ProductItems.Sum(x => x.Quantity * x.Price)),

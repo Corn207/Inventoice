@@ -5,10 +5,8 @@ using Domain.Entities;
 namespace Application.Interfaces.Repositories;
 public interface IProductRepository : IRepository<Product>
 {
-	Task<List<Product>> SearchAsync(
-		string nameOrBarcode,
+	Task<PartialEnumerable<Product>> SearchAsync(
+		string? nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination);
-	Task<uint> CountAsync(
-		string nameOrBarcode);
 }

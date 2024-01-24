@@ -1,7 +1,5 @@
 ﻿namespace Domain.DTOs.Invoices;
-
 public readonly record struct InvoiceCreate(
-	string AuthorUserId,
 	string? ClientId,
 	InvoiceCreateProductItem[] ProductItems,
 	uint GrandTotal,

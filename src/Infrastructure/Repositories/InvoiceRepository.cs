@@ -9,28 +9,43 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
 public class InvoiceRepository(Database database)
-	: SoftDeletableRepository<Invoice>(database), IInvoiceRepository
+	: Repository<Invoice>(database), IInvoiceRepository
 {
-	public async Task<List<Invoice>> SearchAsync(
-		string productNameOrBarcode,
-		string clientNameOrPhonenumber,
-		string authorName,
+	public async Task<PartialEnumerable<Invoice>> SearchAsync(
+		string? productNameOrBarcode,
+		string? clientNameOrPhonenumber,
+		string? authorName,
 		InvoiceStatus status,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var query = Database.Collection<Invoice>();
-		var pipelineBuilder = new PipelineBuilder<Invoice>()
-			.Match(Builders<Invoice>.Filter.Eq(nameof(Invoice.DateDeleted), BsonNull.Value))
-			.MatchOr<InvoiceProductItem>(
-				nameof(Invoice.ProductItems),
-				(nameof(InvoiceProductItem.Name), productNameOrBarcode),
-				(nameof(InvoiceProductItem.Barcode), productNameOrBarcode))
-			.MatchOr(
-				(nameof(Invoice.Client.Name), clientNameOrPhonenumber),
-				(nameof(Invoice.Client.Phonenumber), clientNameOrPhonenumber))
-			.MatchOr((nameof(Invoice.Author.Name), authorName));
+		PipelineDefinition<Invoice, Invoice> pipeline = new EmptyPipelineDefinition<Invoice>();
+
+		var filters = new List<FilterDefinition<Invoice>>();
+
+		filters.AddFilterArrayContainsAnyRegex(
+			x => x.ProductItems,
+			[
+				(x => x.Name, productNameOrBarcode),
+				(x => x.Barcode, productNameOrBarcode)
+			]);
+
+		if (!string.IsNullOrWhiteSpace(clientNameOrPhonenumber))
+		{
+			var clientExistFilter = Builders<Invoice>.Filter.Ne(nameof(Invoice.Client), BsonNull.Value);
+			var clientSearchFilter = Builders<Invoice>.Filter.Or(
+				Utility.TextSearchCaseInsentitive<Invoice>(x => x.Client!.Name, clientNameOrPhonenumber),
+				Utility.TextSearchCaseInsentitive<Invoice>(x => x.Client!.Phonenumber, clientNameOrPhonenumber));
+
+			// Maybe clientExistFilter abundant cuz clientSearchFilter already check for null
+			filters.Add(clientExistFilter);
+			filters.Add(clientSearchFilter);
+		}
+
+		filters.AddFilter(x => x.Author.Name, authorName);
+
 		if (status != InvoiceStatus.All)
 		{
 			var filter = status switch
@@ -39,48 +54,24 @@ public class InvoiceRepository(Database database)
 				InvoiceStatus.Paid => Builders<Invoice>.Filter.Where(x => x.DatePaid != null && x.DateCancelled == null),
 				_ => Builders<Invoice>.Filter.Where(x => x.DateCancelled != null),
 			};
-			pipelineBuilder.Match(filter);
+			filters.Add(filter);
 		}
-		pipelineBuilder
-			.Match(nameof(Invoice.DateCreated), timeRange)
-			.Sort(nameof(Invoice.DateCreated), orderBy)
-			.Paging(pagination);
-		var pipeline = pipelineBuilder.Build();
-		var result = await query.Aggregate(pipeline).ToListAsync();
+
+		filters.AddFilterTimeRange(x => x.DateCreated, timeRange.From, timeRange.To);
+		var matchStage = Utility.BuildStageMatchAnd(filters);
+		if (matchStage is not null)
+		{
+			pipeline = pipeline.AppendStage(matchStage);
+		};
+
+		var sortStage = Utility.BuildStageSort<Invoice>(x => x.DateCreated, orderBy);
+		pipeline = pipeline.AppendStage(sortStage);
+
+		var groupStage = Utility.BuildStageGroupAndPage<Invoice>(pagination);
+		var finalPipeline = pipeline.AppendStage(groupStage);
+
+		var result = await query.Aggregate(finalPipeline).FirstAsync();
 
 		return result;
-	}
-
-	public async Task<uint> CountAsync(
-		string productNameOrBarcode,
-		string clientNameOrPhonenumber,
-		string authorName,
-		InvoiceStatus status,
-		TimeRange timeRange)
-	{
-		var query = Database.Collection<Invoice>();
-		var pipelineBuilder = new PipelineBuilder<Invoice>()
-			.Match(Builders<Invoice>.Filter.Eq(nameof(Invoice.DateDeleted), BsonNull.Value))
-			.MatchOr<InvoiceProductItem>(
-				nameof(Invoice.ProductItems),
-				(nameof(InvoiceProductItem.Name), productNameOrBarcode),
-				(nameof(InvoiceProductItem.Barcode), productNameOrBarcode))
-			.MatchOr(
-				(nameof(Invoice.Client.Name), clientNameOrPhonenumber),
-				(nameof(Invoice.Client.Phonenumber), clientNameOrPhonenumber))
-			.MatchOr((nameof(Invoice.Author.Name), authorName));
-		if (status != InvoiceStatus.All)
-		{
-			var filter = status switch
-			{
-				InvoiceStatus.Pending => Builders<Invoice>.Filter.Where(x => x.DatePaid == null && x.DateCancelled == null),
-				InvoiceStatus.Paid => Builders<Invoice>.Filter.Where(x => x.DatePaid != null && x.DateCancelled == null),
-				_ => Builders<Invoice>.Filter.Where(x => x.DateCancelled != null),
-			};
-			pipelineBuilder.Match(filter);
-		}
-		pipelineBuilder
-			.Match(nameof(Invoice.DateCreated), timeRange);
-		return await pipelineBuilder.BuildAndCount(query);
 	}
 }
