@@ -5,10 +5,10 @@ public readonly record struct PartialArray<T>(
 	T[] Items,
 	uint Total);
 
-public class PartialEnumerable<T>(IEnumerable<T> enumerable, uint total) : IEnumerable<T>
+public class PartialEnumerable<T>(IEnumerable<T> enumerable, int total) : IEnumerable<T>
 {
 	public IEnumerable<T> Enumerable { get; } = enumerable;
-	public uint Total { get; } = total;
+	public uint Total { get; } = Convert.ToUInt32(total);
 
 	public IEnumerator<T> GetEnumerator()
 	{

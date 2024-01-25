@@ -105,7 +105,7 @@ internal static class Utility
 			x => x.Id!,
 			group => new PartialEnumerable<TEntity>(
 				group.Skip((pagination.PageNumber - 1) * pagination.PageSize).Take(pagination.PageSize),
-				Convert.ToUInt32(group.Count())));
+				group.Count()));
 
 		return stage;
 	}
