@@ -40,7 +40,8 @@ public class ImportReportRepository(Database database)
 		var groupStage = Utility.BuildStageGroupAndPage<ImportReport>(pagination);
 		var finalPipeline = pipeline.AppendStage(groupStage);
 
-		var result = await query.Aggregate(finalPipeline).FirstAsync();
+		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
+		result ??= new PartialEnumerable<ImportReport>([], 0);
 
 		return result;
 	}

@@ -29,7 +29,8 @@ public class UserRepository(Database database)
 		var groupStage = Utility.BuildStageGroupAndPage<User>(pagination);
 		var finalPipeline = pipeline.AppendStage(groupStage);
 
-		var result = await query.Aggregate(finalPipeline).FirstAsync();
+		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
+		result ??= new PartialEnumerable<User>([], 0);
 
 		return result;
 	}

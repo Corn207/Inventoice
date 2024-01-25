@@ -39,7 +39,8 @@ public class AuditReportRepository(Database database)
 		var groupStage = Utility.BuildStageGroupAndPage<AuditReport>(pagination);
 		var finalPipeline = pipeline.AppendStage(groupStage);
 
-		var result = await query.Aggregate(finalPipeline).FirstAsync();
+		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
+		result ??= new PartialEnumerable<AuditReport>([], 0);
 
 		return result;
 	}

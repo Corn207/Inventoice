@@ -40,7 +40,8 @@ public class ExportReportRepository(Database database)
 		var groupStage = Utility.BuildStageGroupAndPage<ExportReport>(pagination);
 		var finalPipeline = pipeline.AppendStage(groupStage);
 
-		var result = await query.Aggregate(finalPipeline).FirstAsync();
+		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
+		result ??= new PartialEnumerable<ExportReport>([], 0);
 
 		return result;
 	}

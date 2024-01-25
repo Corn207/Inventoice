@@ -30,7 +30,8 @@ public class ClientRepository(Database database)
 		var groupStage = Utility.BuildStageGroupAndPage<Client>(pagination);
 		var finalPipeline = pipeline.AppendStage(groupStage);
 
-		var result = await query.Aggregate(finalPipeline).FirstAsync();
+		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
+		result ??= new PartialEnumerable<Client>([], 0);
 
 		return result;
 	}

@@ -70,7 +70,8 @@ public class InvoiceRepository(Database database)
 		var groupStage = Utility.BuildStageGroupAndPage<Invoice>(pagination);
 		var finalPipeline = pipeline.AppendStage(groupStage);
 
-		var result = await query.Aggregate(finalPipeline).FirstAsync();
+		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
+		result ??= new PartialEnumerable<Invoice>([], 0);
 
 		return result;
 	}
