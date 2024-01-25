@@ -16,7 +16,7 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 {
 	[HttpGet("search")]
 	[ProducesResponseType<PartialArray<ExportReportShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ExportReportShort>> Get(
+	public async Task<PartialArray<ExportReportShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,
@@ -39,7 +39,7 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 
 	[HttpGet("total")]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
@@ -59,7 +59,7 @@ public class ExportReportsController(ExportReportService service) : ControllerBa
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Post([FromBody] ExportReportCreate body)
+	public async Task<IActionResult> Create([FromBody] ExportReportCreate body)
 	{
 		var userId = this.GetUserId();
 		var newId = await service.CreateAsync(userId, body);

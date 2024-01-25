@@ -34,7 +34,7 @@ public class UsersController(UserService service) : ControllerBase
 	[HttpGet("total")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}

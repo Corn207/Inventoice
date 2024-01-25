@@ -15,7 +15,7 @@ public class ProductsController(ProductService service) : ControllerBase
 {
 	[HttpGet("search")]
 	[ProducesResponseType<PartialArray<ProductShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ProductShort>> Get(
+	public async Task<PartialArray<ProductShort>> Search(
 		[FromQuery] string? nameOrBarcode = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,
@@ -33,7 +33,7 @@ public class ProductsController(ProductService service) : ControllerBase
 
 	[HttpGet("total")]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
@@ -52,7 +52,7 @@ public class ProductsController(ProductService service) : ControllerBase
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Post([FromBody] ProductCreateUpdate body)
+	public async Task<IActionResult> Create([FromBody] ProductCreateUpdate body)
 	{
 		var newId = await service.CreateAsync(body);
 
@@ -62,7 +62,7 @@ public class ProductsController(ProductService service) : ControllerBase
 	[HttpPut("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Put(string id, [FromBody] ProductCreateUpdate body)
+	public async Task<IActionResult> Update(string id, [FromBody] ProductCreateUpdate body)
 	{
 		await service.ReplaceAsync(id, body);
 

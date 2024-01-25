@@ -16,7 +16,7 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 {
 	[HttpGet("search")]
 	[ProducesResponseType<PartialArray<InvoiceShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<InvoiceShort>> Get(
+	public async Task<PartialArray<InvoiceShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? clientNameOrPhonenumber = null,
 		[FromQuery] string? authorName = null,
@@ -43,7 +43,7 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 
 	[HttpGet("total")]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
@@ -62,7 +62,7 @@ public class InvoicesController(InvoiceService service) : ControllerBase
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Post([FromBody] InvoiceCreate body)
+	public async Task<IActionResult> Create([FromBody] InvoiceCreate body)
 	{
 		var userId = this.GetUserId();
 		var newId = await service.CreateAsync(userId, body);

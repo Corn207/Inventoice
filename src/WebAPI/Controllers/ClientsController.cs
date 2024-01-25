@@ -15,7 +15,7 @@ public class ClientsController(ClientService service) : ControllerBase
 {
 	[HttpGet("search")]
 	[ProducesResponseType<PartialArray<ClientShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ClientShort>> Get(
+	public async Task<PartialArray<ClientShort>> Search(
 		[FromQuery] string? nameOrPhonenumber = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,
@@ -32,7 +32,7 @@ public class ClientsController(ClientService service) : ControllerBase
 
 	[HttpGet("total")]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
@@ -50,7 +50,7 @@ public class ClientsController(ClientService service) : ControllerBase
 
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
-	public async Task<IActionResult> Post([FromBody] ClientCreateUpdate body)
+	public async Task<IActionResult> Create([FromBody] ClientCreateUpdate body)
 	{
 		var newId = await service.CreateAsync(body);
 
@@ -60,7 +60,7 @@ public class ClientsController(ClientService service) : ControllerBase
 	[HttpPut("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Put(string id, [FromBody] ClientCreateUpdate body)
+	public async Task<IActionResult> Update(string id, [FromBody] ClientCreateUpdate body)
 	{
 		await service.ReplaceAsync(id, body);
 

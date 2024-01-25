@@ -16,7 +16,7 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 {
 	[HttpGet("search")]
 	[ProducesResponseType<PartialArray<ImportReportShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ImportReportShort>> Get(
+	public async Task<PartialArray<ImportReportShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,
@@ -39,7 +39,7 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 
 	[HttpGet("total")]
 	[ProducesResponseType<uint>(StatusCodes.Status200OK)]
-	public async Task<uint> CountAll()
+	public async Task<uint> Total()
 	{
 		return await service.CountAllAsync();
 	}
@@ -58,7 +58,7 @@ public class ImportReportsController(ImportReportService service) : ControllerBa
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Post([FromBody] ImportReportCreate body)
+	public async Task<IActionResult> Create([FromBody] ImportReportCreate body)
 	{
 		var userId = this.GetUserId();
 		var newId = await service.CreateAsync(userId, body);
