@@ -103,9 +103,7 @@ internal static class Utility
 	{
 		var stage = PipelineStageDefinitionBuilder.Group<TEntity, string, PartialEnumerable<TEntity>>(
 			x => x.Id!,
-			group => new PartialEnumerable<TEntity>(
-				group.Skip((pagination.PageNumber - 1) * pagination.PageSize).Take(pagination.PageSize),
-				group.Count()));
+			group => new PartialEnumerable<TEntity>(group.Skip((pagination.PageNumber - 1) * pagination.PageSize).Take(pagination.PageSize), group.Count()));
 
 		return stage;
 	}

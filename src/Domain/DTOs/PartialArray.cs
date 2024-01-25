@@ -1,27 +1,12 @@
-﻿using System.Collections;
-
-namespace Domain.DTOs;
+﻿namespace Domain.DTOs;
 public readonly record struct PartialArray<T>(
 	T[] Items,
 	uint Total);
 
-public class PartialEnumerable<T>(IEnumerable<T> enumerable, int total) : IEnumerable<T>
+public record PartialEnumerable<T>(IEnumerable<T> Items, int Total)
 {
-	public IEnumerable<T> Enumerable { get; } = enumerable;
-	public uint Total { get; } = Convert.ToUInt32(total);
-
-	public IEnumerator<T> GetEnumerator()
+	public PartialArray<TResult> ToPartialArray<TResult>(Func<T, TResult> select)
 	{
-		return Enumerable.GetEnumerator();
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return GetEnumerator();
-	}
-
-	public PartialArray<TReturn> ToPartialArray<TReturn>(Func<T, TReturn> select)
-	{
-		return new PartialArray<TReturn>(Enumerable.Select(select).ToArray(), Total);
+		return new(Items.Select(select).ToArray(), Convert.ToUInt32(Total));
 	}
 }
