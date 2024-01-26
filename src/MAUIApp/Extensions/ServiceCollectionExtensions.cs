@@ -19,7 +19,6 @@ internal static class ServiceCollectionExtensions
 		services.AddTransient<IImportReportService, ImportReportService>();
 		services.AddTransient<IInvoiceService, InvoiceService>();
 		services.AddTransient<IProductService, ProductService>();
-		services.AddTransient<ICredentialService, CredentialService>();
 		services.AddTransient<IIdentityService, IdentityService>();
 		services.AddTransient<IUserService, UserService>();
 

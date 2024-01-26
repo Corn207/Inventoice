@@ -2,6 +2,7 @@
 using MAUIApp.Services.HttpServices.Exceptions;
 using MAUIApp.Services.HttpServices.Interfaces;
 using System.Net.Http.Json;
+using TimeoutException = MAUIApp.Services.HttpServices.Exceptions.TimeoutException;
 
 namespace MAUIApp.Services.HttpServices;
 public sealed class IdentityService(HttpService httpService) : IIdentityService
@@ -19,7 +20,17 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		await HttpService.ThrowIfNoConnection();
 
 		var uri = httpService.IdentityBaseUri + "login";
-		var response = await httpService.HttpClient.PostAsJsonAsync(uri, body);
+
+		HttpResponseMessage response;
+		try
+		{
+			response = await httpService.HttpClient.PostAsJsonAsync(uri, body);
+		}
+		catch (TaskCanceledException)
+		{
+			await HttpService.HandleTimeoutAsync();
+			throw new TimeoutException();
+		}
 
 		if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
 			response.StatusCode == System.Net.HttpStatusCode.BadRequest)
@@ -53,13 +64,13 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		await HttpService.ThrowIfNoConnection();
 
 		var uri = httpService.IdentityBaseUri + "logout";
-		var response = await httpService.HttpClient.PostAsync(uri, null);
-
-		if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+		try
 		{
-			throw new InvalidLoginException();
+			await httpService.HttpClient.PostAsync(uri, null);
 		}
-		await HttpService.ThrowIfNotSuccessStatusCode(response);
+		catch (TaskCanceledException)
+		{
+		}
 
 		httpService.IdentityToken = string.Empty;
 		httpService.IdentityTokenExpiry = DateTime.MinValue;
@@ -121,7 +132,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 			await HttpService.ThrowIfNotSuccessStatusCode(response);
 		}
 
-		var password = await HttpService.ReadContent<string>(response, cancellationToken);
+		var password = await response.Content.ReadAsStringAsync(cancellationToken);
 		return password;
 	}
 
@@ -264,7 +275,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 			await HttpService.ThrowIfNotSuccessStatusCode(response);
 		}
 
-		var password = await HttpService.ReadContent<string>(response, cancellationToken);
+		var password = await response.Content.ReadAsStringAsync(cancellationToken);
 		return password;
 	}
 

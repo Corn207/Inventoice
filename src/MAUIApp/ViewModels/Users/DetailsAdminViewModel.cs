@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Domain.Entities;
-using Identity.Domain.DTOs;
 using Identity.Domain.Entity;
 using MAUIApp.Services;
 using MAUIApp.Services.HttpServices.Exceptions;
@@ -27,17 +26,16 @@ public partial class DetailsAdminViewModel(
 	[NotifyPropertyChangedFor(nameof(Roles))]
 	[NotifyCanExecuteChangedFor(nameof(ToEditAdminPageCommand))]
 	[NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
-	private IdentityDetails? _identity;
+	private string? _username;
+
+	[ObservableProperty]
+	private Role[] _roles = [];
 
 	[ObservableProperty]
 	private bool _isRefreshing = false;
 
-	public IEnumerable<Role> Roles =>
-		Identity.HasValue ?
-			Enum.GetValues<Role>().Where(role => Identity.Value.Roles.HasFlag(role))
-			: Enumerable.Empty<Role>();
-	public bool CanExecuteToEditAdminPage => User is not null && Identity is not null;
-	public bool CanExecuteDelete => User is not null && Identity is not null;
+	public bool CanExecuteToEditAdminPage => User is not null;
+	public bool CanExecuteDelete => User is not null;
 
 
 	[RelayCommand]
@@ -48,7 +46,9 @@ public partial class DetailsAdminViewModel(
 			try
 			{
 				User = await userService.GetAsync(_id);
-				Identity = await identityService.GetAsync(_id);
+				var details = await identityService.GetAsync(_id);
+				Username = details.Username;
+				Roles = Enum.GetValues<Role>().Where(role => details.Roles.HasFlag(role)).ToArray();
 			}
 			catch (HttpServiceException)
 			{

@@ -7,6 +7,9 @@
 	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels"
 	x:DataType="{x:Type viewmodels:MoreViewModel}"
 	BackgroundColor="{StaticResource BackgroundSecondary}">
+	<ContentPage.Behaviors>
+		<toolkit:EventToCommandBehavior Command="{Binding GetUserInfoCommand}" EventName="Loaded" />
+	</ContentPage.Behaviors>
 
 	<ScrollView>
 		<VerticalStackLayout Spacing="16">
@@ -32,7 +35,7 @@
 					<Label
 						Grid.Column="1"
 						FontSize="Medium"
-						Text="Nguyễn Văn A"
+						Text="{Binding NameOfUser}"
 						VerticalOptions="Center" />
 					<ImageButton
 						Grid.Column="2"
@@ -121,21 +124,6 @@
 							</Image.Behaviors>
 						</Image>
 						<Label Text="Khách hàng" />
-					</HorizontalStackLayout>
-				</Border>
-
-				<Border>
-					<Border.GestureRecognizers>
-						<TapGestureRecognizer Command="{Binding GoToDebugPageCommand}" />
-					</Border.GestureRecognizers>
-
-					<HorizontalStackLayout>
-						<Image Source="adb.png">
-							<Image.Behaviors>
-								<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
-							</Image.Behaviors>
-						</Image>
-						<Label Text="Debug" />
 					</HorizontalStackLayout>
 				</Border>
 

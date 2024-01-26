@@ -4,9 +4,9 @@
 	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
+	xmlns:entities="clr-namespace:Identity.Domain.Entity;assembly=Identity.Domain"
 	xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
 	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-	xmlns:entities="clr-namespace:Identity.Domain.Entity;assembly=Identity.Domain"
 	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Users"
 	xmlns:views="clr-namespace:MAUIApp.Views"
 	x:DataType="{x:Type viewmodels:DetailsAdminViewModel}"
@@ -79,32 +79,45 @@
 							<views:Separator Grid.Row="1" />
 
 							<Label Grid.Row="2" Text="Tên đăng nhập" />
-							<Entry Grid.Row="2" Text="{Binding Identity.Value.Username, Mode=OneWay}" />
+							<Entry Grid.Row="2" Text="{Binding Username, Mode=OneWay}" />
 							<views:Separator Grid.Row="2" />
 						</Grid>
 					</views:Card>
 
-					<!--<views:Card HeaderTitle="Quyền hạn" Style="{StaticResource ListViewCard}">
+					<views:Card HeaderTitle="Quyền hạn" Style="{StaticResource ItemsTemplateCard}">
 						<VerticalStackLayout BindableLayout.ItemsSource="{Binding Roles}">
 							<BindableLayout.ItemTemplate>
 								<DataTemplate x:DataType="{x:Type entities:Role}">
-									<Label>
-										<Label.Triggers>
-											<DataTrigger TargetType="Label" Binding="{Binding}" Value="{Static entities:Role.Admin}">
-												<Setter Property="Text" Value="Quản trị viên"/>
-											</DataTrigger>
-											<DataTrigger TargetType="Label" Binding="{Binding}" Value="{Static entities:Role.Manager}">
-												<Setter Property="Text" Value="Quản lý"/>
-											</DataTrigger>
-											<DataTrigger TargetType="Label" Binding="{Binding}" Value="{Static entities:Role.Employee}">
-												<Setter Property="Text" Value="Nhân viên"/>
-											</DataTrigger>
-										</Label.Triggers>
-									</Label>
+									<VerticalStackLayout Padding="16,8,16,0">
+										<Label>
+											<Label.Triggers>
+												<DataTrigger
+													Binding="{Binding .}"
+													TargetType="Label"
+													Value="1">
+													<Setter Property="Text" Value="Quản trị viên" />
+												</DataTrigger>
+												<DataTrigger
+													Binding="{Binding .}"
+													TargetType="Label"
+													Value="2">
+													<Setter Property="Text" Value="Quản lý" />
+												</DataTrigger>
+												<DataTrigger
+													Binding="{Binding .}"
+													TargetType="Label"
+													Value="4">
+													<Setter Property="Text" Value="Nhân viên" />
+												</DataTrigger>
+											</Label.Triggers>
+										</Label>
+
+										<views:Separator Margin="0,8,0,0" />
+									</VerticalStackLayout>
 								</DataTemplate>
 							</BindableLayout.ItemTemplate>
 						</VerticalStackLayout>
-					</views:Card>-->
+					</views:Card>
 				</VerticalStackLayout>
 			</ScrollView>
 		</RefreshView>

@@ -3,10 +3,10 @@
 	x:Class="MAUIApp.Pages.Invoices.ListPage"
 	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:basemodels="clr-namespace:MAUIApp.Models;assembly=MAUIApp"
 	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
 	xmlns:converters="clr-namespace:MAUIApp.Converters"
 	xmlns:dtos="clr-namespace:Domain.DTOs.Invoices;assembly=Domain"
+	xmlns:models="clr-namespace:MAUIApp.Models.Invoices"
 	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
 	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Invoices"
 	xmlns:views="clr-namespace:MAUIApp.Views"
@@ -57,9 +57,9 @@
 				ItemsSource="{Binding Items}"
 				Style="{StaticResource ShortCollectionView}">
 				<CollectionView.ItemTemplate>
-					<DataTemplate x:DataType="{x:Type basemodels:GroupingByDate`1}">
-						<views:Card HeaderTitle="{Binding Key, Converter={StaticResource DateTimeToWeekDayStringConverter}, Mode=OneTime}" Style="{StaticResource ItemsTemplateCard}">
-							<VerticalStackLayout BindableLayout.ItemsSource="{Binding}">
+					<DataTemplate x:DataType="{x:Type models:GroupShort}">
+						<views:Card HeaderTitle="{Binding Date, Converter={StaticResource DateOnlyToWeekDayStringConverter}, Mode=OneTime}" Style="{StaticResource ItemsTemplateCard}">
+							<VerticalStackLayout BindableLayout.ItemsSource="{Binding Shorts}">
 								<BindableLayout.ItemTemplate>
 									<DataTemplate x:DataType="{x:Type dtos:InvoiceShort}">
 										<Grid

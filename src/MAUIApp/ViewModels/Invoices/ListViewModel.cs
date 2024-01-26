@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Domain.DTOs.Invoices;
-using MAUIApp.Mappers;
-using MAUIApp.Models;
 using MAUIApp.Models.Invoices;
 using MAUIApp.Services;
 using MAUIApp.Services.HttpServices.Exceptions;
@@ -27,7 +24,7 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<InvoiceList
 	public Filter Filter { get; private set; } = new Filter();
 
 	[ObservableProperty]
-	private IEnumerable<GroupingByDate<InvoiceShort>> _items = [];
+	private IEnumerable<GroupShort> _items = [];
 
 	[ObservableProperty]
 	private bool _isRefreshing = true;
@@ -60,6 +57,8 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<InvoiceList
 	{
 		try
 		{
+			TotalAllItems = await _invoiceService.TotalAsync();
+
 			var shorts = await _invoiceService.SearchAsync(
 				Filter.ProductNameOrBarcode,
 				Filter.ClientNameOrPhonenumber,
@@ -68,15 +67,16 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<InvoiceList
 				Filter.DateStart,
 				Filter.DateEnd,
 				Filter.OrderBy);
-			Items = Mapper.ToGroupingByDateCreated(shorts);
-			TotalAllItems = await _invoiceService.CountAllAsync();
-			TotalFoundItems = await _invoiceService.CountAsync(
-				Filter.ProductNameOrBarcode,
-				Filter.ClientNameOrPhonenumber,
-				Filter.AuthorName,
-				Filter.Status,
-				Filter.DateStart,
-				Filter.DateEnd);
+
+			Items = shorts.GroupBy(
+				x =>
+				{
+					var local = LocalizationService.ToLocalTime(x.DateCreated);
+					var date = DateOnly.FromDateTime(local);
+					return date;
+				},
+				(date, shorts) => new GroupShort(date, shorts.ToList()));
+			TotalFoundItems = Convert.ToUInt32(shorts.Count());
 		}
 		catch (HttpServiceException)
 		{

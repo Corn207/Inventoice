@@ -3,7 +3,7 @@
 namespace MAUIApp.Utilities;
 public sealed class QueryStringConverter
 {
-	public static string Convert(IDictionary<string, object?> queries, bool hasLeadingChar = true)
+	public static string Convert(IDictionary<string, object?> queries, bool hasLeadingChar = false)
 	{
 		if (queries.Count > 0)
 		{

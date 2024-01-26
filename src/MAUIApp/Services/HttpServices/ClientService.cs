@@ -2,14 +2,14 @@
 using Domain.DTOs.Clients;
 using Domain.Entities;
 using MAUIApp.Services.HttpServices.Interfaces;
+using MAUIApp.Utilities;
 
 namespace MAUIApp.Services.HttpServices;
-public class ClientService(HttpService httpService) : BaseService<Client>, IClientService
+public class ClientService(HttpService httpService) : IClientService
 {
-	protected override HttpService HttpService => httpService;
-	protected override string Path { get; } = "Clients";
+	private const string _path = "Clients";
 
-	public async Task<ClientShort[]> SearchAsync(
+	public async Task<IEnumerable<ClientShort>> SearchAsync(
 		string? nameOrPhonenumber = null,
 		OrderBy orderBy = OrderBy.Ascending,
 		ushort pageNumber = 1,
@@ -23,27 +23,38 @@ public class ClientService(HttpService httpService) : BaseService<Client>, IClie
 			{ nameof(pageNumber), pageNumber },
 			{ nameof(pageSize), pageSize },
 		};
-		var results = await httpService.GetAsync<ClientShort[]>(Path, queries, cancellationToken);
+		var queryString = QueryStringConverter.Convert(queries);
+		var uri = new Uri(httpService.BaseUri, $"{_path}/search?{queryString}");
+		var results = await httpService.GetAsync<IEnumerable<ClientShort>>(uri, cancellationToken);
+
 		return results;
 	}
 
-	public async Task<uint> CountAsync(
-		string? nameOrPhonenumber = null,
+	public async Task<uint> TotalAsync(
 		CancellationToken cancellationToken = default)
 	{
-		var queries = new Dictionary<string, object?>()
-		{
-			{ nameof(nameOrPhonenumber), nameOrPhonenumber },
-		};
-		var results = await httpService.GetAsync<uint>($"{Path}/count", queries, cancellationToken);
+		var uri = new Uri(httpService.BaseUri, $"{_path}/total");
+		var results = await httpService.GetAsync<uint>(uri, cancellationToken);
+
 		return results;
+	}
+
+	public async Task<Client> GetAsync(
+		string id,
+		CancellationToken cancellationToken = default)
+	{
+		var uri = new Uri(httpService.BaseUri, $"{_path}/{id}");
+		var result = await httpService.GetAsync<Client>(uri, cancellationToken);
+
+		return result;
 	}
 
 	public async Task CreateAsync(
 		ClientCreateUpdate body,
 		CancellationToken cancellationToken = default)
 	{
-		await httpService.PostNoContentAsync(Path, body, cancellationToken);
+		var uri = new Uri(httpService.BaseUri, $"{_path}");
+		await httpService.PostNoContentAsync(uri, body, cancellationToken);
 	}
 
 	public async Task UpdateAsync(
@@ -51,6 +62,15 @@ public class ClientService(HttpService httpService) : BaseService<Client>, IClie
 		ClientCreateUpdate body,
 		CancellationToken cancellationToken = default)
 	{
-		await httpService.PutNoContentAsync($"{Path}/{id}", body, cancellationToken);
+		var uri = new Uri(httpService.BaseUri, $"{_path}/{id}");
+		await httpService.PutNoContentAsync(uri, body, cancellationToken);
+	}
+
+	public async Task DeleteAsync(
+		string id,
+		CancellationToken cancellationToken = default)
+	{
+		var uri = new Uri(httpService.BaseUri, $"{_path}/{id}");
+		await httpService.DeleteAsync(uri, cancellationToken);
 	}
 }

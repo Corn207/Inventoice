@@ -4,22 +4,32 @@ using Domain.Entities;
 
 namespace MAUIApp.Services.HttpServices.Interfaces;
 
-public interface IClientService : IService<Client>
+public interface IClientService
 {
-    Task<ClientShort[]> SearchAsync(
-        string? nameOrPhonenumber = null,
-        OrderBy orderBy = OrderBy.Ascending,
-        ushort pageNumber = 1,
-        ushort pageSize = 15,
+	Task<IEnumerable<ClientShort>> SearchAsync(
+		string? nameOrPhonenumber = null,
+		OrderBy orderBy = OrderBy.Ascending,
+		ushort pageNumber = 1,
+		ushort pageSize = 15,
 		CancellationToken cancellationToken = default);
-    Task<uint> CountAsync(
-        string? nameOrPhonenumber = null,
+
+	Task<uint> TotalAsync(
 		CancellationToken cancellationToken = default);
-    Task CreateAsync(
-        ClientCreateUpdate body,
+
+	Task<Client> GetAsync(
+		string id,
 		CancellationToken cancellationToken = default);
-    Task UpdateAsync(
-        string id,
-        ClientCreateUpdate body,
-        CancellationToken cancellationToken = default);
+
+	Task CreateAsync(
+		ClientCreateUpdate body,
+		CancellationToken cancellationToken = default);
+
+	Task UpdateAsync(
+		string id,
+		ClientCreateUpdate body,
+		CancellationToken cancellationToken = default);
+
+	Task DeleteAsync(
+		string id,
+		CancellationToken cancellationToken = default);
 }

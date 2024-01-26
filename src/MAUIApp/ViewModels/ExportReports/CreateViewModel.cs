@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Domain.DTOs.ExportReports;
 using Domain.DTOs.Products;
 using MAUIApp.Mappers;
 using MAUIApp.Models.Products;
@@ -16,11 +17,9 @@ namespace MAUIApp.ViewModels.ExportReports;
 public partial class CreateViewModel : ObservableObject, IQueryAttributable
 {
 	public CreateViewModel(
-		ICredentialService credentialService,
 		IExportReportService exportReportService,
 		NavigationService navigationService)
 	{
-		_credentialService = credentialService;
 		_exportReportService = exportReportService;
 		_navigationService = navigationService;
 		Items.CollectionChanged += Items_CollectionChanged;
@@ -28,7 +27,6 @@ public partial class CreateViewModel : ObservableObject, IQueryAttributable
 
 	public const string RouteName = "ExportReportCreate";
 	public const string QueryAddProduct = "addproduct";
-	private readonly ICredentialService _credentialService;
 	private readonly IExportReportService _exportReportService;
 	private readonly NavigationService _navigationService;
 
@@ -43,7 +41,8 @@ public partial class CreateViewModel : ObservableObject, IQueryAttributable
 	[RelayCommand(CanExecute = nameof(CanExecuteSave))]
 	private async Task SaveAsync()
 	{
-		var create = ExportReportMapper.ToCreate(_credentialService.User.Id!, Items);
+		var items = Items.Select(x => new ExportReportCreateProductItem(x.Id, x.Quantity)).ToArray();
+		var create = new ExportReportCreate(items);
 		try
 		{
 			await _exportReportService.CreateAsync(create);

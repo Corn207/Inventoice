@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Identity.Domain.DTOs;
-using MAUIApp.Pages;
 using MAUIApp.Services;
 using MAUIApp.Services.HttpServices.Exceptions;
 using MAUIApp.Services.HttpServices.Interfaces;
@@ -34,6 +33,10 @@ public partial class LoginViewModel(IIdentityService service) : ObservableObject
 		catch (ActionFailedException ex)
 		{
 			await NavigationService.DisplayAlertAsync("Lỗi mạng", ex.Message, "OK");
+			return;
+		}
+		catch (HttpServiceException)
+		{
 			return;
 		}
 

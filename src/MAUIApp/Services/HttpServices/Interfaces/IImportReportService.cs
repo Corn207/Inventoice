@@ -4,24 +4,34 @@ using Domain.Entities;
 
 namespace MAUIApp.Services.HttpServices.Interfaces;
 
-public interface IImportReportService : IService<ImportReport>, ICancellableService
+public interface IImportReportService
 {
-    Task<ImportReportShort[]> SearchAsync(
-        string? productNameOrBarcode = null,
-        string? authorName = null,
-        DateTime? dateStart = null,
-        DateTime? dateEnd = null,
-        OrderBy orderBy = OrderBy.Descending,
-        ushort pageNumber = 1,
-        ushort pageSize = 15,
+	Task<IEnumerable<ImportReportShort>> SearchAsync(
+		string? productNameOrBarcode = null,
+		string? authorName = null,
+		DateTime? dateStart = null,
+		DateTime? dateEnd = null,
+		OrderBy orderBy = OrderBy.Descending,
+		ushort pageNumber = 1,
+		ushort pageSize = 15,
 		CancellationToken cancellationToken = default);
-    Task<uint> CountAsync(
-        string? productNameOrBarcode = null,
-        string? authorName = null,
-        DateTime? dateStart = null,
-        DateTime? dateEnd = null,
+
+	Task<uint> TotalAsync(
 		CancellationToken cancellationToken = default);
-    Task CreateAsync(
-        ImportReportCreate body,
+
+	Task<ImportReport> GetAsync(
+		string id,
+		CancellationToken cancellationToken = default);
+
+	Task CreateAsync(
+		ImportReportCreate body,
+		CancellationToken cancellationToken = default);
+
+	Task DeleteAsync(
+		string id,
+		CancellationToken cancellationToken = default);
+
+	Task CancelAsync(
+		string id,
 		CancellationToken cancellationToken = default);
 }

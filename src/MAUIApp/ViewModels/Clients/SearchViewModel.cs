@@ -19,7 +19,7 @@ public partial class SearchViewModel(IClientService clientService) : ObservableO
 	private string _searchTerm = string.Empty;
 
 	[ObservableProperty]
-	private ClientShort[] _shorts = [];
+	private IEnumerable<ClientShort> _shorts = [];
 
 
 	[RelayCommand]
@@ -27,7 +27,8 @@ public partial class SearchViewModel(IClientService clientService) : ObservableO
 	{
 		try
 		{
-			Shorts = await clientService.SearchAsync(SearchTerm);
+			var shorts = await clientService.SearchAsync(SearchTerm);
+			Shorts = shorts;
 		}
 		catch (HttpServiceException)
 		{

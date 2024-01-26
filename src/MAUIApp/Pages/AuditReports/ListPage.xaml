@@ -5,7 +5,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels;assembly=MAUIApp"
 	xmlns:dtos="clr-namespace:Domain.DTOs.AuditReports;assembly=Domain"
-	xmlns:models="clr-namespace:MAUIApp.Models"
+	xmlns:models="clr-namespace:MAUIApp.Models.AuditReports"
 	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
 	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.AuditReports"
 	xmlns:views="clr-namespace:MAUIApp.Views"
@@ -53,11 +53,11 @@
 				ItemsSource="{Binding Items}"
 				Style="{StaticResource ShortCollectionView}">
 				<CollectionView.ItemTemplate>
-					<DataTemplate x:DataType="{x:Type models:GroupingByDate`1}">
+					<DataTemplate x:DataType="{x:Type models:GroupShort}">
 						<VerticalStackLayout>
-							<Label Style="{StaticResource CardHeaderLabel}" Text="{Binding Key, Converter={StaticResource DateTimeToWeekDayStringConverter}, Mode=OneTime}" />
+							<Label Style="{StaticResource CardHeaderLabel}" Text="{Binding Date, Converter={StaticResource DateOnlyToWeekDayStringConverter}, Mode=OneTime}" />
 							<Border Style="{StaticResource TemplatedLayoutCardBorder}">
-								<VerticalStackLayout BindableLayout.ItemsSource="{Binding}">
+								<VerticalStackLayout BindableLayout.ItemsSource="{Binding Shorts}">
 									<BindableLayout.ItemTemplate>
 										<DataTemplate x:DataType="{x:Type dtos:AuditReportShort}">
 											<views:InventoryReportShortView

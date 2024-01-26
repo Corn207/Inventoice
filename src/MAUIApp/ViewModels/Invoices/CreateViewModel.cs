@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Domain.DTOs.Clients;
+using Domain.DTOs.Invoices;
 using Domain.DTOs.Products;
 using MAUIApp.Mappers;
 using MAUIApp.Models.Products;
@@ -16,11 +17,9 @@ namespace MAUIApp.ViewModels.Invoices;
 public partial class CreateViewModel : ObservableObject, IQueryAttributable
 {
 	public CreateViewModel(
-		ICredentialService credentialService,
 		IInvoiceService invoiceService,
 		NavigationService navigationService)
 	{
-		_credentialService = credentialService;
 		_invoiceService = invoiceService;
 		_navigationService = navigationService;
 		Items.CollectionChanged += Items_CollectionChanged;
@@ -29,7 +28,6 @@ public partial class CreateViewModel : ObservableObject, IQueryAttributable
 	public const string RouteName = "InvoiceCreate";
 	public const string QueryAddProduct = "addproduct";
 	public const string QuerySetClient = "client";
-	private readonly ICredentialService _credentialService;
 	private readonly IInvoiceService _invoiceService;
 	private readonly NavigationService _navigationService;
 
@@ -48,18 +46,25 @@ public partial class CreateViewModel : ObservableObject, IQueryAttributable
 	public long TotalProduct => Items.Count;
 	public string? ClientName => _client?.Name;
 	public bool CanExecuteSave => Items.Count > 0;
+
+
 	#endregion
 
 
 	[RelayCommand(CanExecute = nameof(CanExecuteSave))]
 	private async Task SaveAsync()
 	{
-		var create = InvoiceMapper.ToCreate(
-			_credentialService.User.Id!,
-			_client?.Id,
-			GrandTotal,
-			IsPaid,
-			Items);
+		var items = Items
+			.Select(x => new InvoiceCreateProductItem(x.Id, x.Quantity))
+			.ToArray();
+		var create = new InvoiceCreate()
+		{
+			ClientId = _client?.Id,
+			ProductItems = items,
+			GrandTotal = GrandTotal,
+			IsPaid = IsPaid,
+		};
+
 		try
 		{
 			await _invoiceService.CreateAsync(create);

@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Domain.DTOs.AuditReports;
-using MAUIApp.Mappers;
-using MAUIApp.Models;
 using MAUIApp.Models.AuditReports;
 using MAUIApp.Services;
 using MAUIApp.Services.HttpServices.Exceptions;
@@ -24,10 +21,10 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<AuditReport
 	public const string QueryRefresh = "refresh";
 	private readonly IAuditReportService _auditReportService;
 
-	public Filter Filter { get; private set; } = new Filter();
+	private readonly Filter _filter = new();
 
 	[ObservableProperty]
-	private IEnumerable<GroupingByDate<AuditReportShort>> _items = [];
+	private IEnumerable<GroupShort> _items = [];
 
 	[ObservableProperty]
 	private bool _isRefreshing = true;
@@ -44,7 +41,7 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<AuditReport
 	{
 		var queries = new ShellNavigationQueryParameters()
 		{
-			{ FilterViewModel.QueryFilter, Filter },
+			{ FilterViewModel.QueryFilter, _filter },
 		};
 		await NavigationService.ToAsync(FilterViewModel.RouteName, queries);
 	}
@@ -60,19 +57,24 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<AuditReport
 	{
 		try
 		{
+			TotalAllItems = await _auditReportService.TotalAsync();
+
 			var shorts = await _auditReportService.SearchAsync(
-				Filter.ProductNameOrBarcode,
-				Filter.AuthorName,
-				Filter.DateStart,
-				Filter.DateEnd,
-				Filter.OrderBy);
-			Items = Mapper.ToGroupingByDateCreated(shorts);
-			TotalAllItems = await _auditReportService.CountAllAsync();
-			TotalFoundItems = await _auditReportService.CountAsync(
-				Filter.ProductNameOrBarcode,
-				Filter.AuthorName,
-				Filter.DateStart,
-				Filter.DateEnd);
+				_filter.ProductNameOrBarcode,
+				_filter.AuthorName,
+				_filter.DateStart,
+				_filter.DateEnd,
+				_filter.OrderBy);
+
+			Items = shorts.GroupBy(
+				x =>
+				{
+					var local = LocalizationService.ToLocalTime(x.DateCreated);
+					var date = DateOnly.FromDateTime(local);
+					return date;
+				},
+				(date, shorts) => new GroupShort(date, shorts.ToList()));
+			TotalFoundItems = Convert.ToUInt32(shorts.Count());
 		}
 		catch (HttpServiceException)
 		{

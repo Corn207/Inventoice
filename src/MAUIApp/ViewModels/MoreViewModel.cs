@@ -1,20 +1,46 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MAUIApp.Services;
+using MAUIApp.Services.HttpServices.Exceptions;
 using MAUIApp.Services.HttpServices.Interfaces;
 
 namespace MAUIApp.ViewModels;
 
-public partial class MoreViewModel(IIdentityService identityService) : ObservableObject
+public partial class MoreViewModel(
+	IUserService userService,
+	IIdentityService identityService) : ObservableObject
 {
 	public const string RouteName = "More";
 
+	[ObservableProperty]
+	private string? _nameOfUser;
+
+
+	[RelayCommand]
+	private async Task GetUserInfo()
+	{
+		try
+		{
+			var user = await userService.GetMeAsync();
+			NameOfUser = user.Name;
+		}
+		catch (HttpServiceException)
+		{
+		}
+	}
 
 	[RelayCommand]
 	private async Task LogoutAsync()
 	{
-		await identityService.LogoutAsync();
-		await Shell.Current.GoToAsync("//loginStack");
+		try
+		{
+			await identityService.LogoutAsync();
+		}
+		catch (HttpServiceException)
+		{
+		}
+
+		await NavigationService.ToLoginStackAsync();
 	}
 
 	[RelayCommand]

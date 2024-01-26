@@ -8,7 +8,7 @@
 	<converters:ConvertObjectToCurrencyStringConverter x:Key="ConvertObjectToCurrencyStringConverter" />
 	<converters:LongToIsPositiveNullableColorConverter x:Key="LongToIsPositiveNullableColorConverter" />
 	<converters:DateTimeToDetailedStringConverter x:Key="DateTimeToDetailedStringConverter" />
-	<converters:DateTimeToWeekDayStringConverter x:Key="DateTimeToWeekDayStringConverter" />
+	<converters:DateOnlyToWeekDayStringConverter x:Key="DateOnlyToWeekDayStringConverter" />
 	<converters:TotalPriceToCurrencyStringConverter x:Key="TotalPriceToCurrencyStringConverter" />
 	<toolkit:MathExpressionConverter x:Key="MathExpressionConverter" />
 	<toolkit:MultiMathExpressionConverter x:Key="MultiMathExpressionConverter" />

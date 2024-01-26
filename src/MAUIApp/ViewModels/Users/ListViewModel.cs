@@ -22,10 +22,10 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<UserListRef
 	public const string QueryRefresh = "refresh";
 	private readonly IUserService _service;
 
-	public Filter Filter { get; private set; } = new Filter();
+	private readonly Filter _filter = new();
 
 	[ObservableProperty]
-	private UserShort[] _items = [];
+	private IEnumerable<UserShort> _items = [];
 
 	[ObservableProperty]
 	private bool _isRefreshing = true;
@@ -42,7 +42,7 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<UserListRef
 	{
 		var queries = new ShellNavigationQueryParameters()
 		{
-			{ FilterViewModel.QueryFilter, Filter },
+			{ FilterViewModel.QueryFilter, _filter },
 		};
 		await NavigationService.ToAsync(FilterViewModel.RouteName, queries);
 	}
@@ -58,13 +58,16 @@ public partial class ListViewModel : ObservableRecipient, IRecipient<UserListRef
 	{
 		try
 		{
-			Items = await _service.SearchAsync(Filter.Name, Filter.OrderBy);
-			TotalFoundItems = await _service.CountAsync(Filter.Name);
-			TotalAllItems = await _service.CountAsync();
+			TotalAllItems = await _service.TotalAsync();
+
+			var shorts = await _service.SearchAsync(_filter.Name, _filter.OrderBy);
+			Items = shorts;
+			TotalFoundItems = Convert.ToUInt32(shorts.Count());
 		}
 		catch (HttpServiceException)
 		{
 		}
+
 		IsRefreshing = false;
 	}
 

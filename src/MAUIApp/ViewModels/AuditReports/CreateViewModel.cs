@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Domain.DTOs.AuditReports;
 using Domain.DTOs.Products;
 using MAUIApp.Mappers;
 using MAUIApp.Models.Products;
@@ -10,18 +11,15 @@ using MAUIApp.Services.HttpServices.Interfaces;
 using MAUIApp.ViewModels.Messenger;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using static Android.Graphics.ColorSpace;
 
 namespace MAUIApp.ViewModels.AuditReports;
 
 public partial class CreateViewModel : ObservableObject, IQueryAttributable
 {
 	public CreateViewModel(
-		ICredentialService credentialService,
 		IAuditReportService auditReportService,
 		NavigationService navigationService)
 	{
-		_credentialService = credentialService;
 		_auditReportService = auditReportService;
 		_navigationService = navigationService;
 		Items.CollectionChanged += Items_CollectionChanged;
@@ -29,7 +27,6 @@ public partial class CreateViewModel : ObservableObject, IQueryAttributable
 
 	public const string RouteName = "AuditReportCreate";
 	public const string QueryAddProduct = "addproduct";
-	private readonly ICredentialService _credentialService;
 	private readonly IAuditReportService _auditReportService;
 	private readonly NavigationService _navigationService;
 
@@ -45,7 +42,8 @@ public partial class CreateViewModel : ObservableObject, IQueryAttributable
 	[RelayCommand(CanExecute = nameof(CanExecuteSave))]
 	private async Task SaveAsync()
 	{
-		var create = AuditReportMapper.ToCreate(_credentialService.User.Id!, Items);
+		var items = Items.Select(x => new AuditReportCreateProductItem(x.Id, x.Quantity)).ToArray();
+		var create = new AuditReportCreate(items);
 		try
 		{
 			await _auditReportService.CreateAsync(create);

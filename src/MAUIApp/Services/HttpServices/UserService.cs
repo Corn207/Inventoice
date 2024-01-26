@@ -2,21 +2,20 @@
 using Domain.DTOs.Users;
 using Domain.Entities;
 using MAUIApp.Services.HttpServices.Interfaces;
+using MAUIApp.Utilities;
 
 namespace MAUIApp.Services.HttpServices;
 public class UserService(HttpService httpService) : IUserService
 {
 	private const string _path = "Users";
 
-	public async Task<UserShort[]> SearchAsync(
+	public async Task<IEnumerable<UserShort>> SearchAsync(
 		string? name = null,
 		OrderBy orderBy = OrderBy.Ascending,
 		ushort pageNumber = 1,
 		ushort pageSize = 15,
 		CancellationToken cancellationToken = default)
 	{
-		var path = $"{_path}/search";
-
 		var queries = new Dictionary<string, object?>()
 		{
 			{ nameof(name), name },
@@ -24,21 +23,19 @@ public class UserService(HttpService httpService) : IUserService
 			{ nameof(pageNumber), pageNumber },
 			{ nameof(pageSize), pageSize },
 		};
-		var results = await httpService.GetAsync<UserShort[]>(path, queries, cancellationToken);
+		var queryString = QueryStringConverter.Convert(queries);
+		var uri = new Uri(httpService.BaseUri, $"{_path}/search?{queryString}");
+		var results = await httpService.GetAsync<IEnumerable<UserShort>>(uri, cancellationToken);
+
 		return results;
 	}
 
-	public async Task<uint> CountAsync(
-		string? name = null,
+	public async Task<uint> TotalAsync(
 		CancellationToken cancellationToken = default)
 	{
-		var path = $"{_path}/count";
+		var uri = new Uri(httpService.BaseUri, $"{_path}/total");
+		var results = await httpService.GetAsync<uint>(uri, cancellationToken);
 
-		var queries = new Dictionary<string, object?>()
-		{
-			{ nameof(name), name },
-		};
-		var results = await httpService.GetAsync<uint>(path, queries, cancellationToken);
 		return results;
 	}
 
@@ -46,18 +43,18 @@ public class UserService(HttpService httpService) : IUserService
 		string id,
 		CancellationToken cancellationToken = default)
 	{
-		var path = $"{_path}/{id}";
+		var uri = new Uri(httpService.BaseUri, $"{_path}/{id}");
+		var result = await httpService.GetAsync<User>(uri, cancellationToken);
 
-		var result = await httpService.GetAsync<User>(path, null, cancellationToken);
 		return result;
 	}
 
 	public async Task<User> GetMeAsync(
 		CancellationToken cancellationToken = default)
 	{
-		var path = $"{_path}/me";
+		var uri = new Uri(httpService.BaseUri, $"{_path}/me");
+		var result = await httpService.GetAsync<User>(uri, cancellationToken);
 
-		var result = await httpService.GetAsync<User>(path, null, cancellationToken);
 		return result;
 	}
 
@@ -65,8 +62,7 @@ public class UserService(HttpService httpService) : IUserService
 		UserCreateUpdate update,
 		CancellationToken cancellationToken = default)
 	{
-		var path = $"{_path}/me";
-
-		await httpService.PutAsync(path, update, cancellationToken);
+		var uri = new Uri(httpService.BaseUri, $"{_path}/me");
+		await httpService.PutAsync(uri, update, cancellationToken);
 	}
 }

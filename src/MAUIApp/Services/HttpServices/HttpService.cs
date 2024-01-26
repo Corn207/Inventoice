@@ -1,6 +1,5 @@
 ﻿using Identity.Domain.Entity;
 using MAUIApp.Services.HttpServices.Exceptions;
-using MAUIApp.Utilities;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -91,14 +90,7 @@ public sealed class HttpService
 	};
 	#endregion
 
-
 	#region HTTP pipeline helper methods
-	public static async Task<ConnectionException> GetConnectionException(HttpRequestException exception)
-	{
-		await Shell.Current.DisplayAlert("Lỗi mạng", exception.Message, "OK");
-		return new ConnectionException();
-	}
-	
 	/// <summary>
 	/// 
 	/// </summary>
@@ -144,6 +136,11 @@ public sealed class HttpService
 		}
 	}
 
+	public static async Task HandleTimeoutAsync()
+	{
+		await NavigationService.DisplayAlertAsync("Lỗi mạng", "Quá thời gian gửi yêu cầu.", "OK");
+	}
+
 	/// <summary>
 	/// Throw <see cref="DeserializeException"/> if <paramref name="response"/> content is null.
 	/// </summary>
@@ -156,251 +153,223 @@ public sealed class HttpService
 		HttpResponseMessage response,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
-		var result = await response.Content.ReadFromJsonAsync<T>(cancellationToken);
-		if (result is null)
+		try
+		{
+			var result = await response.Content.ReadFromJsonAsync<T>(cancellationToken);
+			return result is null ? throw new DeserializeException() : result;
+		}
+		catch (Exception ex) when (
+			ex is JsonException ||
+			ex is NotSupportedException ||
+			ex is ArgumentNullException || 
+			ex is DeserializeException)
 		{
 			await NavigationService.DisplayAlertAsync("Lỗi dữ liệu", "Dữ liệu không khớp.", "OK");
 			throw new DeserializeException();
 		}
-		return result;
-	}
-
-	public Uri GetUri(string relativeUri, IDictionary<string, object?>? queries = null)
-	{
-		if (string.IsNullOrWhiteSpace(relativeUri))
-		{
-			throw new ArgumentNullException(nameof(relativeUri));
-		}
-
-		if (queries is not null)
-		{
-			relativeUri += QueryStringConverter.Convert(queries);
-		}
-		return new Uri(BaseUri, relativeUri);
 	}
 	#endregion
 
 	#region HTTP methods
 	public async Task<T> GetAsync<T>(
-		string path,
-		IDictionary<string, object?>? queries = null,
+		Uri uri,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path, queries);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.GetAsync(uri, cancellationToken);
+			using var response = await HttpClient.GetAsync(uri, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
+
+			var result = await ReadContent<T>(response, cancellationToken);
+			return result;
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
-
-		var result = await ReadContent<T>(response, cancellationToken);
-		return result;
 	}
 
 	public async Task PostNoContentAsync<T>(
-		string path,
+		Uri uri,
 		T body,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PostAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			using var response = await HttpClient.PostAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
 	}
 
 	public async Task<T> PostAsync<T>(
-		string path,
+		Uri uri,
 		T body,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PostAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			using var response = await HttpClient.PostAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
+
+			var result = await ReadContent<T>(response, cancellationToken);
+			return result;
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
-
-		var result = await ReadContent<T>(response, cancellationToken);
-		return result;
 	}
 
 	public async Task PutNoContentAsync<T>(
-		string path,
+		Uri uri,
 		T body,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PutAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			using var response = await HttpClient.PutAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
 	}
 
 	public async Task<T> PutAsync<T>(
-		string path,
+		Uri uri,
 		T body,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PutAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			using var response = await HttpClient.PutAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
+
+			var result = await ReadContent<T>(response, cancellationToken);
+			return result;
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
-
-		var result = await ReadContent<T>(response, cancellationToken);
-		return result;
 	}
 
 	public async Task PatchNoContentAsync(
-		string path,
+		Uri uri,
 		CancellationToken cancellationToken = default)
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PatchAsync(uri, null, cancellationToken);
+			using var response = await HttpClient.PatchAsync(uri, null, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
 	}
 
 	public async Task PatchNoContentAsync<T>(
-		string path,
+		Uri uri,
 		T body,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PatchAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			using var response = await HttpClient.PatchAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
 	}
 
 	public async Task<T> PatchAsync<T>(
-		string path,
+		Uri uri,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PatchAsync(uri, null, cancellationToken);
+			using var response = await HttpClient.PatchAsync(uri, null, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
+
+			var result = await ReadContent<T>(response, cancellationToken);
+			return result;
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
-
-		var result = await ReadContent<T>(response, cancellationToken);
-		return result;
 	}
 
 	public async Task<T> PatchAsync<T>(
-		string path,
+		Uri uri,
 		T body,
 		CancellationToken cancellationToken = default) where T : notnull
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.PatchAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			using var response = await HttpClient.PatchAsJsonAsync(uri, body, JsonSerializerOptions, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
+
+			var result = await ReadContent<T>(response, cancellationToken);
+			return result;
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
-
-		var result = await ReadContent<T>(response, cancellationToken);
-		return result;
 	}
 
 	public async Task DeleteAsync(
-		string path,
+		Uri uri,
 		CancellationToken cancellationToken = default)
 	{
 		await ThrowIfNoConnection();
 
-		var uri = GetUri(path);
-		HttpResponseMessage response;
 		try
 		{
-			response = await HttpClient.DeleteAsync(uri, cancellationToken);
+			using var response = await HttpClient.DeleteAsync(uri, cancellationToken);
+			await ThrowIfNotSuccessStatusCode(response);
 		}
-		catch (HttpRequestException ex)
+		catch (TaskCanceledException ex) when (ex.InnerException is System.TimeoutException)
 		{
-			throw await GetConnectionException(ex);
+			await HandleTimeoutAsync();
+			throw new HttpServiceException();
 		}
-
-		await ThrowIfNotSuccessStatusCode(response);
 	}
 	#endregion
 }
