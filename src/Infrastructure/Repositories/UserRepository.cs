@@ -3,34 +3,24 @@ using Domain.DTOs;
 using Domain.Entities;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
 public class UserRepository(Database database)
 	: Repository<User>(database), IUserRepository
 {
-	public async Task<PartialEnumerable<User>> SearchAsync(
+	public async Task<List<User>> SearchAsync(
 		string? name,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = Database.Collection<User>();
-		PipelineDefinition<User, User> pipeline = new EmptyPipelineDefinition<User>();
+		var filters = new List<FilterDefinition<User>>();
+		filters.AddTextSearchCaseInsentitive((x => x.Name, name));
 
-		if (!string.IsNullOrWhiteSpace(name))
-		{
-			var filter = Builders<User>.Filter.Eq(x => x.Name, name);
-			pipeline = pipeline.Match(filter);
-		}
-
-		var sortStage = Utility.BuildStageSort<User>(x => x.Name, orderBy);
-		pipeline = pipeline.AppendStage(sortStage);
-
-		var groupStage = Utility.BuildStageGroupAndPage<User>(pagination);
-		var finalPipeline = pipeline.AppendStage(groupStage);
-
-		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
-		result ??= new PartialEnumerable<User>([], 0);
+		var result = await Database.Collection<User>()
+			.And(filters)
+			.Sort(x => x.Name, orderBy)
+			.Paginate(pagination)
+			.ToListAsync();
 
 		return result;
 	}

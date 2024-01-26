@@ -8,14 +8,14 @@ using Domain.Mappers;
 namespace Application.Services;
 public class UserService(IUserRepository userRepository)
 {
-	public async Task<PartialArray<UserShort>> SearchAsync(
+	public async Task<IEnumerable<UserShort>> SearchAsync(
 		string? name,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var entities = await userRepository.SearchAsync(name, orderBy, pagination);
 
-		return entities.ToPartialArray(UserMapper.ToShort);
+		return entities.Select(UserMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

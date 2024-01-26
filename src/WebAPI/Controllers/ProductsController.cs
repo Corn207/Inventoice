@@ -14,8 +14,8 @@ namespace WebAPI.Controllers;
 public class ProductsController(ProductService service) : ControllerBase
 {
 	[HttpGet("search")]
-	[ProducesResponseType<PartialArray<ProductShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ProductShort>> Search(
+	[ProducesResponseType<IEnumerable<ProductShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<ProductShort>> Search(
 		[FromQuery] string? nameOrBarcode = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,

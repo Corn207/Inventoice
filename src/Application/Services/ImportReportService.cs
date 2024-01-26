@@ -11,7 +11,7 @@ public class ImportReportService(
 	IProductRepository productRepository,
 	IUserRepository userRepository)
 {
-	public async Task<PartialArray<ImportReportShort>> SearchAsync(
+	public async Task<IEnumerable<ImportReportShort>> SearchAsync(
 		string? productNameOrBarcode,
 		string? authorName,
 		TimeRange timeRange,
@@ -25,7 +25,7 @@ public class ImportReportService(
 			orderBy,
 			pagination);
 
-		return entities.ToPartialArray(ImportReportMapper.ToShort);
+		return entities.Select(ImportReportMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

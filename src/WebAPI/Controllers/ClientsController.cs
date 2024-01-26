@@ -14,8 +14,8 @@ namespace WebAPI.Controllers;
 public class ClientsController(ClientService service) : ControllerBase
 {
 	[HttpGet("search")]
-	[ProducesResponseType<PartialArray<ClientShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ClientShort>> Search(
+	[ProducesResponseType<IEnumerable<ClientShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<ClientShort>> Search(
 		[FromQuery] string? nameOrPhonenumber = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,

@@ -5,13 +5,12 @@ using Domain.Entities;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
 public class InvoiceRepository(Database database)
 	: Repository<Invoice>(database), IInvoiceRepository
 {
-	public async Task<PartialEnumerable<Invoice>> SearchAsync(
+	public async Task<List<Invoice>> SearchAsync(
 		string? productNameOrBarcode,
 		string? clientNameOrPhonenumber,
 		string? authorName,
@@ -20,18 +19,11 @@ public class InvoiceRepository(Database database)
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = Database.Collection<Invoice>();
-		PipelineDefinition<Invoice, Invoice> pipeline = new EmptyPipelineDefinition<Invoice>();
-
 		var filters = new List<FilterDefinition<Invoice>>();
-
-		filters.AddFilterArrayContainsAnyRegex(
+		filters.AddTextSearchCaseInsentitive(
 			x => x.ProductItems,
-			[
-				(x => x.Name, productNameOrBarcode),
-				(x => x.Barcode, productNameOrBarcode)
-			]);
-
+			(x => x.Name, productNameOrBarcode),
+			(x => x.Barcode, productNameOrBarcode));
 		if (!string.IsNullOrWhiteSpace(clientNameOrPhonenumber))
 		{
 			var clientExistFilter = Builders<Invoice>.Filter.Ne(nameof(Invoice.Client), BsonNull.Value);
@@ -43,9 +35,7 @@ public class InvoiceRepository(Database database)
 			filters.Add(clientExistFilter);
 			filters.Add(clientSearchFilter);
 		}
-
-		filters.AddFilter(x => x.Author.Name, authorName);
-
+		filters.AddTextSearchCaseInsentitive((x => x.Author.Name, authorName));
 		if (status != InvoiceStatus.All)
 		{
 			var filter = status switch
@@ -56,22 +46,13 @@ public class InvoiceRepository(Database database)
 			};
 			filters.Add(filter);
 		}
+		filters.AddFilterTimeRange(x => x.DateCreated, timeRange);
 
-		filters.AddFilterTimeRange(x => x.DateCreated, timeRange.From, timeRange.To);
-		var matchStage = Utility.BuildStageMatchAnd(filters);
-		if (matchStage is not null)
-		{
-			pipeline = pipeline.AppendStage(matchStage);
-		};
-
-		var sortStage = Utility.BuildStageSort<Invoice>(x => x.DateCreated, orderBy);
-		pipeline = pipeline.AppendStage(sortStage);
-
-		var groupStage = Utility.BuildStageGroupAndPage<Invoice>(pagination);
-		var finalPipeline = pipeline.AppendStage(groupStage);
-
-		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
-		result ??= new PartialEnumerable<Invoice>([], 0);
+		var result = await Database.Collection<Invoice>()
+			.And(filters)
+			.Sort(x => x.DateCreated, orderBy)
+			.Paginate(pagination)
+			.ToListAsync();
 
 		return result;
 	}

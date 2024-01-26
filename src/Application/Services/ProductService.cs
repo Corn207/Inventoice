@@ -8,14 +8,14 @@ using Domain.Mappers;
 namespace Application.Services;
 public class ProductService(IProductRepository productRepository)
 {
-	public async Task<PartialArray<ProductShort>> SearchAsync(
+	public async Task<IEnumerable<ProductShort>> SearchAsync(
 		string? nameOrBarcode,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
 		var entities = await productRepository.SearchAsync(nameOrBarcode, orderBy, pagination);
 
-		return entities.ToPartialArray(ProductMapper.ToShort);
+		return entities.Select(ProductMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

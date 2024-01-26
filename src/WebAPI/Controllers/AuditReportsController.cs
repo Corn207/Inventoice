@@ -15,8 +15,8 @@ namespace WebAPI.Controllers;
 public class AuditReportsController(AuditReportService service) : ControllerBase
 {
 	[HttpGet("search")]
-	[ProducesResponseType<PartialArray<AuditReportShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<AuditReportShort>> Search(
+	[ProducesResponseType<IEnumerable<AuditReportShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<AuditReportShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,

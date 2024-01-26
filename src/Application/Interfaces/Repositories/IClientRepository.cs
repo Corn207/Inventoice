@@ -5,7 +5,7 @@ using Domain.Entities;
 namespace Application.Interfaces.Repositories;
 public interface IClientRepository : IRepository<Client>
 {
-	Task<PartialEnumerable<Client>> SearchAsync(
+	Task<List<Client>> SearchAsync(
 		string? nameOrPhonenumber,
 		OrderBy orderBy,
 		Pagination pagination);

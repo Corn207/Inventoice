@@ -1,6 +1,6 @@
-﻿using Identity.Domain.DTOs;
+﻿using Identity.Application.Exceptions;
+using Identity.Domain.DTOs;
 using Identity.Domain.Entity;
-using Identity.Application.Exceptions;
 using MongoDB.Driver;
 using System.Security.Claims;
 

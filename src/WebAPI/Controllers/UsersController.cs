@@ -15,8 +15,8 @@ public class UsersController(UserService service) : ControllerBase
 {
 	[HttpGet("search")]
 	[Authorize(Roles = nameof(Role.Admin))]
-	[ProducesResponseType<PartialArray<UserShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<UserShort>> Search(
+	[ProducesResponseType<IEnumerable<UserShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<UserShort>> Search(
 		[FromQuery] string? name = null,
 		[FromQuery] OrderBy orderBy = OrderBy.Ascending,
 		[FromQuery] ushort pageNumber = 1,

@@ -5,7 +5,7 @@ using Domain.Entities;
 namespace Application.Interfaces.Repositories;
 public interface IImportReportRepository : IRepository<ImportReport>
 {
-	Task<PartialEnumerable<ImportReport>> SearchAsync(
+	Task<List<ImportReport>> SearchAsync(
 		string? productNameOrBarcode,
 		string? authorName,
 		TimeRange timeRange,

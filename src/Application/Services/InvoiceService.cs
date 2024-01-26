@@ -13,7 +13,7 @@ public class InvoiceService(
 	IExportReportRepository exportReportRepository,
 	IUserRepository userRepository)
 {
-	public async Task<PartialArray<InvoiceShort>> SearchAsync(
+	public async Task<IEnumerable<InvoiceShort>> SearchAsync(
 		string? productNameOrBarcode,
 		string? clientNameOrPhonenumber,
 		string? authorName,
@@ -31,7 +31,7 @@ public class InvoiceService(
 			orderBy,
 			pagination);
 
-		return entities.ToPartialArray(InvoiceMapper.ToShort);
+		return entities.Select(InvoiceMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

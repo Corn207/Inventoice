@@ -8,7 +8,7 @@ using Domain.Mappers;
 namespace Application.Services;
 public class ClientService(IClientRepository clientRepository)
 {
-	public async Task<PartialArray<ClientShort>> SearchAsync(
+	public async Task<IEnumerable<ClientShort>> SearchAsync(
 		string? nameOrPhonenumber,
 		OrderBy orderBy,
 		Pagination pagination)
@@ -18,7 +18,7 @@ public class ClientService(IClientRepository clientRepository)
 			orderBy,
 			pagination);
 
-		return entities.ToPartialArray(ClientMapper.ToShort);
+		return entities.Select(ClientMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

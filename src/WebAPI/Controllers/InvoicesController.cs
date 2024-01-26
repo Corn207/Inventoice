@@ -15,8 +15,8 @@ namespace WebAPI.Controllers;
 public class InvoicesController(InvoiceService service) : ControllerBase
 {
 	[HttpGet("search")]
-	[ProducesResponseType<PartialArray<InvoiceShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<InvoiceShort>> Search(
+	[ProducesResponseType<IEnumerable<InvoiceShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<InvoiceShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? clientNameOrPhonenumber = null,
 		[FromQuery] string? authorName = null,

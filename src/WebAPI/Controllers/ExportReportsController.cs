@@ -15,8 +15,8 @@ namespace WebAPI.Controllers;
 public class ExportReportsController(ExportReportService service) : ControllerBase
 {
 	[HttpGet("search")]
-	[ProducesResponseType<PartialArray<ExportReportShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ExportReportShort>> Search(
+	[ProducesResponseType<IEnumerable<ExportReportShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<ExportReportShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,

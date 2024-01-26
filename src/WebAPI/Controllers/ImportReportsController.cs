@@ -15,8 +15,8 @@ namespace WebAPI.Controllers;
 public class ImportReportsController(ImportReportService service) : ControllerBase
 {
 	[HttpGet("search")]
-	[ProducesResponseType<PartialArray<ImportReportShort>>(StatusCodes.Status200OK)]
-	public async Task<PartialArray<ImportReportShort>> Search(
+	[ProducesResponseType<IEnumerable<ImportReportShort>>(StatusCodes.Status200OK)]
+	public async Task<IEnumerable<ImportReportShort>> Search(
 		[FromQuery] string? productNameOrBarcode = null,
 		[FromQuery] string? authorName = null,
 		[FromQuery] DateTime? dateStart = null,

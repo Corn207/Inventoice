@@ -12,7 +12,7 @@ public class ExportReportService(
 	IProductRepository productRepository,
 	IUserRepository userRepository)
 {
-	public async Task<PartialArray<ExportReportShort>> SearchAsync(
+	public async Task<IEnumerable<ExportReportShort>> SearchAsync(
 		string? productNameOrBarcode,
 		string? authorName,
 		TimeRange timeRange,
@@ -26,7 +26,7 @@ public class ExportReportService(
 			orderBy,
 			pagination);
 
-		return entities.ToPartialArray(ExportReportMapper.ToShort);
+		return entities.Select(ExportReportMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

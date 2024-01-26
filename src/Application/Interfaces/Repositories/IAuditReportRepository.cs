@@ -5,7 +5,7 @@ using Domain.Entities;
 namespace Application.Interfaces.Repositories;
 public interface IAuditReportRepository : IRepository<AuditReport>
 {
-	Task<PartialEnumerable<AuditReport>> SearchAsync(
+	Task<List<AuditReport>> SearchAsync(
 		string? productNameOrBarcode,
 		string? authorName,
 		TimeRange timeRange,

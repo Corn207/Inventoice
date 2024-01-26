@@ -6,7 +6,7 @@ using Domain.Entities;
 namespace Application.Interfaces.Repositories;
 public interface IInvoiceRepository : IRepository<Invoice>
 {
-	Task<PartialEnumerable<Invoice>> SearchAsync(
+	Task<List<Invoice>> SearchAsync(
 		string? productNameOrBarcode,
 		string? clientNameOrPhonenumber,
 		string? authorName,

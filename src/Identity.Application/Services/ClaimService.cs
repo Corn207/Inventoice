@@ -1,5 +1,5 @@
-﻿using Identity.Domain.Entity;
-using Identity.Application.Exceptions;
+﻿using Identity.Application.Exceptions;
+using Identity.Domain.Entity;
 using MongoDB.Driver;
 
 namespace Identity.Application.Services;

@@ -1,5 +1,4 @@
 ﻿using Domain.DTOs;
-using Domain.Entities.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq.Expressions;
@@ -8,12 +7,14 @@ using System.Text.RegularExpressions;
 namespace Infrastructure;
 internal static class Utility
 {
-	#region Match
 	public static FilterDefinition<T>? TextSearchCaseInsentitive<T>(
 		Expression<Func<T, object>> field,
 		string? term)
 	{
-		if (string.IsNullOrWhiteSpace(term)) return null;
+		if (string.IsNullOrWhiteSpace(term))
+		{
+			return null;
+		}
 
 		var regex = new BsonRegularExpression(Regex.Escape(term), "i");
 		var filter = Builders<T>.Filter.Regex(field, regex);
@@ -21,69 +22,135 @@ internal static class Utility
 		return filter;
 	}
 
-	public static void AddFilter<T, TField>(
+	public static void AddTextSearchCaseInsentitive<T>(
 		this IList<FilterDefinition<T>> list,
-		Expression<Func<T, TField>> field,
-		TField? value)
+		params (Expression<Func<T, object>> field, string? term)[] searches)
 	{
-		if (value is null) return;
-
-		var filter = Builders<T>.Filter.Eq(field, value);
-		list.Add(filter);
-	}
-
-	public static void AddFilterArrayContainsAnyRegex<T, TItem>(
-		this IList<FilterDefinition<T>> list,
-		Expression<Func<T, IEnumerable<TItem>>> fieldItems,
-		IEnumerable<(Expression<Func<TItem, object>> field, string? term)> fieldRegexes)
-	{
-		var searchs = fieldRegexes.Where(x => !string.IsNullOrWhiteSpace(x.term)).ToList();
-		if (searchs.Count == 0) return;
-
-		var filters = searchs.Select(x => TextSearchCaseInsentitive(x.field, x.term));
-
-		if (searchs.Count == 1)
+		if (searches.Length == 0)
 		{
-			var filter = Builders<T>.Filter.ElemMatch(fieldItems, filters.First());
-			list.Add(filter);
+			return;
+		}
+		else if (searches.Length == 1)
+		{
+			var (field, term) = searches.First();
+			var filter = TextSearchCaseInsentitive(field, term);
+			if (filter is not null)
+			{
+				list.Add(filter);
+			}
+			return;
 		}
 		else
 		{
-			var or = Builders<TItem>.Filter.Or(filters);
-			var filter = Builders<T>.Filter.ElemMatch(fieldItems, or);
-			list.Add(filter);
+			var filters = searches
+				.Where(x => !string.IsNullOrWhiteSpace(x.term))
+				.Select(x => TextSearchCaseInsentitive(x.field, x.term)!)
+				.ToList();
+
+			if (filters.Count == 0)
+			{
+				return;
+			}
+			else if (filters.Count == 1)
+			{
+				list.Add(filters.First());
+				return;
+			}
+			else
+			{
+				var or = Builders<T>.Filter.Or(filters);
+				list.Add(or);
+				return;
+			}
+		}
+	}
+
+	public static void AddTextSearchCaseInsentitive<T, TItem>(
+		this IList<FilterDefinition<T>> list,
+		Expression<Func<T, IEnumerable<TItem>>> fieldItems,
+		params (Expression<Func<TItem, object>> field, string? term)[] searches)
+	{
+		if (searches.Length == 0)
+		{
+			return;
+		}
+		else if (searches.Length == 1)
+		{
+			var (field, term) = searches.First();
+			var regexFilter = TextSearchCaseInsentitive(field, term);
+			if (regexFilter is not null)
+			{
+				var filter = Builders<T>.Filter.ElemMatch(fieldItems, regexFilter);
+				list.Add(filter);
+			}
+			return;
+		}
+		else
+		{
+			var filters = searches
+				.Where(x => !string.IsNullOrWhiteSpace(x.term))
+				.Select(x => TextSearchCaseInsentitive(x.field, x.term)!)
+				.ToList();
+
+			if (filters.Count == 0)
+			{
+				return;
+			}
+			else if (filters.Count == 1)
+			{
+				var filter = Builders<T>.Filter.ElemMatch(fieldItems, filters.First());
+				list.Add(filter);
+				return;
+			}
+			else
+			{
+				var or = Builders<TItem>.Filter.Or(filters);
+				var filter = Builders<T>.Filter.ElemMatch(fieldItems, or);
+				list.Add(filter);
+				return;
+			}
 		}
 	}
 
 	public static void AddFilterTimeRange<T>(
 		this IList<FilterDefinition<T>> list,
 		Expression<Func<T, DateTime>> field,
-		DateTime from,
-		DateTime to)
+		TimeRange timeRange)
 	{
-		if (from != DateTime.MinValue)
+		if (timeRange.From != DateTime.MinValue)
 		{
-			list.Add(Builders<T>.Filter.Gte(field, from));
+			list.Add(Builders<T>.Filter.Gte(field, timeRange.From));
 		}
-		if (to != DateTime.MaxValue)
+		if (timeRange.To != DateTime.MaxValue)
 		{
-			list.Add(Builders<T>.Filter.Lte(field, to));
+			list.Add(Builders<T>.Filter.Lte(field, timeRange.To));
 		}
 	}
 
-	public static PipelineStageDefinition<T, T>? BuildStageMatchAnd<T>(IList<FilterDefinition<T>> list)
+
+	public static IFindFluent<T, T> And<T>(
+		this IMongoCollection<T> collection,
+		IList<FilterDefinition<T>> filters)
 	{
-		if (list.Count == 0) return null;
-		if (list.Count == 1) PipelineStageDefinitionBuilder.Match(list[0]);
+		FilterDefinition<T> filter;
+		if (filters.Count == 0)
+		{
+			filter = Builders<T>.Filter.Empty;
+		}
+		else if (filters.Count == 1)
+		{
+			filter = filters[0];
+		}
+		else
+		{
+			filter = Builders<T>.Filter.And(filters);
+		}
 
-		var and = Builders<T>.Filter.And(list);
-		var stage = PipelineStageDefinitionBuilder.Match(and);
-
-		return stage;
+		return collection.Find(filter);
 	}
-	#endregion
 
-	public static PipelineStageDefinition<T, T> BuildStageSort<T>(
+	public static IFindFluent<T, T> Sort<T>(
+		this IFindFluent<T, T> collection,
 		Expression<Func<T, object>> field,
 		OrderBy orderBy)
 	{
@@ -93,18 +160,15 @@ internal static class Utility
 			_ => Builders<T>.Sort.Descending(field)
 		};
 
-		var stage = PipelineStageDefinitionBuilder.Sort(sort);
-		
-		return stage;
+		return collection.Sort(sort);
 	}
 
-	public static PipelineStageDefinition<TEntity, PartialEnumerable<TEntity>> BuildStageGroupAndPage<TEntity>(
-		Pagination pagination) where TEntity : IEntity
+	public static IFindFluent<T, T> Paginate<T>(
+		this IFindFluent<T, T> collection,
+		Pagination pagination)
 	{
-		var stage = PipelineStageDefinitionBuilder.Group<TEntity, string, PartialEnumerable<TEntity>>(
-			x => x.Id!,
-			group => new PartialEnumerable<TEntity>(group.Skip((pagination.PageNumber - 1) * pagination.PageSize).Take(pagination.PageSize), group.Count()));
-
-		return stage;
+		return collection
+			.Skip((pagination.PageNumber - 1) * pagination.PageSize)
+			.Limit(pagination.PageSize);
 	}
 }

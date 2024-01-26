@@ -8,30 +8,21 @@ namespace Infrastructure.Repositories;
 public class ClientRepository(Database database)
 	: Repository<Client>(database), IClientRepository
 {
-	public async Task<PartialEnumerable<Client>> SearchAsync(
+	public async Task<List<Client>> SearchAsync(
 		string? nameOrPhonenumber,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = Database.Collection<Client>();
-		PipelineDefinition<Client, Client> pipeline = new EmptyPipelineDefinition<Client>();
+		var filters = new List<FilterDefinition<Client>>();
+		filters.AddTextSearchCaseInsentitive(
+			(x => x.Name, nameOrPhonenumber),
+			(x => x.Phonenumber, nameOrPhonenumber));
 
-		if (!string.IsNullOrWhiteSpace(nameOrPhonenumber))
-		{
-			var filter = Builders<Client>.Filter.Or(
-				Utility.TextSearchCaseInsentitive<Client>(x => x.Name, nameOrPhonenumber),
-				Utility.TextSearchCaseInsentitive<Client>(x => x.Phonenumber, nameOrPhonenumber));
-			pipeline = pipeline.Match(filter);
-		}
-
-		var sortStage = Utility.BuildStageSort<Client>(x => x.Name, orderBy);
-		pipeline = pipeline.AppendStage(sortStage);
-
-		var groupStage = Utility.BuildStageGroupAndPage<Client>(pagination);
-		var finalPipeline = pipeline.AppendStage(groupStage);
-
-		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
-		result ??= new PartialEnumerable<Client>([], 0);
+		var result = await Database.Collection<Client>()
+			.And(filters)
+			.Sort(x => x.DateCreated, orderBy)
+			.Paginate(pagination)
+			.ToListAsync();
 
 		return result;
 	}

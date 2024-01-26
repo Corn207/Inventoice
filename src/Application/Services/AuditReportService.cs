@@ -11,7 +11,7 @@ public class AuditReportService(
 	IProductRepository productRepository,
 	IUserRepository userRepository)
 {
-	public async Task<PartialArray<AuditReportShort>> SearchAsync(
+	public async Task<IEnumerable<AuditReportShort>> SearchAsync(
 		string? productNameOrBarcode,
 		string? authorName,
 		TimeRange timeRange,
@@ -25,7 +25,7 @@ public class AuditReportService(
 			orderBy,
 			pagination);
 
-		return entities.ToPartialArray(AuditReportMapper.ToShort);
+		return entities.Select(AuditReportMapper.ToShort);
 	}
 
 	public async Task<uint> CountAllAsync()

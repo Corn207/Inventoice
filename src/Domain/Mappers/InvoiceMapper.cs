@@ -22,7 +22,7 @@ public static partial class InvoiceMapper
 		{
 			status = InvoiceStatus.Paid;
 		}
-		
+
 		var target = new InvoiceShort()
 		{
 			Id = source.Id ?? throw new NullReferenceException("Invoice's Id is null."),

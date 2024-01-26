@@ -1,7 +1,6 @@
 ﻿using Identity.Application;
 using Identity.Application.Exceptions;
 using Identity.Application.Services;
-using Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Globalization;

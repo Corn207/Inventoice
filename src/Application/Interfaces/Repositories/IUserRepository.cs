@@ -5,7 +5,7 @@ using Domain.Entities;
 namespace Application.Interfaces.Repositories;
 public interface IUserRepository : IRepository<User>
 {
-	Task<PartialEnumerable<User>> SearchAsync(
+	Task<List<User>> SearchAsync(
 		string? name,
 		OrderBy orderBy,
 		Pagination pagination);

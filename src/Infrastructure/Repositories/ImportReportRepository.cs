@@ -3,45 +3,31 @@ using Domain.DTOs;
 using Domain.Entities;
 using Infrastructure.Repositories.Bases;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Repositories;
 public class ImportReportRepository(Database database)
 	: Repository<ImportReport>(database), IImportReportRepository
 {
-	public async Task<PartialEnumerable<ImportReport>> SearchAsync(
+	public async Task<List<ImportReport>> SearchAsync(
 		string? productNameOrBarcode,
 		string? authorName,
 		TimeRange timeRange,
 		OrderBy orderBy,
 		Pagination pagination)
 	{
-		var query = Database.Collection<ImportReport>();
-		PipelineDefinition<ImportReport, ImportReport> pipeline = new EmptyPipelineDefinition<ImportReport>();
-
 		var filters = new List<FilterDefinition<ImportReport>>();
-		filters.AddFilterArrayContainsAnyRegex(
+		filters.AddTextSearchCaseInsentitive(
 			x => x.ProductItems,
-			[
-				(x => x.Name, productNameOrBarcode),
-				(x => x.Barcode, productNameOrBarcode)
-			]);
-		filters.AddFilter(x => x.Author.Name, authorName);
-		filters.AddFilterTimeRange(x => x.DateCreated, timeRange.From, timeRange.To);
-		var matchStage = Utility.BuildStageMatchAnd(filters);
-		if (matchStage is not null)
-		{
-			pipeline = pipeline.AppendStage(matchStage);
-		};
+			(x => x.Name, productNameOrBarcode),
+			(x => x.Barcode, productNameOrBarcode));
+		filters.AddTextSearchCaseInsentitive((x => x.Author.Name, authorName));
+		filters.AddFilterTimeRange(x => x.DateCreated, timeRange);
 
-		var sortStage = Utility.BuildStageSort<ImportReport>(x => x.DateCreated, orderBy);
-		pipeline = pipeline.AppendStage(sortStage);
-
-		var groupStage = Utility.BuildStageGroupAndPage<ImportReport>(pagination);
-		var finalPipeline = pipeline.AppendStage(groupStage);
-
-		var result = await query.Aggregate(finalPipeline).FirstOrDefaultAsync();
-		result ??= new PartialEnumerable<ImportReport>([], 0);
+		var result = await Database.Collection<ImportReport>()
+			.And(filters)
+			.Sort(x => x.DateCreated, orderBy)
+			.Paginate(pagination)
+			.ToListAsync();
 
 		return result;
 	}
