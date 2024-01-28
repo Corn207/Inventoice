@@ -4,17 +4,23 @@ name: inventoice
 services:
   webapi:
     container_name: inventoice-webapi
-    restart: unless-stopped
+    image: inventoice-webapi:latest
+    restart: on-failure:2
     environment:
-      - MongoConnection__ConnectionString=mongodb://database:27017
+      - MainMongoDB__ConnectionString=mongodb://inventoice:Str0ngPa55w0rd@database:27017
+      - MainMongoDB__DatabaseName=inventoice
+      - IdentityMongoDB__ConnectionString=mongodb://inventoice:Str0ngPa55w0rd@database:27017
+      - IdentityMongoDB__DatabaseName=inventoiceidentity
       - TZ=Asia/Ho_Chi_Minh
     ports:
       - "21080:8080"
+
   database:
     container_name: inventoice-database
-    restart: unless-stopped
-    ports:
-      - "27017"
+    restart: on-failure:2
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=inventoice
+      - MONGO_INITDB_ROOT_PASSWORD=Str0ngPa55w0rd
     volumes:
       - inventoice:/data/db
 

@@ -3,6 +3,8 @@ name: inventoice-dev
 
 services:
   webapi:
+    container_name: inventoice-dev-webapi
+    image: inventoice-webapi:dev
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MainMongoDB__ConnectionString=mongodb://inventoice-dev:Str0ngPa55w0rd@database:27017
@@ -14,6 +16,7 @@ services:
       - "21080:8080"
 
   database:
+    container_name: inventoice-dev-database
     environment:
       - MONGO_INITDB_ROOT_USERNAME=inventoice-dev
       - MONGO_INITDB_ROOT_PASSWORD=Str0ngPa55w0rd
