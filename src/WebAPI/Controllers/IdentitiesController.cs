@@ -180,6 +180,16 @@ public class IdentitiesController(
 		return CreatedAtAction(nameof(GetIdentity), new { Id = userId }, password);
 	}
 
+	[HttpPatch("{id}/role")]
+	[Authorize(Roles = nameof(Role.Admin))]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> UpdateRolesIdentity(string id, [FromBody] Role role)
+	{
+		await claimService.UpdateRolesAsync(id, role);
+		return NoContent();
+	}
+
 	[HttpDelete("{id}")]
 	[Authorize(Roles = nameof(Role.Admin))]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
