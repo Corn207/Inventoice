@@ -16,7 +16,7 @@ public class ExportReportService(HttpService httpService) : IExportReportService
 		DateTime? dateEnd = null,
 		OrderBy orderBy = OrderBy.Descending,
 		ushort pageNumber = 1,
-		ushort pageSize = 15,
+		ushort pageSize = 30,
 		CancellationToken cancellationToken = default)
 	{
 		var queries = new Dictionary<string, object?>()

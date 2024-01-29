@@ -24,6 +24,21 @@ public partial class BarcodeScannerViewModel : ObservableObject, IQueryAttributa
 	}
 
 	[RelayCommand]
+	private static async Task LoadedAsync()
+	{
+		var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
+		if (status != PermissionStatus.Granted)
+		{
+			status = await Permissions.RequestAsync<Permissions.Camera>();
+			if (status != PermissionStatus.Granted)
+			{
+				await NavigationService.BackAsync();
+				return;
+			}
+		}
+	}
+
+	[RelayCommand]
 	private async Task DetectedAsync(BarcodeScanning.OnDetectionFinishedEventArg e)
 	{
 		var result = e.BarcodeResults.FirstOrDefault();

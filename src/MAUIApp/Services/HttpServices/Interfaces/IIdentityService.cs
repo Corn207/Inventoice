@@ -1,4 +1,5 @@
 ﻿using Identity.Domain.DTOs;
+using Identity.Domain.Entity;
 using MAUIApp.Services.HttpServices.Exceptions;
 
 namespace MAUIApp.Services.HttpServices.Interfaces;
@@ -92,6 +93,11 @@ public interface IIdentityService
 	/// <exception cref="ActionFailedException"></exception>
 	Task<string> CreateAsync(
 		CreateIdentity body,
+		CancellationToken cancellationToken = default);
+
+	Task UpdateRoleAsync(
+		string id,
+		Role role,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Domain.Entities;
+using Identity.Domain.DTOs;
 using Identity.Domain.Entity;
 using MAUIApp.Services;
 using MAUIApp.Services.HttpServices.Exceptions;
@@ -16,11 +17,15 @@ public partial class DetailsAdminViewModel(
 {
 	public const string RouteName = "UserDetailsAdmin";
 	public const string QueryId = "id";
+	public const string QueryRefresh = "refresh";
 
 	private string? _id;
 
 	[ObservableProperty]
 	private User? _user;
+
+	[ObservableProperty]
+	private IdentityDetails? _identityDetails;
 
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(Roles))]
@@ -34,6 +39,7 @@ public partial class DetailsAdminViewModel(
 	[ObservableProperty]
 	private bool _isRefreshing = false;
 
+	public bool CanExecuteResetPassword => User is not null;
 	public bool CanExecuteToEditAdminPage => User is not null;
 	public bool CanExecuteDelete => User is not null;
 
@@ -46,9 +52,9 @@ public partial class DetailsAdminViewModel(
 			try
 			{
 				User = await userService.GetAsync(_id);
-				var details = await identityService.GetAsync(_id);
-				Username = details.Username;
-				Roles = Enum.GetValues<Role>().Where(role => details.Roles.HasFlag(role)).ToArray();
+				IdentityDetails = await identityService.GetAsync(_id);
+				Username = IdentityDetails.Value.Username;
+				Roles = Enum.GetValues<Role>().Where(role => IdentityDetails.Value.Roles.HasFlag(role)).ToArray();
 			}
 			catch (HttpServiceException)
 			{
@@ -60,14 +66,33 @@ public partial class DetailsAdminViewModel(
 		IsRefreshing = false;
 	}
 
+	[RelayCommand(CanExecute = nameof(CanExecuteResetPassword))]
+	private async Task ResetPasswordAsync()
+	{
+		if (_id is not null)
+		{
+			try
+			{
+				var newPassword = await identityService.ResetPasswordAsync(_id);
+				await NavigationService.DisplayAlertAsync("Thành công", $"Mật khẩu mới là: {newPassword}", "OK");
+			}
+			catch (HttpServiceException)
+			{
+				return;
+			}
+		}
+	}
+
 	[RelayCommand(CanExecute = nameof(CanExecuteToEditAdminPage))]
 	private async Task ToEditAdminPageAsync()
 	{
-		//var queries = new ShellNavigationQueryParameters()
-		//{
-		//	{ CreateUpdateViewModel.QueryModel, Model! }
-		//};
-		//await NavigationService.ToAsync(CreateUpdateViewModel.RouteName, queries);
+		var role = Roles.Aggregate((Role)0, (current, next) => current | next);
+		var queries = new ShellNavigationQueryParameters()
+		{
+			{ EditAdminViewModel.QueryId, _id! },
+			{ EditAdminViewModel.QueryRole, role }
+		};
+		await NavigationService.ToAsync(EditAdminViewModel.RouteName, queries);
 	}
 
 	[RelayCommand(CanExecute = nameof(CanExecuteDelete))]
@@ -89,11 +114,20 @@ public partial class DetailsAdminViewModel(
 
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
+		var isRequestingRefresh = false;
+
 		if (query.TryGetValue(QueryId, out var id))
 		{
 			var casted = (string)id;
 			_id = casted;
-			IsRefreshing = true;
+			isRequestingRefresh = true;
 		}
+
+		if (query.ContainsKey(QueryRefresh))
+		{
+			isRequestingRefresh = true;
+		}
+
+		IsRefreshing = isRequestingRefresh;
 	}
 }

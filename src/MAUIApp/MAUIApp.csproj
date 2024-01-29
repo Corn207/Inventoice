@@ -21,16 +21,26 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<Nullable>enable</Nullable>
+		<Authors>Corn207</Authors>
+		<Product>Inventoice</Product>
+		<RepositoryUrl>https://github.com/Corn207/Inventoice</RepositoryUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
 	  <RunAOTCompilation>False</RunAOTCompilation>
+	  <ApplicationTitle>Inventoice</ApplicationTitle>
+	  <ApplicationId>com.corn207.inventoice</ApplicationId>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
+	  <ApplicationTitle>Inventoice</ApplicationTitle>
+	  <ApplicationId>com.corn207.inventoice</ApplicationId>
 	</PropertyGroup>
 	
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\appicon.png" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
@@ -185,8 +195,20 @@
 	  <Compile Update="Pages\Users\CreatePage.xaml.cs">
 	    <DependentUpon>CreatePage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Pages\Users\EditMePage.xaml.cs">
+	    <DependentUpon>EditMePage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\Users\DetailsUserPage.xaml.cs">
+	    <DependentUpon>DetailsUserPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\Users\EditAdminPage.xaml.cs">
+	    <DependentUpon>EditAdminPage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\Users\DetailsAdminPage.xaml.cs">
 	    <DependentUpon>DetailsAdminPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\Users\ChangePasswordPopup.xaml.cs">
+	    <DependentUpon>ChangePasswordPopup.xaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Pages\Users\FilterPage.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
@@ -305,7 +327,19 @@
 	  <MauiXaml Update="Pages\Users\CreatePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\Users\EditMePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\Users\DetailsUserPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\Users\EditAdminPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\Users\DetailsAdminPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\Users\ChangePasswordPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\Users\FilterPage.xaml">

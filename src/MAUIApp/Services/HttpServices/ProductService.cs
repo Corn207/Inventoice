@@ -13,7 +13,7 @@ public class ProductService(HttpService httpService) : IProductService
 		string? nameOrBarcode = null,
 		OrderBy orderBy = OrderBy.Ascending,
 		ushort pageNumber = 1,
-		ushort pageSize = 15,
+		ushort pageSize = 30,
 		CancellationToken cancellationToken = default)
 	{
 		var queries = new Dictionary<string, object?>()

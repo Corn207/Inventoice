@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-	x:Class="MAUIApp.Pages.Users.DetailsAdminPage"
+	x:Class="MAUIApp.Pages.Users.DetailsUserPage"
 	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 	xmlns:baseviewmodels="clr-namespace:MAUIApp.ViewModels"
@@ -9,7 +9,7 @@
 	xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
 	xmlns:viewmodels="clr-namespace:MAUIApp.ViewModels.Users"
 	xmlns:views="clr-namespace:MAUIApp.Views"
-	x:DataType="{x:Type viewmodels:DetailsAdminViewModel}"
+	x:DataType="{x:Type viewmodels:DetailsUserViewModel}"
 	BackgroundColor="{StaticResource BackgroundSecondary}"
 	Shell.NavBarIsVisible="False"
 	Shell.PresentationMode="Animated">
@@ -28,20 +28,15 @@
 					<DataTemplate>
 						<the49:Menu>
 							<the49:Action
-								Title="Reset mật khẩu"
-								Command="{Binding ResetPasswordCommand}"
+								Title="Đổi mật khẩu"
+								Command="{Binding ChangePasswordCommand}"
 								Icon="key.png"
-								IsVisible="{Binding CanExecuteResetPassword}" />
+								IsVisible="{Binding CanExecuteChangePassword}" />
 							<the49:Action
 								Title="Sửa"
-								Command="{Binding ToEditAdminPageCommand}"
+								Command="{Binding ToEditMePageCommand}"
 								Icon="edit.png"
-								IsVisible="{Binding CanExecuteToEditAdminPage}" />
-							<the49:Action
-								Title="Xóa"
-								Command="{Binding DeleteCommand}"
-								Icon="delete.png"
-								IsVisible="{Binding CanExecuteDelete}" />
+								IsVisible="{Binding CanExecuteToEditMePage}" />
 						</the49:Menu>
 					</DataTemplate>
 				</the49:ContextMenu.Menu>
@@ -82,46 +77,7 @@
 							<Label Grid.Row="1" Text="Số điện thoại" />
 							<Entry Grid.Row="1" Text="{Binding User.Phonenumber, Mode=OneWay}" />
 							<views:Separator Grid.Row="1" />
-
-							<Label Grid.Row="2" Text="Tên đăng nhập" />
-							<Entry Grid.Row="2" Text="{Binding Username, Mode=OneWay}" />
-							<views:Separator Grid.Row="2" />
 						</Grid>
-					</views:Card>
-
-					<views:Card HeaderTitle="Quyền hạn" Style="{StaticResource ItemsTemplateCard}">
-						<VerticalStackLayout BindableLayout.ItemsSource="{Binding Roles}">
-							<BindableLayout.ItemTemplate>
-								<DataTemplate x:DataType="{x:Type entities:Role}">
-									<VerticalStackLayout Padding="16,8,16,0">
-										<Label>
-											<Label.Triggers>
-												<DataTrigger
-													Binding="{Binding .}"
-													TargetType="Label"
-													Value="1">
-													<Setter Property="Text" Value="Quản trị viên" />
-												</DataTrigger>
-												<DataTrigger
-													Binding="{Binding .}"
-													TargetType="Label"
-													Value="2">
-													<Setter Property="Text" Value="Quản lý" />
-												</DataTrigger>
-												<DataTrigger
-													Binding="{Binding .}"
-													TargetType="Label"
-													Value="4">
-													<Setter Property="Text" Value="Nhân viên" />
-												</DataTrigger>
-											</Label.Triggers>
-										</Label>
-
-										<views:Separator Margin="0,8,0,0" />
-									</VerticalStackLayout>
-								</DataTemplate>
-							</BindableLayout.ItemTemplate>
-						</VerticalStackLayout>
 					</views:Card>
 				</VerticalStackLayout>
 			</ScrollView>

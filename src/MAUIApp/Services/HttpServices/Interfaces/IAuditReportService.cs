@@ -13,7 +13,7 @@ public interface IAuditReportService
 		DateTime? dateEnd = null,
 		OrderBy orderBy = OrderBy.Descending,
 		ushort pageNumber = 1,
-		ushort pageSize = 15,
+		ushort pageSize = 30,
 		CancellationToken cancellationToken = default);
 
 	Task<uint> TotalAsync(

@@ -71,8 +71,12 @@ internal static class ServiceCollectionExtensions
 
 		services.AddTransientWithShellRoute<Pages.Users.ListPage, ViewModels.Users.ListViewModel>(ViewModels.Users.ListViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Users.FilterPage, ViewModels.Users.FilterViewModel>(ViewModels.Users.FilterViewModel.RouteName);
-		services.AddTransientWithShellRoute<Pages.Users.DetailsAdminPage, ViewModels.Users.DetailsAdminViewModel>(ViewModels.Users.DetailsAdminViewModel.RouteName);
 		services.AddTransientWithShellRoute<Pages.Users.CreatePage, ViewModels.Users.CreateViewModel>(ViewModels.Users.CreateViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.DetailsAdminPage, ViewModels.Users.DetailsAdminViewModel>(ViewModels.Users.DetailsAdminViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.EditAdminPage, ViewModels.Users.EditAdminViewModel>(ViewModels.Users.EditAdminViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.DetailsUserPage, ViewModels.Users.DetailsUserViewModel>(ViewModels.Users.DetailsUserViewModel.RouteName);
+		services.AddTransientWithShellRoute<Pages.Users.EditMePage, ViewModels.Users.EditMeViewModel>(ViewModels.Users.EditMeViewModel.RouteName);
+		services.AddTransientPopup<Pages.Users.ChangePasswordPopup, ViewModels.Users.ChangePasswordViewModel>();
 
 		return services;
 	}

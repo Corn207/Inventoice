@@ -8,7 +8,7 @@
 	x:DataType="{x:Type viewmodels:MoreViewModel}"
 	BackgroundColor="{StaticResource BackgroundSecondary}">
 	<ContentPage.Behaviors>
-		<toolkit:EventToCommandBehavior Command="{Binding GetUserInfoCommand}" EventName="Loaded" />
+		<toolkit:EventToCommandBehavior Command="{Binding LoadedCommand}" EventName="Loaded" />
 	</ContentPage.Behaviors>
 
 	<ScrollView>
@@ -32,11 +32,20 @@
 							<toolkit:IconTintColorBehavior TintColor="{StaticResource Gray}" />
 						</ImageButton.Behaviors>
 					</ImageButton>
-					<Label
-						Grid.Column="1"
-						FontSize="Medium"
-						Text="{Binding NameOfUser}"
-						VerticalOptions="Center" />
+
+					<VerticalStackLayout Grid.Column="1">
+						<VerticalStackLayout.GestureRecognizers>
+							<TapGestureRecognizer Command="{Binding ToUserDetailsUserPageCommand}" />
+						</VerticalStackLayout.GestureRecognizers>
+
+						<Label
+							FontSize="Medium"
+							Text="{Binding NameOfUser}"
+							TextColor="{StaticResource TextPrimary}"
+							VerticalOptions="Center" />
+						<Label Text="{Binding RoleOfUser}" TextColor="{StaticResource TextSecondary}" />
+					</VerticalStackLayout>
+
 					<ImageButton
 						Grid.Column="2"
 						Command="{Binding LogoutCommand}"
@@ -67,7 +76,7 @@
 					</Style>
 				</VerticalStackLayout.Resources>
 
-				<Border>
+				<Border IsVisible="{Binding IsManager}">
 					<Border.GestureRecognizers>
 						<TapGestureRecognizer Command="{Binding GoToImportReportsPageCommand}" />
 					</Border.GestureRecognizers>
@@ -82,7 +91,7 @@
 					</HorizontalStackLayout>
 				</Border>
 
-				<Border>
+				<Border IsVisible="{Binding IsManager}">
 					<Border.GestureRecognizers>
 						<TapGestureRecognizer Command="{Binding GoToExportReportsPageCommand}" />
 					</Border.GestureRecognizers>
@@ -97,7 +106,7 @@
 					</HorizontalStackLayout>
 				</Border>
 
-				<Border>
+				<Border IsVisible="{Binding IsManager}">
 					<Border.GestureRecognizers>
 						<TapGestureRecognizer Command="{Binding GoToAuditReportsPageCommand}" />
 					</Border.GestureRecognizers>
@@ -127,7 +136,7 @@
 					</HorizontalStackLayout>
 				</Border>
 
-				<Border>
+				<Border IsVisible="{Binding IsAdmin}">
 					<Border.GestureRecognizers>
 						<TapGestureRecognizer Command="{Binding GoToUserListPageCommand}" />
 					</Border.GestureRecognizers>

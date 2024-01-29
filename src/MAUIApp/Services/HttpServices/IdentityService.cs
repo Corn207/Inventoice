@@ -1,4 +1,5 @@
 ﻿using Identity.Domain.DTOs;
+using Identity.Domain.Entity;
 using MAUIApp.Services.HttpServices.Exceptions;
 using MAUIApp.Services.HttpServices.Interfaces;
 using System.Net.Http.Json;
@@ -50,6 +51,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 		var tokenInfo = await HttpService.ReadContent<TokenInfo>(response);
 		httpService.IdentityToken = tokenInfo.Token;
 		httpService.IdentityTokenExpiry = tokenInfo.DateExpired;
+		httpService.IdentityRoles = tokenInfo.Roles;
 	}
 
 	/// <summary>
@@ -74,6 +76,7 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 
 		httpService.IdentityToken = string.Empty;
 		httpService.IdentityTokenExpiry = DateTime.MinValue;
+		httpService.IdentityRoles = 0;
 	}
 
 	/// <summary>
@@ -277,6 +280,17 @@ public sealed class IdentityService(HttpService httpService) : IIdentityService
 
 		var password = await response.Content.ReadAsStringAsync(cancellationToken);
 		return password;
+	}
+
+	public async Task UpdateRoleAsync(
+		string id,
+		Role role,
+		CancellationToken cancellationToken = default)
+	{
+		await HttpService.ThrowIfNoConnection();
+
+		var path = new Uri(httpService.IdentityBaseUri, $"{id}/role");
+		await httpService.PatchNoContentAsync(path, role, cancellationToken);
 	}
 
 	/// <summary>

@@ -52,9 +52,13 @@
 					<ListView.ItemTemplate>
 						<DataTemplate x:DataType="{x:Type dtos:UserShort}">
 							<ViewCell>
-								<Label Text="{Binding Name}" TextColor="{StaticResource TextPrimary}" FontSize="Body" Margin="16,8">
+								<Label
+									Margin="16,8"
+									FontSize="Body"
+									Text="{Binding Name}"
+									TextColor="{StaticResource TextPrimary}">
 									<Label.GestureRecognizers>
-										<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToUserDetailsAdminPageCommand}" CommandParameter="{Binding Id}"/>
+										<TapGestureRecognizer Command="{Static baseviewmodels:StaticViewModel.ToUserDetailsAdminPageCommand}" CommandParameter="{Binding Id}" />
 									</Label.GestureRecognizers>
 								</Label>
 							</ViewCell>
