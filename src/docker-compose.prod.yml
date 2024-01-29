@@ -21,6 +21,8 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=inventoice
       - MONGO_INITDB_ROOT_PASSWORD=Str0ngPa55w0rd
+    ports:
+      - "21081:8080"
     volumes:
       - inventoice:/data/db
 
